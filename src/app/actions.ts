@@ -7,13 +7,8 @@ import { games } from "@/db/schema";
 import { isStatus, type Status } from "@/lib/statuses";
 
 export type FormState = {
+  ok?: boolean;
   error?: string;
-  values?: {
-    title: string;
-    platform: string;
-    status: string;
-    rating: string;
-  };
 };
 
 export async function addGame(
@@ -28,22 +23,22 @@ export async function addGame(
   };
 
   if (!values.title) {
-    return { error: "Title is required.", values };
+    return { error: "Title is required." };
   }
 
   if (values.title.length > 200) {
-    return { error: "Title must be 200 characters or fewer.", values };
+    return { error: "Title must be 200 characters or fewer." };
   }
 
   if (!isStatus(values.status)) {
-    return { error: "Unknown status.", values };
+    return { error: "Unknown status." };
   }
 
   let rating: number | null = null;
   if (values.rating) {
     rating = Number(values.rating);
     if (!Number.isInteger(rating) || rating < 1 || rating > 10) {
-      return { error: "Rating must be a whole number from 1 to 10.", values };
+      return { error: "Rating must be a whole number from 1 to 10." };
     }
   }
 
@@ -58,7 +53,7 @@ export async function addGame(
     .run();
 
   refresh();
-  return {};
+  return { ok: true };
 }
 
 export async function setGameStatus(id: number, status: Status): Promise<void> {

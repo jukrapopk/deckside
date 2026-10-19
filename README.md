@@ -61,6 +61,20 @@ scripts/seed.ts   sample data
   out of the bundle. Removing that breaks the build.
 - The game list reads through `io()` to keep the query out of the static shell.
 
+## Design
+
+The interface follows a Steam Big Picture direction: cover art forward, large targets,
+restrained motion.
+
+Tokens live in `src/app/globals.css` under `@theme`. Two rules keep it coherent:
+
+- **One theme.** Dark only, on purpose. Do not reintroduce a light variant.
+- **One accent.** `--color-accent-strong` for fills, `--color-accent` for borders and
+  hover. Nothing else is coloured except the destructive confirm.
+
+Contrast is documented inline and passes WCAG AA. Every CSS transition is gated behind
+`motion-reduce`. Icons come from `@phosphor-icons/react`; do not hand-roll SVGs.
+
 ## Configuration
 
 | Variable | Default | Purpose |
