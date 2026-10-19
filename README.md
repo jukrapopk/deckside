@@ -70,9 +70,12 @@ a game are two configurations of the same dialog rather than two separate forms.
 ## Design
 
 The interface follows a Steam Big Picture direction: cover art forward, large targets,
-restrained motion.
+restrained motion. The palette is **Harbour Blue** — a deep navy ground lit by a single
+cyan-blue accent. Every neutral sits inside one five-degree hue band (206-210°), so the
+ramp reads as one blue rather than as grey surfaces with a blue button dropped on them,
+and the accent stays under 70% saturation.
 
-Tokens live in `src/app/globals.css` under `@theme`. Two rules keep it coherent:
+Tokens live in `src/app/globals.css` under `@theme`. Three rules keep it coherent:
 
 - **One theme.** Dark only, on purpose. Do not reintroduce a light variant.
 - **One accent.** `--color-accent-strong` for fills, `--color-accent` for borders and
@@ -81,6 +84,11 @@ Tokens live in `src/app/globals.css` under `@theme`. Two rules keep it coherent:
   decoration — it repeats the badge's `aria-label`, which is the accessible source —
   and every pair is measured to carry a white glyph at AA or better. Those numbers are
   recorded next to the tokens; re-measure before changing either side.
+- **Solid surfaces, atmospheric depth.** Every surface and control is a flat token, so
+  its contrast stays measurable. Depth comes from one vertical background falloff plus
+  a 3.5% grain overlay. Do not put gradients on controls or fills: the documented
+  contrast numbers stop meaning anything once a glyph can land anywhere on a ramp.
+
 
 Contrast is documented inline and passes WCAG AA. Every CSS transition is gated behind
 `motion-reduce`. Icons come from `@phosphor-icons/react`; do not hand-roll SVGs. Server

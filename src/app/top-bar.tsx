@@ -166,7 +166,9 @@ function FilterButton({
                 }`}
               >
                 {option.label}
-                <span className={active ? "text-white/80" : "text-muted"}>
+                {/* Full white: white at 80% over the accent fill measures
+                    3.83:1, under AA for text this size. */}
+                <span className={active ? "text-white" : "text-muted"}>
                   {option.count}
                 </span>
               </a>

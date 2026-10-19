@@ -171,7 +171,7 @@ function GameForm(props: GameFormProps) {
       </FieldGroup>
 
       {error && (
-        <p role="alert" className="text-base text-red-400">
+        <p role="alert" className="text-base text-danger">
           {error}
         </p>
       )}
@@ -188,7 +188,7 @@ function GameForm(props: GameFormProps) {
                     deleteGame(props.game.id).then(props.onDone),
                   )
                 }
-                className="bg-red-600 px-4 py-3 text-base font-semibold text-white hover:bg-red-500 disabled:opacity-60"
+                className="bg-danger-strong px-4 py-3 text-base font-semibold text-white transition-[filter] hover:brightness-110 disabled:opacity-60 motion-reduce:transition-none"
               >
                 {isDeleting ? "Deleting" : "Delete"}
               </button>
@@ -204,7 +204,7 @@ function GameForm(props: GameFormProps) {
             <button
               type="button"
               onClick={() => setConfirmingDelete(true)}
-              className="flex items-center gap-2 px-1 py-3 text-base font-medium text-muted hover:text-red-400"
+              className="flex items-center gap-2 px-1 py-3 text-base font-medium text-muted hover:text-danger"
             >
               <Trash size={18} weight="bold" aria-hidden="true" />
               Delete

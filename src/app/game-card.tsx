@@ -38,10 +38,11 @@ export function GameCard({ game, eager = false }: GameCardProps) {
         className="object-cover transition-transform duration-500 group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
       />
 
-      {/* Scrim so the labels stay legible over any photo. */}
+      {/* Scrim so the labels stay legible over any photo. Tinted to the page
+          ground rather than neutral black, so the card edge belongs to it. */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-3/5 bg-linear-to-t from-black/95 via-black/70 to-transparent"
+        className="absolute inset-x-0 bottom-0 h-3/5 bg-linear-to-t from-bg/95 via-bg/70 to-transparent"
       />
 
       <EditGameDialog

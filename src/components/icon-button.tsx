@@ -16,7 +16,8 @@ const VARIANTS: Record<Variant, string> = {
   accent: "bg-accent-strong text-white hover:brightness-110",
   // No background, for icons sitting directly on artwork. The shadow keeps
   // the glyph legible over a bright photo without adding a chip behind it.
-  bare: "text-white/85 hover:text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]",
+  // Tinted to the page ground rather than black.
+  bare: "text-white/85 hover:text-white drop-shadow-[0_1px_3px_rgba(18,28,38,0.9)]",
 };
 
 type IconButtonProps = Omit<

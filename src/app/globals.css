@@ -1,35 +1,56 @@
 @import "tailwindcss";
 
 /*
-  Steam Big Picture direction: one locked dark theme, cover art forward,
-  a single cool blue accent against cold neutrals.
+  Harbour Blue: a deep navy ground lit by a single cyan-blue accent.
 
-  Contrast (WCAG AA checked):
-    ink on bg        16.4:1
-    muted on bg       6.5:1
-    white on accent   5.3:1
+  This is the Steam Big Picture end of dark: navy surfaces, one bright blue for
+  anything interactive, art doing the talking. Held tighter than a stock dark
+  theme — every neutral sits inside a five-degree hue band, the accent stays
+  under 70% saturation, and every pair below is measured rather than eyeballed.
+
+  Rules:
+    - One theme. Dark only, on purpose.
+    - One accent. Nothing else is coloured except two documented exceptions:
+      the four semantic status fills, and the destructive confirm.
+    - Solid surfaces, atmospheric depth. See the body rule below.
+
+  Contrast (WCAG AA, every pair measured):
+    ink on bg              14.26:1     muted on bg            6.94:1
+    ink on surface         13.08:1     muted on surface       6.36:1
+    ink on surface-2       11.69:1
+    accent on bg            8.70:1     accent on surface      7.98:1
+    white on accent-strong  5.90:1     white on card scrim   15.11:1
+    danger on bg            7.13:1     white on danger-strong 6.26:1
+
+  Neutrals run 206-210° and the accent 203-205°, so the whole ramp reads as one
+  blue rather than a neutral grey with a blue button dropped on it.
 */
 @theme {
-  --color-bg: #0b0f14;
-  --color-surface: #131a22;
-  --color-surface-2: #1a232d;
-  --color-line: #26313d;
-  --color-ink: #e6edf3;
-  --color-muted: #93a1af;
-  --color-accent: #6cb8f0;
-  --color-accent-strong: #1f6fb2;
+  --color-bg: #121c26;
+  --color-surface: #17242f;
+  --color-surface-2: #1d2d3a;
+  --color-line: #2a3b4a;
+  --color-ink: #e2ebf2;
+  --color-muted: #93a7b8;
+  --color-accent: #7fc0e8;
+  --color-accent-strong: #22699b;
 
   /*
-    Status colours fill the badge circle behind a white glyph. Semantic
-    colour, so a deliberate exception to the single-accent rule. White on
-    each, measured:
-      backlog 8.28:1   playing 5.28:1
-      completed 6.29:1 dropped 8.35:1
+    Semantic colour, the deliberate exception to the single-accent rule. Each
+    one fills the badge circle behind a white glyph, measured white-on-fill:
+      backlog 6.31:1   playing 5.90:1
+      completed 6.26:1 dropped 7.28:1
+    Kept cool so they belong to the navy: muted slate for backlog, teal-leaning
+    green for completed, a magenta-leaning red for dropped.
   */
-  --color-status-backlog: #41505f;
-  --color-status-playing: #1f6fb2;
-  --color-status-completed: #2f6b4f;
-  --color-status-dropped: #7a3b3b;
+  --color-status-backlog: #4f6273;
+  --color-status-playing: #22699b;
+  --color-status-completed: #2e6b57;
+  --color-status-dropped: #8a3f47;
+
+  /* Destructive. A cool red, so the palette holds one red family. */
+  --color-danger: #ef8a8f;
+  --color-danger-strong: #a83a44;
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -39,10 +60,43 @@
   color-scheme: dark;
 }
 
+/*
+  Surfaces stay solid so their contrast stays measurable. The atmosphere lives
+  here instead: the surface tone, carrying a touch of the accent at the very
+  top, falling away to the page tone by roughly half a screen. A single vertical
+  falloff rather than a radial glow — a radial one has an edge, and on the empty
+  screen that edge reads as a stain rather than as light.
+*/
 body {
-  background: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  background-color: var(--color-bg);
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-accent-strong) 8%, var(--color-surface)) 0%,
+    var(--color-bg) 52%
+  );
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/*
+  Film grain over the whole viewport at 3.5%. Without it large dark fills band
+  on cheap panels and the page reads as flat digital black.
+
+  Z-index scale, in full: 20 top bar, 30 filter menu, 40 grain. Open modals sit
+  in the browser's top layer, above all of it. The grain never takes a pointer
+  event.
+*/
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.035;
+  background-repeat: repeat;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
 /* One focus treatment for the whole app, visible on every surface. */
@@ -56,7 +110,8 @@ body {
   color: #ffffff;
 }
 
+/* A tinted veil rather than neutral black, so the page behind keeps its hue. */
 dialog::backdrop {
-  background: rgb(0 0 0 / 0.65);
+  background: color-mix(in srgb, var(--color-bg) 68%, transparent);
   backdrop-filter: blur(3px);
 }
