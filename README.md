@@ -71,9 +71,9 @@ a game are two configurations of the same dialog rather than two separate forms.
 
 The interface follows a Steam Big Picture direction: cover art forward, large targets,
 restrained motion. The palette is **Harbour Blue** — a deep navy ground lit by a single
-cyan-blue accent. Every neutral sits inside one five-degree hue band (206-210°), so the
-ramp reads as one blue rather than as grey surfaces with a blue button dropped on them,
-and the accent stays under 70% saturation.
+cyan-blue accent. Every neutral sits inside one three-degree hue band (216-218°), so
+the ramp reads as one blue rather than as grey surfaces with a blue button dropped on
+them, and the accent stays under 70% saturation.
 
 Tokens live in `src/app/globals.css` under `@theme`. Three rules keep it coherent:
 

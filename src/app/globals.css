@@ -5,7 +5,7 @@
 
   This is the Steam Big Picture end of dark: navy surfaces, one bright blue for
   anything interactive, art doing the talking. Held tighter than a stock dark
-  theme — every neutral sits inside a five-degree hue band, the accent stays
+  theme — every neutral sits inside a three-degree hue band, the accent stays
   under 70% saturation, and every pair below is measured rather than eyeballed.
 
   Rules:
@@ -15,37 +15,38 @@
     - Solid surfaces, atmospheric depth. See the body rule below.
 
   Contrast (WCAG AA, every pair measured):
-    ink on bg              14.26:1     muted on bg            6.94:1
-    ink on surface         13.08:1     muted on surface       6.36:1
-    ink on surface-2       11.69:1
-    accent on bg            8.70:1     accent on surface      7.98:1
-    white on accent-strong  5.90:1     white on card scrim   15.11:1
-    danger on bg            7.13:1     white on danger-strong 6.26:1
+    ink on bg              14.98:1     muted on bg            6.93:1
+    ink on surface         13.97:1     muted on surface       6.47:1
+    ink on surface-2       12.74:1
+    accent on bg            8.29:1     accent on surface      7.73:1
+    white on accent-strong  6.99:1     white on card scrim   15.99:1
+    danger on bg            7.51:1     white on danger-strong 6.26:1
 
-  Neutrals run 206-210° and the accent 203-205°, so the whole ramp reads as one
-  blue rather than a neutral grey with a blue button dropped on it.
+  Neutrals run 216-218° and the accent 210-212°. That is deliberate: a navy at
+  208-210° reads as cyan-teal and the whole page looks green-tinted, so the ramp
+  is pulled toward true blue, with the green channel kept well below the blue.
 */
 @theme {
-  --color-bg: #121c26;
-  --color-surface: #17242f;
-  --color-surface-2: #1d2d3a;
-  --color-line: #2a3b4a;
-  --color-ink: #e2ebf2;
-  --color-muted: #93a7b8;
-  --color-accent: #7fc0e8;
-  --color-accent-strong: #22699b;
+  --color-bg: #0f1622;
+  --color-surface: #141d2c;
+  --color-surface-2: #1a2536;
+  --color-line: #27344a;
+  --color-ink: #e3eaf5;
+  --color-muted: #93a1b8;
+  --color-accent: #7fb4e8;
+  --color-accent-strong: #225a9b;
 
   /*
     Semantic colour, the deliberate exception to the single-accent rule. Each
     one fills the badge circle behind a white glyph, measured white-on-fill:
-      backlog 6.31:1   playing 5.90:1
-      completed 6.26:1 dropped 7.28:1
-    Kept cool so they belong to the navy: muted slate for backlog, teal-leaning
+      backlog 6.68:1   playing 6.99:1
+      completed 7.31:1 dropped 7.28:1
+    Kept cool so they belong to the navy: muted slate for backlog, a deeper
     green for completed, a magenta-leaning red for dropped.
   */
-  --color-status-backlog: #4f6273;
-  --color-status-playing: #22699b;
-  --color-status-completed: #2e6b57;
+  --color-status-backlog: #4f5d73;
+  --color-status-playing: #225a9b;
+  --color-status-completed: #2b6049;
   --color-status-dropped: #8a3f47;
 
   /* Destructive. A cool red, so the palette holds one red family. */
