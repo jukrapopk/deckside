@@ -56,24 +56,24 @@ export function GameCard({ game, eager = false }: GameCardProps) {
         triggerClassName="opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none"
       />
 
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-4">
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-4">
         {/* Star row sits above the title. Both it and the platform row keep a
             fixed height so missing data never shifts the title. */}
-        <div className="flex h-6 items-center">
+        <div className="flex h-4 items-center">
           {rating !== null && <StarRating value={rating} />}
         </div>
         {/* Badge trails the title. It must not shrink, or a long title would
             push it out of the row. */}
         <div className="flex items-center gap-2">
           <h3
-            className="min-w-0 truncate text-base font-semibold text-white"
+            className="min-w-0 truncate text-lg font-semibold text-white"
             title={title}
           >
             {title}
           </h3>
           <StatusBadge status={status} className="shrink-0" />
         </div>
-        <p className="min-h-5 truncate text-sm text-white/75">{platform}</p>
+        <p className="min-h-6 truncate text-base text-white/75">{platform}</p>
       </div>
     </li>
   );

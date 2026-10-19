@@ -7,7 +7,7 @@ export function StarRating({ value }: { value: number }) {
     <span
       role="img"
       aria-label={`Rated ${value} out of ${RATING_MAX}`}
-      className="flex items-center gap-0.5"
+      className="flex items-center gap-1"
     >
       {Array.from({ length: RATING_MAX }, (_, index) => {
         const filled = index < value;
@@ -15,7 +15,7 @@ export function StarRating({ value }: { value: number }) {
         return (
           <Star
             key={index}
-            size={12}
+            size={16}
             strokeWidth={2}
             fill={filled ? "currentColor" : "none"}
             aria-hidden="true"
