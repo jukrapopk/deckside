@@ -45,12 +45,18 @@ checkout needs no extra setup step.
 ## How it is put together
 
 ```
-src/app/          pages, server actions, and UI components
+src/app/          pages, server actions, and page-level components
+src/components/   reusable UI primitives
 src/db/           schema, connection, queries, migrations
 src/lib/          shared constants used by both client and server
 drizzle/          generated SQL migrations
 scripts/seed.ts   sample data
 ```
+
+`src/components/` holds the primitives that dialogs and forms are built from, so an
+affordance is defined once and reused: `Modal` and its `useModal` hook, `IconButton`,
+`Field`/`FieldGroup`, `StarRating`, `StarPicker`, and `StatusBadge`. Adding and editing
+a game are two configurations of the same dialog rather than two separate forms.
 
 - `src/db/index.ts` opens a single `better-sqlite3` connection lazily, in WAL mode.
   It is lazy so that `next build` does not create the database as a side effect.
@@ -70,10 +76,16 @@ Tokens live in `src/app/globals.css` under `@theme`. Two rules keep it coherent:
 
 - **One theme.** Dark only, on purpose. Do not reintroduce a light variant.
 - **One accent.** `--color-accent-strong` for fills, `--color-accent` for borders and
-  hover. Nothing else is coloured except the destructive confirm.
+  hover. Nothing else is coloured except two documented exceptions: the destructive
+  confirm, and the `--color-status-*` circles. Status colour is data rather than
+  decoration — it repeats the badge's `aria-label`, which is the accessible source —
+  and every pair is measured to carry a white glyph at AA or better. Those numbers are
+  recorded next to the tokens; re-measure before changing either side.
 
 Contrast is documented inline and passes WCAG AA. Every CSS transition is gated behind
-`motion-reduce`. Icons come from `@phosphor-icons/react`; do not hand-roll SVGs.
+`motion-reduce`. Icons come from `@phosphor-icons/react`; do not hand-roll SVGs. Server
+components must import them from `@phosphor-icons/react/dist/ssr` — the default entry
+point calls `createContext` and throws when rendered on the server.
 
 ## Configuration
 

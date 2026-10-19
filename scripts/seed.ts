@@ -6,11 +6,11 @@ import { games } from "@/db/schema";
 runMigrations();
 
 const seed = [
-  { title: "Hollow Knight", platform: "PC", status: "completed", rating: 9 },
-  { title: "Celeste", platform: "Switch", status: "completed", rating: 10 },
-  { title: "Hades", platform: "PC", status: "playing", rating: 9 },
+  { title: "Hollow Knight", platform: "PC", status: "completed", rating: 5 },
+  { title: "Celeste", platform: "Switch", status: "completed", rating: 5 },
+  { title: "Hades", platform: "PC", status: "playing", rating: 4 },
   { title: "Outer Wilds", platform: "PC", status: "backlog", rating: null },
-  { title: "Bloodborne", platform: "PS4", status: "dropped", rating: 7 },
+  { title: "Bloodborne", platform: "PS4", status: "dropped", rating: 3 },
 ] as const;
 
 const db = getDb();

@@ -1,19 +1,13 @@
 export function TopBarSkeleton() {
   return (
     <header className="border-b border-line">
-      <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-3 sm:px-6">
-        <span className="font-semibold tracking-tight text-muted">
-          Game Library
-        </span>
-        <div className="ml-auto h-9 w-32 animate-pulse rounded-[10px] bg-surface-2 motion-reduce:animate-none" />
-      </div>
-      <div className="mx-auto flex max-w-[1400px] gap-2 px-4 pb-3 sm:px-6">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div
-            key={index}
-            className="h-7 w-24 animate-pulse rounded-full bg-surface-2 motion-reduce:animate-none"
-          />
-        ))}
+      <div className="flex items-stretch">
+        <div className="flex h-16 flex-1 items-center gap-4 px-5">
+          <div className="size-5 shrink-0 animate-pulse bg-surface-2 motion-reduce:animate-none" />
+          <div className="h-5 w-56 animate-pulse bg-surface-2 motion-reduce:animate-none" />
+        </div>
+        <div className="size-16 shrink-0 border-l border-line" />
+        <div className="size-16 shrink-0 border-l border-line" />
       </div>
     </header>
   );
@@ -21,15 +15,16 @@ export function TopBarSkeleton() {
 
 export function GameGridSkeleton() {
   return (
-    <div className="flex flex-col gap-4" aria-hidden="true">
-      <div className="h-4 w-20 animate-pulse rounded bg-surface-2 motion-reduce:animate-none" />
-      <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {Array.from({ length: 10 }).map((_, index) => (
-          <div key={index} className="flex flex-col gap-2">
-            <div className="aspect-2/3 animate-pulse rounded-[10px] bg-surface-2 motion-reduce:animate-none" />
-            <div className="h-3.5 w-3/4 animate-pulse rounded bg-surface-2 motion-reduce:animate-none" />
-            <div className="h-3 w-1/2 animate-pulse rounded bg-surface-2 motion-reduce:animate-none" />
-          </div>
+    <div className="flex flex-col" aria-hidden="true">
+      <div className="border-b border-line px-5 py-3">
+        <div className="h-5 w-24 animate-pulse bg-surface-2 motion-reduce:animate-none" />
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+        {Array.from({ length: 12 }).map((_, index) => (
+          <div
+            key={index}
+            className="aspect-2/3 animate-pulse border-b border-r border-line bg-surface-2 motion-reduce:animate-none"
+          />
         ))}
       </div>
     </div>

@@ -11,6 +11,14 @@ export const STATUS_LABELS: Record<Status, string> = {
   dropped: "Dropped",
 };
 
+/** Filled circle per status. The glyph on top is always white. */
+export const STATUS_BADGE: Record<Status, string> = {
+  backlog: "bg-status-backlog",
+  playing: "bg-status-playing",
+  completed: "bg-status-completed",
+  dropped: "bg-status-dropped",
+};
+
 export function isStatus(value: string): value is Status {
   return (STATUSES as readonly string[]).includes(value);
 }

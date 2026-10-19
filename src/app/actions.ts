@@ -5,67 +5,69 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { games } from "@/db/schema";
 import { isStatus, type Status } from "@/lib/statuses";
+import { parseRating } from "@/lib/rating";
 
-export type FormState = {
-  ok?: boolean;
-  error?: string;
-};
+export type FormState = { ok?: boolean; error?: string };
 
-export async function addGame(
-  _prevState: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  const values = {
-    title: String(formData.get("title") ?? "").trim(),
-    platform: String(formData.get("platform") ?? "").trim(),
-    status: String(formData.get("status") ?? "backlog"),
-    rating: String(formData.get("rating") ?? "").trim(),
-  };
-
-  if (!values.title) {
-    return { error: "Title is required." };
-  }
-
-  if (values.title.length > 200) {
-    return { error: "Title must be 200 characters or fewer." };
-  }
-
-  if (!isStatus(values.status)) {
-    return { error: "Unknown status." };
-  }
-
-  let rating: number | null = null;
-  if (values.rating) {
-    rating = Number(values.rating);
-    if (!Number.isInteger(rating) || rating < 1 || rating > 10) {
-      return { error: "Rating must be a whole number from 1 to 10." };
+type Fields =
+  | {
+      ok: true;
+      values: {
+        title: string;
+        platform: string | null;
+        status: Status;
+        rating: number | null;
+      };
     }
-  }
+  | { ok: false; error: string };
 
-  getDb()
-    .insert(games)
-    .values({
-      title: values.title,
-      platform: values.platform || null,
-      status: values.status,
-      rating,
-    })
-    .run();
+function readFields(formData: FormData): Fields {
+  const title = String(formData.get("title") ?? "").trim();
+  const platform = String(formData.get("platform") ?? "").trim();
+  const status = String(formData.get("status") ?? "backlog");
+
+  if (!title) return { ok: false, error: "Title is required." };
+  if (title.length > 200) {
+    return { ok: false, error: "Title must be 200 characters or fewer." };
+  }
+  if (!isStatus(status)) return { ok: false, error: "Unknown status." };
+
+  const parsed = parseRating(String(formData.get("rating") ?? ""));
+  if (parsed.error) return { ok: false, error: parsed.error };
+
+  return {
+    ok: true,
+    values: { title, platform: platform || null, status, rating: parsed.rating },
+  };
+}
+
+export async function addGame(formData: FormData): Promise<FormState> {
+  const fields = readFields(formData);
+  if (!fields.ok) return { error: fields.error };
+
+  getDb().insert(games).values(fields.values).run();
 
   refresh();
   return { ok: true };
 }
 
-export async function setGameStatus(id: number, status: Status): Promise<void> {
-  if (!Number.isInteger(id) || !isStatus(status)) return;
+export async function updateGame(
+  id: number,
+  formData: FormData,
+): Promise<FormState> {
+  if (!Number.isInteger(id)) return { error: "Unknown game." };
+
+  const fields = readFields(formData);
+  if (!fields.ok) return { error: fields.error };
 
   getDb()
     .update(games)
-    .set({ status, updatedAt: new Date() })
+    .set({ ...fields.values, updatedAt: new Date() })
     .where(eq(games.id, id))
     .run();
 
   refresh();
+  return { ok: true };
 }
 
 export async function deleteGame(id: number): Promise<void> {

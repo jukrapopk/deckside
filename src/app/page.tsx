@@ -52,7 +52,7 @@ export default function Home({ searchParams }: { searchParams: SearchParams }) {
         <LibraryBar searchParams={searchParams} />
       </Suspense>
 
-      <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-8 sm:px-6">
+      <main className="flex-1">
         <Suspense fallback={<GameGridSkeleton />}>
           <LibraryGrid searchParams={searchParams} />
         </Suspense>

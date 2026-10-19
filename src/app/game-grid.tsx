@@ -23,14 +23,14 @@ export function GameGrid({ games, total, filters }: GameGridProps) {
   const filtered = Boolean(filters.q || filters.status);
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="text-xs text-muted">
+    <div className="flex flex-col">
+      <p className="border-b border-line px-5 py-3 text-base text-muted">
         {filtered
           ? `${games.length} of ${total} games`
           : `${total} ${total === 1 ? "game" : "games"}`}
       </p>
 
-      <ul className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
         {games.map((game, index) => (
           <GameCard
             key={game.id}
@@ -40,7 +40,7 @@ export function GameGrid({ games, total, filters }: GameGridProps) {
             status={game.status as Status}
             rating={game.rating}
             coverUrl={game.coverUrl}
-            eager={index < 5}
+            eager={index < 6}
           />
         ))}
       </ul>
@@ -50,11 +50,11 @@ export function GameGrid({ games, total, filters }: GameGridProps) {
 
 function EmptyLibrary() {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[10px] border border-dashed border-line px-6 py-20 text-center">
-      <GameController size={32} weight="bold" aria-hidden="true" className="text-muted" />
-      <h2 className="text-lg font-semibold">Your library is empty</h2>
-      <p className="max-w-[40ch] text-sm text-muted">
-        Use the Add game button above to record the first thing you own, are
+    <div className="flex flex-col items-center gap-4 px-6 py-24 text-center">
+      <GameController size={40} weight="bold" aria-hidden="true" className="text-muted" />
+      <h2 className="text-xl font-semibold">Your library is empty</h2>
+      <p className="max-w-[45ch] text-base text-muted">
+        Use the add button in the top bar to record the first thing you own, are
         playing, or have finished.
       </p>
     </div>
@@ -67,13 +67,13 @@ function NoMatches({ filters }: { filters: GameFilters }) {
     : "Nothing matches this filter.";
 
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[10px] border border-dashed border-line px-6 py-20 text-center">
-      <MagnifyingGlass size={32} weight="bold" aria-hidden="true" className="text-muted" />
-      <h2 className="text-lg font-semibold">No games found</h2>
-      <p className="max-w-[40ch] text-sm text-muted">{description}</p>
+    <div className="flex flex-col items-center gap-4 px-6 py-24 text-center">
+      <MagnifyingGlass size={40} weight="bold" aria-hidden="true" className="text-muted" />
+      <h2 className="text-xl font-semibold">No games found</h2>
+      <p className="max-w-[45ch] text-base text-muted">{description}</p>
       <Link
         href="/"
-        className="mt-1 rounded-[10px] border border-line px-4 py-2 text-sm font-medium hover:border-accent"
+        className="mt-2 border border-line px-5 py-3 text-base font-medium hover:border-accent"
       >
         Clear filters
       </Link>
