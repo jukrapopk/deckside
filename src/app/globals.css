@@ -65,6 +65,13 @@
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /*
+    Dialog motion. One duration for both directions: long enough to read as
+    movement, short enough that it never delays the next action.
+  */
+  --dialog-duration: 160ms;
+  --dialog-ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
 :root {
@@ -121,8 +128,65 @@ body::after {
   color: #ffffff;
 }
 
+/*
+  Dialog motion. It lives here, on the element, rather than in Modal's markup:
+  every dialog in the app is the <dialog> that Modal renders, so one rule
+  covers add, edit and delete, and the ::backdrop — which a wrapper div cannot
+  reach — animates with it.
+
+  A native dialog is display:none until showModal(), so entering needs
+  @starting-style to have a state to come from. Leaving needs display and
+  overlay to transition discretely: without that, close() drops the element out
+  of the top layer immediately and there is nothing left to fade. Both are
+  progressive — a browser without them shows the dialog instantly, as before.
+*/
+dialog {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--dialog-duration) var(--dialog-ease),
+    transform var(--dialog-duration) var(--dialog-ease),
+    display var(--dialog-duration) allow-discrete,
+    overlay var(--dialog-duration) allow-discrete;
+}
+
+dialog:not([open]) {
+  opacity: 0;
+  transform: translateY(0.5rem) scale(0.98);
+}
+
+@starting-style {
+  dialog[open] {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
+}
+
 /* A tinted veil rather than neutral black, so the page behind keeps its hue. */
 dialog::backdrop {
   background: color-mix(in srgb, var(--color-bg) 68%, transparent);
   backdrop-filter: blur(3px);
+  opacity: 1;
+  transition:
+    opacity var(--dialog-duration) var(--dialog-ease),
+    display var(--dialog-duration) allow-discrete,
+    overlay var(--dialog-duration) allow-discrete;
+}
+
+dialog:not([open])::backdrop {
+  opacity: 0;
+}
+
+@starting-style {
+  dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/* Motion is decoration, so drop it entirely when reduced motion is asked for. */
+@media (prefers-reduced-motion: reduce) {
+  dialog,
+  dialog::backdrop {
+    transition: none;
+  }
 }
