@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import { db } from "./index";
+import { getDb } from "./index";
 
 const migrationsFolder = resolve(
   /*turbopackIgnore: true*/
@@ -8,5 +8,5 @@ const migrationsFolder = resolve(
 );
 
 export function runMigrations() {
-  migrate(db, { migrationsFolder });
+  migrate(getDb(), { migrationsFolder });
 }

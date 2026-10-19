@@ -1,29 +1,34 @@
 import { Suspense } from "react";
-import { connection } from "next/server";
+import { io } from "next/cache";
+import { AddGameForm } from "@/app/add-game-form";
+import { GameRow } from "@/app/game-row";
 import { listGames } from "@/db/queries";
 
 async function GameList() {
-  // The data is request-time, so opt out of prerendering instead of
-  // baking a stale list into the static shell.
-  await connection();
+  // better-sqlite3 is synchronous, so it would otherwise be read during
+  // prerendering. `io()` keeps the query out of the static shell.
+  await io();
   const games = listGames();
 
   if (games.length === 0) {
-    return <p className="text-zinc-500">No games yet.</p>;
+    return (
+      <p className="text-sm text-zinc-500">
+        No games yet. Add your first one above.
+      </p>
+    );
   }
 
   return (
     <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
       {games.map((game) => (
-        <li key={game.id} className="flex items-center gap-4 py-3">
-          <span className="flex-1 font-medium">{game.title}</span>
-          {game.platform && (
-            <span className="text-sm text-zinc-500">{game.platform}</span>
-          )}
-          <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs uppercase tracking-wide text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
-            {game.status}
-          </span>
-        </li>
+        <GameRow
+          key={game.id}
+          id={game.id}
+          title={game.title}
+          platform={game.platform}
+          status={game.status}
+          rating={game.rating}
+        />
       ))}
     </ul>
   );
@@ -31,9 +36,17 @@ async function GameList() {
 
 export default function Home() {
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-6 py-16">
-      <h1 className="text-2xl font-semibold tracking-tight">Game Library</h1>
-      <Suspense fallback={<p className="text-zinc-500">Loading games…</p>}>
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-6 py-16">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Game Library</h1>
+        <p className="text-sm text-zinc-500">
+          Track what you own, what you are playing, and what you have finished.
+        </p>
+      </header>
+
+      <AddGameForm />
+
+      <Suspense fallback={<p className="text-sm text-zinc-500">Loading…</p>}>
         <GameList />
       </Suspense>
     </main>
