@@ -30,7 +30,10 @@ export function FieldGroup({
 }) {
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="text-sm font-medium text-muted">{legend}</legend>
+      {/* A rendered legend is laid out in the fieldset's border area rather
+          than as a flex item, so the gap never opens between it and the
+          controls. The margin supplies the same 8px the other fields get. */}
+      <legend className="mb-2 text-sm font-medium text-muted">{legend}</legend>
       {children}
     </fieldset>
   );
