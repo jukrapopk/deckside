@@ -13,6 +13,8 @@ RUN npm ci
 FROM node:22-alpine AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
+# Opt in to the standalone output that the runner stage copies.
+ENV BUILD_STANDALONE=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
@@ -28,7 +30,7 @@ ENV DATABASE_PATH=/data/game-library.db
 ENV MIGRATIONS_PATH=/app/drizzle
 
 RUN addgroup --system --gid 1001 nodejs \
-  && adduser --system --uid 1001 nextjs \
+  && adduser --system --uid 1001 --ingroup nodejs nextjs \
   && mkdir -p /data \
   && chown nextjs:nodejs /data
 

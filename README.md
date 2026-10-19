@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Game Library
 
-## Getting Started
+A personal game library: track what you own, what you are playing, and what you have finished.
 
-First, run the development server:
+Built with Next.js 16 (App Router, Cache Components), SQLite, and Drizzle ORM.
+
+## Getting started
 
 ```bash
+npm install
+npm run db:seed   # optional: 5 sample games
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The database file lives at `data/game-library.db` and is created on first run. Schema
+migrations are applied automatically when the server starts.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+| Script | What it does |
+| --- | --- |
+| `npm run dev` | Development server with hot reload |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | Generate route types and type-check |
+| `npm run db:generate` | Generate a migration after editing the schema |
+| `npm run db:migrate` | Apply pending migrations |
+| `npm run db:seed` | Replace contents with sample data |
+| `npm run db:studio` | Browse the database in Drizzle Studio |
 
-To learn more about Next.js, take a look at the following resources:
+## Changing the schema
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Edit `src/db/schema.ts`, then generate and commit a migration:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run db:generate
+```
 
-## Deploy on Vercel
+Migrations are committed to `drizzle/` and applied at server startup, so a fresh
+checkout needs no extra setup step.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## How it is put together
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/app/          pages, server actions, and UI components
+src/db/           schema, connection, queries, migrations
+src/lib/          shared constants used by both client and server
+drizzle/          generated SQL migrations
+scripts/seed.ts   sample data
+```
+
+- `src/db/index.ts` opens a single `better-sqlite3` connection lazily, in WAL mode.
+  It is lazy so that `next build` does not create the database as a side effect.
+- `src/instrumentation.ts` runs migrations once at server startup.
+- SQLite is a single-writer database. Run one instance; if you ever need horizontal
+  scaling, move to Postgres or Turso.
+- `better-sqlite3` is listed in `serverExternalPackages` so its native binding stays
+  out of the bundle. Removing that breaks the build.
+- The game list reads through `io()` to keep the query out of the static shell.
+
+## Configuration
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `DATABASE_PATH` | `./data/game-library.db` | SQLite file location |
+| `MIGRATIONS_PATH` | `./drizzle` | Directory migrations are read from |
+
+## Docker
+
+A `Dockerfile` and `docker-compose.yml` are included but currently parked while local
+development is the focus.
+
+```bash
+docker compose up --build
+```
+
+The image runs as a non-root user and stores the database on a named volume at `/data`.
+Set `BUILD_STANDALONE=1` to produce the standalone output the Dockerfile expects;
+`npm run build` on its own does not, because standalone output is incompatible with
+`next start`.
