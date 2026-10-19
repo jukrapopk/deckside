@@ -52,7 +52,11 @@ export function AddGameDialog() {
         title="Add game"
         description="Only the title is required."
       >
-        <GameForm key={modal.open ? "open" : "closed"} mode="add" onDone={modal.closeModal} />
+        <GameForm
+          key={modal.open ? "open" : "closed"}
+          mode="add"
+          onDone={modal.closeModal}
+        />
       </Modal>
     </>
   );
@@ -98,6 +102,11 @@ type GameFormProps =
   | { mode: "add"; onDone: () => void }
   | { mode: "edit"; game: GameValues; onDone: () => void };
 
+/**
+ * The one form behind both dialogs. Callers give it a `key` that changes with
+ * the open state, so each opening remounts it and starts from a clean slate
+ * rather than the previous attempt's fields and error.
+ */
 function GameForm(props: GameFormProps) {
   const existing = props.mode === "edit" ? props.game : null;
 

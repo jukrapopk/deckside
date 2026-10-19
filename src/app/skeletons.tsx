@@ -1,3 +1,5 @@
+import { GRID_COLS, GRID_TILE } from "@/lib/grid";
+
 export function TopBarSkeleton() {
   return (
     <header className="border-b border-line">
@@ -19,11 +21,12 @@ export function GameGridSkeleton() {
       <div className="border-b border-line px-5 py-3">
         <div className="h-5 w-24 animate-pulse bg-surface-2 motion-reduce:animate-none" />
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+      {/* Tiles carry the same shape as a card, so nothing moves on arrival. */}
+      <div className={GRID_COLS}>
         {Array.from({ length: 12 }).map((_, index) => (
           <div
             key={index}
-            className="aspect-2/3 animate-pulse border-b border-r border-line bg-surface-2 motion-reduce:animate-none"
+            className={`${GRID_TILE} animate-pulse motion-reduce:animate-none`}
           />
         ))}
       </div>

@@ -1,7 +1,7 @@
 import { and, desc, eq, like, or, type SQL } from "drizzle-orm";
 import { getDb } from "./index";
 import { games } from "./schema";
-import { isStatus, STATUSES, type Status } from "@/lib/statuses";
+import { isStatus, STATUSES, type Status, type StatusCounts } from "@/lib/statuses";
 
 export type GameFilters = {
   q?: string;
@@ -45,15 +45,13 @@ export function listGames({ q, status }: GameFilters = {}) {
     .all();
 }
 
-export type StatusCounts = Record<Status, number> & { all: number };
-
 export function countByStatus(): StatusCounts {
   const rows = getDb()
     .select({ status: games.status })
     .from(games)
     .all();
 
-  const counts: StatusCounts = { all: rows.length } as StatusCounts;
+  const counts = { all: rows.length } as StatusCounts;
   for (const status of STATUSES) counts[status] = 0;
   for (const row of rows) counts[row.status] += 1;
 

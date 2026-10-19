@@ -20,11 +20,9 @@ const STATUS_ICONS: Record<Status, Icon> = {
  */
 export function StatusBadge({
   status,
-  size = 16,
   className = "",
 }: {
   status: Status;
-  size?: number;
   className?: string;
 }) {
   const Glyph = STATUS_ICONS[status];
@@ -35,7 +33,7 @@ export function StatusBadge({
       aria-label={STATUS_LABELS[status]}
       className={`flex size-7 items-center justify-center rounded-full text-white ${STATUS_BADGE[status]} ${className}`}
     >
-      <Glyph size={size} weight="bold" aria-hidden="true" />
+      <Glyph size={16} weight="bold" aria-hidden="true" />
     </span>
   );
 }

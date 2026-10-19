@@ -5,14 +5,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { AddGameDialog } from "./game-dialog";
 import { IconButton } from "@/components/icon-button";
-import { STATUSES, STATUS_LABELS, type Status } from "@/lib/statuses";
-
-type Counts = { all: number } & Record<Status, number>;
+import { STATUSES, STATUS_LABELS, type Status, type StatusCounts } from "@/lib/statuses";
 
 type TopBarProps = {
   q: string;
   status?: Status;
-  counts: Counts;
+  counts: StatusCounts;
 };
 
 export function TopBar({ q, status, counts }: TopBarProps) {
@@ -98,7 +96,7 @@ function FilterButton({
   onSelect,
 }: {
   status?: Status;
-  counts: Counts;
+  counts: StatusCounts;
   hrefFor: (next?: Status) => string;
   onSelect: (next?: Status) => void;
 }) {
@@ -150,6 +148,8 @@ function FilterButton({
             const active = option.value === status;
 
             return (
+              // A real href, so the option can be opened in a new tab or
+              // copied; the click handler keeps in-app navigation instant.
               <a
                 key={option.label}
                 href={hrefFor(option.value)}

@@ -1,9 +1,10 @@
 import { GameController, MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { GameCard } from "./game-card";
 import type { GameFilters } from "@/db/queries";
 import type { Game } from "@/db/schema";
-import type { Status } from "@/lib/statuses";
+import { GRID_COLS } from "@/lib/grid";
 
 type GameGridProps = {
   games: Game[];
@@ -30,53 +31,79 @@ export function GameGrid({ games, total, filters }: GameGridProps) {
           : `${total} ${total === 1 ? "game" : "games"}`}
       </p>
 
-      <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+      <ul className={GRID_COLS}>
         {games.map((game, index) => (
-          <GameCard
-            key={game.id}
-            id={game.id}
-            title={game.title}
-            platform={game.platform}
-            status={game.status as Status}
-            rating={game.rating}
-            coverUrl={game.coverUrl}
-            eager={index < 6}
-          />
+          <GameCard key={game.id} game={game} eager={index < 6} />
         ))}
       </ul>
     </div>
   );
 }
 
-function EmptyLibrary() {
+/** Icon, heading, explanation, and an optional action. Shared empty state. */
+function MessageState({
+  icon,
+  title,
+  description,
+  action,
+}: {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  action?: ReactNode;
+}) {
   return (
     <div className="flex flex-col items-center gap-4 px-6 py-24 text-center">
-      <GameController size={40} weight="bold" aria-hidden="true" className="text-muted" />
-      <h2 className="text-xl font-semibold">Your library is empty</h2>
-      <p className="max-w-[45ch] text-base text-muted">
-        Use the add button in the top bar to record the first thing you own, are
-        playing, or have finished.
-      </p>
+      {icon}
+      <h2 className="text-xl font-semibold">{title}</h2>
+      <p className="max-w-[45ch] text-base text-muted">{description}</p>
+      {action}
     </div>
   );
 }
 
-function NoMatches({ filters }: { filters: GameFilters }) {
-  const description = filters.q
-    ? `Nothing matches "${filters.q}".`
-    : "Nothing matches this filter.";
-
+function EmptyLibrary() {
   return (
-    <div className="flex flex-col items-center gap-4 px-6 py-24 text-center">
-      <MagnifyingGlass size={40} weight="bold" aria-hidden="true" className="text-muted" />
-      <h2 className="text-xl font-semibold">No games found</h2>
-      <p className="max-w-[45ch] text-base text-muted">{description}</p>
-      <Link
-        href="/"
-        className="mt-2 border border-line px-5 py-3 text-base font-medium hover:border-accent"
-      >
-        Clear filters
-      </Link>
-    </div>
+    <MessageState
+      title="Your library is empty"
+      description="Use the add button in the top bar to record the first thing you own, are playing, or have finished."
+      icon={
+        <GameController
+          size={40}
+          weight="bold"
+          aria-hidden="true"
+          className="text-muted"
+        />
+      }
+    />
+  );
+}
+
+function NoMatches({ filters }: { filters: GameFilters }) {
+  return (
+    <MessageState
+      title="No games found"
+      description={
+        filters.q
+          ? `Nothing matches "${filters.q}".`
+          : "Nothing matches this filter."
+      }
+      icon={
+        <MagnifyingGlass
+          size={40}
+          weight="bold"
+          aria-hidden="true"
+          className="text-muted"
+        />
+      }
+      action={
+        <Link
+          href="/"
+          className="mt-2 border border-line px-5 py-3 text-base font-medium hover:border-accent"
+        >
+          Clear filters
+        </Link>
+      }
+    />
   );
 }

@@ -1,37 +1,33 @@
 import Image from "next/image";
-import { EditGameDialog, type GameValues } from "@/app/game-dialog";
+import { EditGameDialog } from "@/app/game-dialog";
 import { StarRating } from "@/components/star-rating";
 import { StatusBadge } from "@/components/status-badge";
-import { coverSeed, type Status } from "@/lib/statuses";
+import type { Game } from "@/db/schema";
+import { GRID_TILE } from "@/lib/grid";
 
 type GameCardProps = {
-  id: number;
-  title: string;
-  platform: string | null;
-  status: Status;
-  rating: number | null;
-  coverUrl: string | null;
+  game: Game;
   /** First row of covers is above the fold, so load it eagerly. */
   eager?: boolean;
 };
 
-export function GameCard({
-  id,
-  title,
-  platform,
-  status,
-  rating,
-  coverUrl,
-  eager = false,
-}: GameCardProps) {
+/** Stable per-title seed so a game without cover art keeps the same image. */
+function coverSeed(title: string) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export function GameCard({ game, eager = false }: GameCardProps) {
+  const { title, platform, status, rating, coverUrl } = game;
+
   // Seeded so a game without artwork keeps the same image between renders.
   const cover =
     coverUrl ?? `https://picsum.photos/seed/${coverSeed(title)}/600/900`;
 
-  const values: GameValues = { id, title, platform, status, rating };
-
   return (
-    <li className="group relative aspect-2/3 overflow-hidden border-b border-r border-line bg-surface-2">
+    <li className={`group relative overflow-hidden ${GRID_TILE}`}>
       <Image
         src={cover}
         alt=""
@@ -49,7 +45,7 @@ export function GameCard({
       />
 
       <EditGameDialog
-        game={values}
+        game={game}
         triggerClassName="opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none"
       />
 

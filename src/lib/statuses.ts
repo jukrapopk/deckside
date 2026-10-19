@@ -19,14 +19,9 @@ export const STATUS_BADGE: Record<Status, string> = {
   dropped: "bg-status-dropped",
 };
 
+/** How many games sit in each status, plus the total. */
+export type StatusCounts = Record<Status, number> & { all: number };
+
 export function isStatus(value: string): value is Status {
   return (STATUSES as readonly string[]).includes(value);
-}
-
-/** Stable per-title seed so a game without cover art keeps the same image. */
-export function coverSeed(title: string) {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
 }
