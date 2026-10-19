@@ -1,6 +1,6 @@
 "use client";
 
-import { Star } from "@phosphor-icons/react";
+import { Star } from "lucide-react";
 import { RATING_MAX } from "@/lib/rating";
 
 /** Star picker. Radios, so arrow keys work and the value posts as a field. */
@@ -38,7 +38,8 @@ export function StarPicker({
             >
               <Star
                 size={16}
-                weight={filled ? "fill" : "regular"}
+                strokeWidth={2}
+                fill={filled ? "currentColor" : "none"}
                 aria-hidden="true"
               />
             </span>

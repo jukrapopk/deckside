@@ -1,6 +1,6 @@
 "use client";
 
-import { FunnelSimple, MagnifyingGlass, X } from "@phosphor-icons/react";
+import { Filter, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { AddGameDialog } from "./game-dialog";
@@ -49,9 +49,9 @@ export function TopBar({ q, status, counts }: TopBarProps) {
           <label htmlFor="library-search" className="sr-only">
             Search games
           </label>
-          <MagnifyingGlass
+          <Search
             size={20}
-            weight="bold"
+            strokeWidth={2.25}
             aria-hidden="true"
             className="pointer-events-none ml-5 shrink-0 text-muted"
           />
@@ -71,7 +71,7 @@ export function TopBar({ q, status, counts }: TopBarProps) {
               aria-label="Clear search"
               className="mr-2 flex size-9 shrink-0 items-center justify-center text-muted hover:text-ink"
             >
-              <X size={18} weight="bold" aria-hidden="true" />
+              <X size={18} strokeWidth={2.25} aria-hidden="true" />
             </button>
           )}
         </form>
@@ -139,7 +139,7 @@ function FilterButton({
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-haspopup="true"
-        icon={<FunnelSimple size={22} weight="bold" aria-hidden="true" />}
+        icon={<Filter size={22} strokeWidth={2.25} aria-hidden="true" />}
       />
 
       {open && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { PencilSimple, Plus, Trash } from "@phosphor-icons/react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
 import { addGame, deleteGame, updateGame } from "@/app/actions";
@@ -42,7 +42,7 @@ export function AddGameDialog() {
           label="Add game"
           size="lg"
           onClick={modal.openModal}
-          icon={<Plus size={22} weight="bold" aria-hidden="true" />}
+          icon={<Plus size={22} strokeWidth={2.25} aria-hidden="true" />}
         />
       </div>
 
@@ -78,7 +78,7 @@ export function EditGameDialog({
         variant="bare"
         onClick={modal.openModal}
         className={`absolute right-0 top-0 ${triggerClassName}`}
-        icon={<PencilSimple size={18} weight="bold" aria-hidden="true" />}
+        icon={<Pencil size={18} strokeWidth={2.25} aria-hidden="true" />}
       />
 
       <Modal
@@ -206,7 +206,7 @@ function GameForm(props: GameFormProps) {
               onClick={() => setConfirmingDelete(true)}
               className="flex items-center gap-2 px-1 py-3 text-base font-medium text-muted hover:text-danger"
             >
-              <Trash size={18} weight="bold" aria-hidden="true" />
+              <Trash2 size={18} strokeWidth={2.25} aria-hidden="true" />
               Delete
             </button>
           )

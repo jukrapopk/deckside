@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "@phosphor-icons/react";
+import { X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { IconButton } from "./icon-button";
 
@@ -68,7 +68,7 @@ export function Modal({
           label="Close"
           size="sm"
           onClick={onClose}
-          icon={<X size={18} weight="bold" aria-hidden="true" />}
+          icon={<X size={18} strokeWidth={2.25} aria-hidden="true" />}
         />
       </div>
 

@@ -1,4 +1,4 @@
-import { GameController, MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
+import { Gamepad2, Search } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { GameCard } from "./game-card";
@@ -66,11 +66,11 @@ function EmptyLibrary() {
   return (
     <MessageState
       title="Your library is empty"
-      description="Use the add button in the top bar to record the first thing you own, are playing, or have finished."
+      description="Use the add button in the top bar to record the first thing you own, want to play next, or have finished."
       icon={
-        <GameController
+        <Gamepad2
           size={40}
-          weight="bold"
+          strokeWidth={1.75}
           aria-hidden="true"
           className="text-muted"
         />
@@ -89,9 +89,9 @@ function NoMatches({ filters }: { filters: GameFilters }) {
           : "Nothing matches this filter."
       }
       icon={
-        <MagnifyingGlass
+        <Search
           size={40}
-          weight="bold"
+          strokeWidth={1.75}
           aria-hidden="true"
           className="text-muted"
         />

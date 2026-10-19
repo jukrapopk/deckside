@@ -1,11 +1,25 @@
 // Shared between client components and server actions. Must not live in a
 // "use server" file: those may only export async functions to the client.
-export const STATUSES = ["backlog", "playing", "completed", "dropped"] as const;
+//
+// Ordered as a game actually moves through a library: it sits in the backlog,
+// gets picked to play next, is played, and then either finishes or is dropped.
+// The order is the filter-menu order and the status picker's order.
+export const STATUSES = [
+  "backlog",
+  "up-next",
+  "playing",
+  "completed",
+  "dropped",
+] as const;
 
 export type Status = (typeof STATUSES)[number];
 
 export const STATUS_LABELS: Record<Status, string> = {
   backlog: "Backlog",
+  // "Up next" rather than "Queued" or "Play next": it names a slot, not an
+  // order, which matters because nothing here stores a sequence. It also
+  // reads as a subset of Backlog in the filter list, which is what it is.
+  "up-next": "Up next",
   playing: "Playing",
   completed: "Completed",
   dropped: "Dropped",
@@ -14,6 +28,7 @@ export const STATUS_LABELS: Record<Status, string> = {
 /** Filled circle per status. The glyph on top is always white. */
 export const STATUS_BADGE: Record<Status, string> = {
   backlog: "bg-status-backlog",
+  "up-next": "bg-status-up-next",
   playing: "bg-status-playing",
   completed: "bg-status-completed",
   dropped: "bg-status-dropped",

@@ -11,7 +11,7 @@
   Rules:
     - One theme. Dark only, on purpose.
     - One accent. Nothing else is coloured except two documented exceptions:
-      the four semantic status fills, and the destructive confirm.
+      the five semantic status fills, and the destructive confirm.
     - Solid surfaces, atmospheric depth. See the body rule below.
 
   Contrast (WCAG AA, every pair measured):
@@ -39,14 +39,24 @@
   /*
     Semantic colour, the deliberate exception to the single-accent rule. Each
     one fills the badge circle behind a white glyph, measured white-on-fill:
-      backlog 6.68:1   playing 6.99:1
-      completed 7.31:1 dropped 7.28:1
-    Kept cool so they belong to the navy: muted slate for backlog, a deeper
-    green for completed, a magenta-leaning red for dropped.
+      backlog 8.31:1   up-next 5.29:1   playing 6.99:1
+      completed 6.37:1 dropped 7.28:1
+
+    The five also have to be told apart from each other at 28px, so they are
+    spread across the wheel rather than tinted five ways blue: teal for the
+    list you have not started, gold for the one pulled out to play next, blue
+    for playing, green for finished, red for dropped. Closest pair is
+    backlog/playing at OKLab dE 9.8.
+
+    Teal and green sit only 54 degrees apart, so they cannot both be teal-ish.
+    Completed is a true green (136 degrees) for exactly that reason: it leaves
+    the backlog its own hue. Pulling either back toward the middle costs more
+    separation than any other pair in the set.
   */
-  --color-status-backlog: #4f5d73;
+  --color-status-backlog: #1f5560;
+  --color-status-up-next: #8a6524;
   --color-status-playing: #225a9b;
-  --color-status-completed: #2b6049;
+  --color-status-completed: #2f6b3f;
   --color-status-dropped: #8a3f47;
 
   /* Destructive. A cool red, so the palette holds one red family. */

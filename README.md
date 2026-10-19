@@ -1,6 +1,7 @@
 # Game Library
 
-A personal game library: track what you own, what you are playing, and what you have finished.
+A personal game library: track what you own, what is up next, what you are
+playing, and what you have finished or dropped.
 
 Built with Next.js 16 (App Router, Cache Components), SQLite, and Drizzle ORM.
 
@@ -91,9 +92,11 @@ Tokens live in `src/app/globals.css` under `@theme`. Three rules keep it coheren
 
 
 Contrast is documented inline and passes WCAG AA. Every CSS transition is gated behind
-`motion-reduce`. Icons come from `@phosphor-icons/react`; do not hand-roll SVGs. Server
-components must import them from `@phosphor-icons/react/dist/ssr` — the default entry
-point calls `createContext` and throws when rendered on the server.
+`motion-reduce`. Icons come from `lucide-react`; do not hand-roll SVGs, and do not add a
+second icon library. They are stroked, never filled: a filled set mixes solid masses
+(triangle, bookmark) with line marks (tick, X), and the light ones always look weak next
+to the heavy ones. Uniform stroke width is what makes the set read as one family, so a
+new icon inherits the stroke width rather than picking its own weight.
 
 ## Configuration
 
