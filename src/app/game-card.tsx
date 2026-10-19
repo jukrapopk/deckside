@@ -26,8 +26,14 @@ export function GameCard({ game, eager = false }: GameCardProps) {
   const cover =
     coverUrl ?? `https://picsum.photos/seed/${coverSeed(title)}/600/900`;
 
+  // The tile itself is what responds, so the labels ride with the cover
+  // instead of staying put under a zooming image. z-10 keeps a grown card
+  // above its neighbours; the gutter is wide enough that it only covers
+  // empty space.
   return (
-    <li className={`group relative overflow-hidden ${GRID_TILE}`}>
+    <li
+      className={`group relative overflow-hidden ${GRID_TILE} transition-transform duration-200 ease-out hover:z-10 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100`}
+    >
       <Image
         src={cover}
         alt=""
@@ -35,7 +41,7 @@ export function GameCard({ game, eager = false }: GameCardProps) {
         fill
         priority={eager}
         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-        className="object-cover transition-transform duration-500 group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+        className="object-cover"
       />
 
       {/* Scrim so the labels stay legible over any photo. Tinted to the page
