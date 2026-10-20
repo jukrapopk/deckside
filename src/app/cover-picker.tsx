@@ -13,6 +13,13 @@ type Result =
   | { status: "message"; message: string };
 
 /**
+ * Two rows of four. A taller grid would push the rest of the form a screen
+ * down; eight is enough to choose between, and the picker previews the
+ * selection at full size.
+ */
+const VISIBLE_OPTIONS = 8;
+
+/**
  * Cover art picker. Writes the chosen URL into the game form's hidden field,
  * so Save is still the only thing that persists anything; the preview updates
  * immediately because that is what makes a choice feel like a choice.
@@ -26,7 +33,10 @@ export function CoverPicker({
   value: string;
   onChange: (url: string) => void;
 }) {
-  const [query, setQuery] = useState(title);
+  // Until the search box is touched it follows the title, so adding a game
+  // does not ask for the same words twice.
+  const [typed, setTyped] = useState<string | null>(null);
+  const query = typed ?? title;
   const [result, setResult] = useState<Result>({ status: "idle" });
   const [searching, startSearch] = useTransition();
 
@@ -70,7 +80,7 @@ export function CoverPicker({
             <input
               id="cover-search"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => setTyped(event.target.value)}
               onKeyDown={(event) => {
                 // Enter searches. It must not submit the game form.
                 if (event.key === "Enter") {
@@ -108,8 +118,8 @@ export function CoverPicker({
           <p className="text-sm text-muted">
             Art for <span className="text-ink">{result.game}</span>
           </p>
-          <ul className="grid max-h-64 grid-cols-4 gap-2 overflow-y-auto pr-1">
-            {result.options.map((option, index) => {
+          <ul className="grid grid-cols-4 gap-2">
+            {result.options.slice(0, VISIBLE_OPTIONS).map((option, index) => {
               const selected = option.url === value;
 
               return (

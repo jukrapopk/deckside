@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 /** First visible character, upper-cased. Spread so an emoji is not cut in half. */
-export function initialOf(title: string): string {
+function initialOf(title: string): string {
   return [...title.trim()][0]?.toUpperCase() ?? "?";
 }
 

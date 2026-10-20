@@ -99,6 +99,7 @@ function GameForm(props: GameFormProps) {
   const existing = props.mode === "edit" ? props.game : null;
 
   const [rating, setRating] = useState<number | null>(existing?.rating ?? null);
+  const [title, setTitle] = useState(existing?.title ?? "");
   const [coverUrl, setCoverUrl] = useState(existing?.coverUrl ?? "");
   const [error, setError] = useState<string>();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -126,20 +127,15 @@ function GameForm(props: GameFormProps) {
           required
           maxLength={200}
           autoComplete="off"
-          defaultValue={existing?.title ?? ""}
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
           className={inputClass}
         />
       </Field>
 
-      {existing && (
-        <FieldGroup legend="Cover">
-          <CoverPicker
-            title={existing.title}
-            value={coverUrl}
-            onChange={setCoverUrl}
-          />
-        </FieldGroup>
-      )}
+      <FieldGroup legend="Cover">
+        <CoverPicker title={title} value={coverUrl} onChange={setCoverUrl} />
+      </FieldGroup>
 
       <Field label="Platform">
         <input
