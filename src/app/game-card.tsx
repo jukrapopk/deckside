@@ -40,13 +40,14 @@ export function GameCard({ game, eager = false }: GameCardProps) {
       <CoverArt src={coverUrl} title={title} eager={eager} />
 
       {/* A favourite is a state, not an action, so the heart sits opposite the
-          edit affordance and borrows its colour and shadow rather than a badge. */}
+          edit affordance. It is solid white, not a stroked outline, so the
+          mark stays even over a light cover. */}
       {favourite && (
         <span
           role="img"
           aria-label="Favourite"
           title="Favourite"
-          className="absolute left-0 top-0 flex size-10 items-center justify-center text-white/85 drop-shadow-[0_1px_3px_rgba(15,22,34,0.9)]"
+          className="absolute left-0 top-0 flex size-10 items-center justify-center text-white drop-shadow-[0_1px_3px_rgba(15,22,34,0.9)]"
         >
           <HeartGlyph filled />
         </span>
