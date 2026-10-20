@@ -89,29 +89,32 @@
   looks like an unexplained gutter. Draw a quiet rail instead: the track stays
   visible when there is nothing to scroll, and the thumb only appears with
   overflow. The standard properties are the Firefox fallback; the pseudo
-  elements keep the rail's border in Chromium and Safari.
+  elements keep the rail's border in Chromium and Safari. Apply the rail to
+  every scroll container, so dialog bodies do not fall back to the browser's
+  default scrollbar.
 */
 @supports not selector(::-webkit-scrollbar) {
-  :root {
+  * {
     scrollbar-color: var(--color-line) var(--color-surface);
   }
 }
 
-:root::-webkit-scrollbar {
+*::-webkit-scrollbar {
   width: 12px;
+  height: 12px;
 }
 
-:root::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track {
   background: var(--color-surface);
   border-left: 1px solid var(--color-line);
 }
 
-:root::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
   background: var(--color-line);
   border: 3px solid var(--color-surface);
 }
 
-:root::-webkit-scrollbar-thumb:hover {
+*::-webkit-scrollbar-thumb:hover {
   background: var(--color-muted);
 }
 
