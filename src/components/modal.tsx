@@ -71,18 +71,23 @@ export function Modal({
     <dialog
       ref={dialogRef}
       aria-labelledby={headingId}
-      onClose={onClose}
+      onClose={(event) => {
+        // React gives even the non-bubbling `close` event a synthetic bubbling
+        // phase, so a nested dialog closing would otherwise close this one too.
+        if (event.target === dialogRef.current) onClose();
+      }}
       onClick={(event) => {
         // Clicks land on the dialog element itself only on the backdrop.
         if (event.target === dialogRef.current) onClose();
       }}
-      className="m-auto w-[calc(100vw-2rem)] max-w-lg border border-line bg-surface p-0 text-ink open:flex open:max-h-[calc(100dvh-2rem)] open:flex-col open:overflow-hidden"
+      className="m-auto w-[calc(100vw-2rem)] max-w-lg max-h-[calc(100dvh-2rem)] flex-col overflow-hidden border border-line bg-surface p-0 text-ink open:flex"
     >
-      {/* The dialog is the height cap, and it is only a flex column while
-          open — so the closed rule from the browser (`display: none`) still
-          applies. The header stays put; the body is the single scroller. A
-          `max-height` here also beats the browser's own modal cap, which
-          would otherwise make the dialog itself a second scroll container. */}
+      {/* Only `display` is tied to [open]; the browser needs that to hide the
+          closed dialog. The other layout rules stay on the element so the
+          closing fade keeps its shape instead of snapping to a row before it
+          leaves the top layer. The header stays put; the body is the single
+          scroller. This `max-height` also beats the browser's own modal cap,
+          which would otherwise make the dialog a second scroll container. */}
       <div className="flex shrink-0 items-start justify-between gap-4 border-b border-line px-5 py-4">
         <div>
           <h2 id={headingId} className="text-lg font-semibold">
