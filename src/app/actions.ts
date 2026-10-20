@@ -1,10 +1,10 @@
 "use server";
 
 import { refresh } from "next/cache";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { gamePlatforms, games, platforms } from "@/db/schema";
-import { isPlatformIcon } from "@/lib/platforms";
+import { isPlatformIcon, type PlatformIconKey } from "@/lib/platforms";
 import { clearSetting, setSetting, STEAMGRIDDB_KEY } from "@/lib/settings";
 import { isStatus, type Status } from "@/lib/statuses";
 import { parseRating } from "@/lib/rating";
@@ -139,26 +139,72 @@ export async function deleteGame(id: number): Promise<void> {
 }
 
 /** The platform list is managed from Settings and picked from a game's form. */
-export async function addPlatform(formData: FormData): Promise<FormState> {
+type PlatformFields =
+  | { ok: true; name: string; icon: PlatformIconKey }
+  | { ok: false; error: string };
+
+function readPlatform(formData: FormData): PlatformFields {
   const name = String(formData.get("name") ?? "").trim();
   const icon = String(formData.get("icon") ?? "");
 
-  if (!name) return { error: "Name is required." };
+  if (!name) return { ok: false, error: "Name is required." };
   if (name.length > 40) {
-    return { error: "Keep the name to 40 characters or fewer." };
+    return { ok: false, error: "Keep the name to 40 characters or fewer." };
   }
-  if (!isPlatformIcon(icon)) return { error: "Choose an icon." };
+  if (!isPlatformIcon(icon)) return { ok: false, error: "Choose an icon." };
 
-  const db = getDb();
-  const existing = db
-    .select({ id: platforms.id })
-    .from(platforms)
-    .where(sql`lower(${platforms.name}) = lower(${name})`)
-    .get();
+  return { ok: true, name, icon };
+}
 
-  if (existing) return { error: "That platform is already in the list." };
+function platformNameTaken(name: string, exceptId?: number) {
+  const where = sql`lower(${platforms.name}) = lower(${name})`;
 
-  db.insert(platforms).values({ name, icon }).run();
+  return Boolean(
+    getDb()
+      .select({ id: platforms.id })
+      .from(platforms)
+      .where(
+        exceptId === undefined ? where : and(where, ne(platforms.id, exceptId)),
+      )
+      .get(),
+  );
+}
+
+export async function addPlatform(formData: FormData): Promise<FormState> {
+  const fields = readPlatform(formData);
+  if (!fields.ok) return { error: fields.error };
+  if (platformNameTaken(fields.name)) {
+    return { error: "That platform is already in the list." };
+  }
+
+  getDb()
+    .insert(platforms)
+    .values({ name: fields.name, icon: fields.icon })
+    .run();
+  refresh();
+  return { ok: true };
+}
+
+export async function updatePlatform(
+  id: number,
+  formData: FormData,
+): Promise<FormState> {
+  if (!Number.isInteger(id)) return { error: "Unknown platform." };
+
+  const fields = readPlatform(formData);
+  if (!fields.ok) return { error: fields.error };
+  if (platformNameTaken(fields.name, id)) {
+    return { error: "That platform is already in the list." };
+  }
+
+  const updated = getDb()
+    .update(platforms)
+    .set({ name: fields.name, icon: fields.icon })
+    .where(eq(platforms.id, id))
+    .run();
+
+  if (updated.changes === 0) return { error: "Unknown platform." };
+
   refresh();
   return { ok: true };
 }
