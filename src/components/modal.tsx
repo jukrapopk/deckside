@@ -57,22 +57,29 @@ export function Modal({
       }}
       className="m-auto w-[calc(100vw-2rem)] max-w-lg border border-line bg-surface p-0 text-ink"
     >
-      <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
-        <div>
-          <h2 id={headingId} className="text-lg font-semibold">
-            {title}
-          </h2>
-          {description && <p className="mt-1 text-sm text-muted">{description}</p>}
+      {/* The dialog itself is height-capped so a long form (the cover picker
+          adds a result grid) scrolls its body instead of pushing its own
+          buttons off-screen. */}
+      <div className="flex max-h-[calc(100dvh-2rem)] flex-col">
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-line px-5 py-4">
+          <div>
+            <h2 id={headingId} className="text-lg font-semibold">
+              {title}
+            </h2>
+            {description && (
+              <p className="mt-1 text-sm text-muted">{description}</p>
+            )}
+          </div>
+          <IconButton
+            label="Close"
+            size="sm"
+            onClick={onClose}
+            icon={<X size={18} strokeWidth={2.25} aria-hidden="true" />}
+          />
         </div>
-        <IconButton
-          label="Close"
-          size="sm"
-          onClick={onClose}
-          icon={<X size={18} strokeWidth={2.25} aria-hidden="true" />}
-        />
-      </div>
 
-      <div className="px-5 py-5">{children}</div>
+        <div className="min-h-0 overflow-y-auto px-5 py-5">{children}</div>
+      </div>
     </dialog>
   );
 }

@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { EditGameDialog } from "@/app/game-dialog";
+import { CoverArt } from "@/components/cover-art";
 import { StarRating } from "@/components/star-rating";
 import { StatusBadge } from "@/components/status-badge";
 import type { Game } from "@/db/schema";
@@ -11,20 +11,8 @@ type GameCardProps = {
   eager?: boolean;
 };
 
-/** Stable per-title seed so a game without cover art keeps the same image. */
-function coverSeed(title: string) {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
 export function GameCard({ game, eager = false }: GameCardProps) {
   const { title, platform, status, rating, coverUrl } = game;
-
-  // Seeded so a game without artwork keeps the same image between renders.
-  const cover =
-    coverUrl ?? `https://picsum.photos/seed/${coverSeed(title)}/600/900`;
 
   // The tile itself is what responds, so the labels ride with the cover
   // instead of staying put under a zooming image. z-10 keeps a grown card
@@ -34,15 +22,7 @@ export function GameCard({ game, eager = false }: GameCardProps) {
     <li
       className={`group relative overflow-hidden ${GRID_TILE} transition-transform duration-200 ease-out hover:z-10 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100`}
     >
-      <Image
-        src={cover}
-        alt=""
-        aria-hidden="true"
-        fill
-        priority={eager}
-        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-        className="object-cover"
-      />
+      <CoverArt src={coverUrl} title={title} eager={eager} />
 
       {/* Scrim so the labels stay legible over any photo. Tinted to the page
           ground rather than neutral black, so the card edge belongs to it. */}

@@ -4,6 +4,7 @@ import { Filter, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { AddGameDialog } from "./game-dialog";
+import { SettingsDialog } from "./settings-dialog";
 import { IconButton } from "@/components/icon-button";
 import { STATUSES, STATUS_LABELS, type Status, type StatusCounts } from "@/lib/statuses";
 
@@ -11,9 +12,10 @@ type TopBarProps = {
   q: string;
   status?: Status;
   counts: StatusCounts;
+  hasSteamGridDbKey: boolean;
 };
 
-export function TopBar({ q, status, counts }: TopBarProps) {
+export function TopBar({ q, status, counts, hasSteamGridDbKey }: TopBarProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const searchRef = useRef<HTMLInputElement>(null);
@@ -82,6 +84,8 @@ export function TopBar({ q, status, counts }: TopBarProps) {
           hrefFor={(next) => buildHref(typed(), next)}
           onSelect={(next) => go(typed(), next)}
         />
+
+        <SettingsDialog hasKey={hasSteamGridDbKey} />
 
         <AddGameDialog />
       </div>

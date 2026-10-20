@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { io } from "next/cache";
 import { countByStatus, listGames, parseFilters } from "@/db/queries";
+import { hasSteamGridDbKey } from "@/lib/settings";
 import { GameGrid } from "./game-grid";
 import { GameGridSkeleton, TopBarSkeleton } from "./skeletons";
 import { TopBar } from "./top-bar";
@@ -29,6 +30,7 @@ async function LibraryBar({ searchParams }: { searchParams: SearchParams }) {
       q={filters.q ?? ""}
       status={filters.status}
       counts={countByStatus()}
+      hasSteamGridDbKey={hasSteamGridDbKey()}
     />
   );
 }

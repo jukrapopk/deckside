@@ -2,12 +2,13 @@
 
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
-import { useFormStatus } from "react-dom";
 import { addGame, deleteGame, updateGame } from "@/app/actions";
+import { CoverPicker } from "@/app/cover-picker";
 import { Field, FieldGroup, inputClass } from "@/components/field";
 import { IconButton } from "@/components/icon-button";
 import { Modal, useModal } from "@/components/modal";
 import { StarPicker } from "@/components/star-picker";
+import { SubmitButton } from "@/components/submit-button";
 import { STATUSES, STATUS_LABELS, type Status } from "@/lib/statuses";
 
 export type GameValues = {
@@ -16,21 +17,8 @@ export type GameValues = {
   platform: string | null;
   status: Status;
   rating: number | null;
+  coverUrl: string | null;
 };
-
-function SubmitButton({ label }: { label: string }) {
-  const { pending } = useFormStatus();
-
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="bg-accent-strong px-5 py-3 text-base font-semibold text-white transition-[filter] hover:brightness-110 disabled:opacity-60 motion-reduce:transition-none"
-    >
-      {pending ? "Saving" : label}
-    </button>
-  );
-}
 
 export function AddGameDialog() {
   const modal = useModal();
@@ -111,6 +99,7 @@ function GameForm(props: GameFormProps) {
   const existing = props.mode === "edit" ? props.game : null;
 
   const [rating, setRating] = useState<number | null>(existing?.rating ?? null);
+  const [coverUrl, setCoverUrl] = useState(existing?.coverUrl ?? "");
   const [error, setError] = useState<string>();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [isDeleting, startDelete] = useTransition();
@@ -141,6 +130,16 @@ function GameForm(props: GameFormProps) {
           className={inputClass}
         />
       </Field>
+
+      {existing && (
+        <FieldGroup legend="Cover">
+          <CoverPicker
+            title={existing.title}
+            value={coverUrl}
+            onChange={setCoverUrl}
+          />
+        </FieldGroup>
+      )}
 
       <Field label="Platform">
         <input

@@ -24,3 +24,9 @@ export const games = sqliteTable("games", {
 
 export type Game = typeof games.$inferSelect;
 export type NewGame = typeof games.$inferInsert;
+
+/** Small key/value store for local preferences, such as the SteamGridDB key. */
+export const settings = sqliteTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+});

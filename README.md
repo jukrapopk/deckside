@@ -9,7 +9,7 @@ Built with Next.js 16 (App Router, Cache Components), SQLite, and Drizzle ORM.
 
 ```bash
 npm install
-npm run db:seed   # optional: 5 sample games
+npm run db:seed   # optional: 6 sample games
 npm run dev
 ```
 
@@ -56,8 +56,9 @@ scripts/seed.ts   sample data
 
 `src/components/` holds the primitives that dialogs and forms are built from, so an
 affordance is defined once and reused: `Modal` and its `useModal` hook, `IconButton`,
-`Field`/`FieldGroup`, `StarRating`, `StarPicker`, and `StatusBadge`. Adding and editing
-a game are two configurations of the same dialog rather than two separate forms.
+`Field`/`FieldGroup`, `StarRating`, `StarPicker`, `StatusBadge`, `CoverArt`, and
+`SubmitButton`. Adding and editing a game are two configurations of the same dialog
+rather than two separate forms.
 
 - `src/db/index.ts` opens a single `better-sqlite3` connection lazily, in WAL mode.
   It is lazy so that `next build` does not create the database as a side effect.
@@ -98,12 +99,33 @@ second icon library. They are stroked, never filled: a filled set mixes solid ma
 to the heavy ones. Uniform stroke width is what makes the set read as one family, so a
 new icon inherits the stroke width rather than picking its own weight.
 
+## Cover art
+
+Art comes from [SteamGridDB](https://www.steamgriddb.com). Open **Settings** (the gear
+next to the add button in the top bar) and paste an API key from the
+[preferences page](https://www.steamgriddb.com/profile/preferences). Then, in the edit
+dialog, search with the game's title and pick one of the portrait grids. The chosen CDN
+URL is stored on the game; nothing is downloaded or re-hosted.
+
+IGDB was the other candidate. It needs a Twitch client ID *and* secret plus a token
+exchange and refresh, and returns a single official cover per game rather than a choice
+— more moving parts for less of what this screen needs. Reach for it only if the library
+ever wants IGDB's metadata.
+
+A game with no art shows its initial on the tile surface. That is deterministic and
+works offline, unlike the random photo service it replaced.
+
+The key is stored in the `settings` table. `STEAMGRIDDB_API_KEY` overrides it and keeps
+it out of the database file. Either way the browser never receives it: searches run in a
+server action.
+
 ## Configuration
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `DATABASE_PATH` | `./data/game-library.db` | SQLite file location |
 | `MIGRATIONS_PATH` | `./drizzle` | Directory migrations are read from |
+| `STEAMGRIDDB_API_KEY` | unset | Overrides the key saved in Settings |
 
 ## Docker
 

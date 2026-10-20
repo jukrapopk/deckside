@@ -15,6 +15,13 @@
       "when": 1792405746498,
       "tag": "0001_rating_scale_five",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792430634584,
+      "tag": "0002_thin_wild_pack",
+      "breakpoints": true
     }
   ]
 }
