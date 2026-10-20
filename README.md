@@ -156,3 +156,7 @@ The image runs as a non-root user and stores the database on a named volume at `
 Set `BUILD_STANDALONE=1` to produce the standalone output the Dockerfile expects;
 `npm run build` on its own does not, because standalone output is incompatible with
 `next start`.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
