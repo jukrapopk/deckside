@@ -31,6 +31,10 @@ export function CoverInitial({
   );
 }
 
+/** Matches the card's width across the grid's breakpoints. */
+const CARD_SIZES =
+  "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw";
+
 /**
  * Cover art with the initial as its empty state. The parent supplies the box:
  * the card is already relative, the picker's preview sets its own.
@@ -39,12 +43,19 @@ export function CoverArt({
   src,
   title,
   eager = false,
+  sizes = CARD_SIZES,
+  letterClassName,
 }: {
   src: string | null;
   title: string;
   eager?: boolean;
+  /** Rendered width for `next/image`; the card's layout is the default. */
+  sizes?: string;
+  letterClassName?: string;
 }) {
-  if (!src) return <CoverInitial title={title} />;
+  if (!src) {
+    return <CoverInitial title={title} letterClassName={letterClassName} />;
+  }
 
   return (
     <Image
@@ -53,7 +64,7 @@ export function CoverArt({
       aria-hidden="true"
       fill
       priority={eager}
-      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+      sizes={sizes}
       className="object-cover"
     />
   );

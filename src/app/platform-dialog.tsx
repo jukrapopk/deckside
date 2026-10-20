@@ -1,9 +1,12 @@
 "use client";
 
-import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { Pencil, Plus } from "lucide-react";
+import { useState } from "react";
 import { addPlatform, deletePlatform, updatePlatform } from "@/app/actions";
-import { Field, FieldGroup, inputClass } from "@/components/field";
+import { Button } from "@/components/button";
+import { DeleteButton } from "@/components/delete-button";
+import { FieldGroup, TextField } from "@/components/field";
+import { FormError, FormFooter } from "@/components/form";
 import { IconButton } from "@/components/icon-button";
 import { Modal, useModal } from "@/components/modal";
 import { SubmitButton } from "@/components/submit-button";
@@ -86,8 +89,6 @@ function PlatformForm(props: PlatformFormProps) {
       : DEFAULT_PLATFORM_ICON,
   );
   const [error, setError] = useState<string>();
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const [isDeleting, startDelete] = useTransition();
 
   async function submit(formData: FormData) {
     const result =
@@ -105,17 +106,15 @@ function PlatformForm(props: PlatformFormProps) {
 
   return (
     <form action={submit} className="flex flex-col gap-5">
-      <Field label="Name">
-        <input
-          name="name"
-          required
-          maxLength={40}
-          autoComplete="off"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          className={inputClass}
-        />
-      </Field>
+      <TextField
+        label="Name"
+        name="name"
+        required
+        maxLength={40}
+        autoComplete="off"
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+      />
 
       <FieldGroup legend="Icon">
         <div className="grid grid-cols-4 gap-2">
@@ -145,61 +144,23 @@ function PlatformForm(props: PlatformFormProps) {
         <input type="hidden" name="icon" value={icon} />
       </FieldGroup>
 
-      {error && (
-        <p role="alert" className="text-base text-danger">
-          {error}
-        </p>
-      )}
+      <FormError message={error} />
 
-      <div className="flex items-center justify-between gap-3 border-t border-line pt-5">
-        {props.mode === "edit" ? (
-          confirmingDelete ? (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={isDeleting}
-                onClick={() =>
-                  startDelete(() =>
-                    deletePlatform(props.platform.id).then(props.onDone),
-                  )
-                }
-                className="bg-danger-strong px-4 py-3 text-base font-semibold text-white transition-[filter] hover:brightness-110 disabled:opacity-60 motion-reduce:transition-none"
-              >
-                {isDeleting ? "Deleting" : "Delete"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmingDelete(false)}
-                className="border border-line px-4 py-3 text-base font-medium text-muted hover:text-ink"
-              >
-                Keep
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setConfirmingDelete(true)}
-              className="flex items-center gap-2 px-1 py-3 text-base font-medium text-muted hover:text-danger"
-            >
-              <Trash2 size={18} strokeWidth={2.25} aria-hidden="true" />
-              Delete
-            </button>
-          )
-        ) : (
-          <span />
-        )}
-
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={props.onDone}
-            className="border border-line px-5 py-3 text-base font-medium text-muted hover:text-ink"
-          >
-            Cancel
-          </button>
-          <SubmitButton label={props.mode === "edit" ? "Save" : "Add platform"} />
-        </div>
-      </div>
+      <FormFooter
+        left={
+          props.mode === "edit" ? (
+            <DeleteButton
+              onDelete={() => deletePlatform(props.platform.id)}
+              onDone={props.onDone}
+            />
+          ) : undefined
+        }
+      >
+        <Button variant="secondary" onClick={props.onDone}>
+          Cancel
+        </Button>
+        <SubmitButton label={props.mode === "edit" ? "Save" : "Add platform"} />
+      </FormFooter>
     </form>
   );
 }

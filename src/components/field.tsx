@@ -33,6 +33,19 @@ export function Field({
   );
 }
 
+/** A labelled text input; `className` adds to the input, not the label. */
+export function TextField({
+  label,
+  className = "",
+  ...props
+}: { label: string } & ComponentProps<"input">) {
+  return (
+    <Field label={label}>
+      <input className={`${inputClass} ${className}`} {...props} />
+    </Field>
+  );
+}
+
 /** For control groups that are not a single labelled input (radios, custom). */
 export function FieldGroup({
   legend,

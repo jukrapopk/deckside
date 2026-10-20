@@ -1,4 +1,5 @@
 import { and, asc, desc, eq, inArray, like, or, type SQL } from "drizzle-orm";
+import { cache } from "react";
 import { getDb } from "./index";
 import {
   gamePlatforms,
@@ -24,9 +25,12 @@ export function parseFilters(params: { q?: string }): GameFilters {
   };
 }
 
-export function listPlatforms(): Platform[] {
+/**
+ * Called from both the bar and the grid, so the request reads the list once.
+ */
+export const listPlatforms = cache((): Platform[] => {
   return getDb().select().from(platforms).orderBy(asc(platforms.name)).all();
-}
+});
 
 export function listGames({ q }: GameFilters = {}): GameWithPlatforms[] {
   const filters: SQL[] = [];
@@ -88,7 +92,8 @@ export function listGames({ q }: GameFilters = {}): GameWithPlatforms[] {
   }));
 }
 
-export function countByStatus(): StatusCounts {
+/** Both suspense boundaries ask for this; one scan per request is enough. */
+export const countByStatus = cache((): StatusCounts => {
   const rows = getDb()
     .select({ status: games.status })
     .from(games)
@@ -99,4 +104,4 @@ export function countByStatus(): StatusCounts {
   for (const row of rows) counts[row.status] += 1;
 
   return counts;
-}
+});

@@ -9,6 +9,7 @@ import {
   Tv,
   type LucideIcon,
 } from "lucide-react";
+import type { Platform } from "@/db/schema";
 
 /*
   Platform icons are stored as a key, not as a component, so the database stays
@@ -39,4 +40,19 @@ export function platformIcon(key: string): LucideIcon {
     PLATFORM_ICONS.find((option) => option.key === key) ??
     PLATFORM_ICONS.find((option) => option.key === DEFAULT_PLATFORM_ICON)!
   ).icon;
+}
+
+/** The list as a lookup, for resolving the ids stored on a game. */
+export function indexPlatforms(platforms: Platform[]): Map<number, Platform> {
+  return new Map(platforms.map((platform) => [platform.id, platform]));
+}
+
+/** A game's platforms, skipping ids whose platform has since been deleted. */
+export function platformsOf(
+  game: { platformIds: number[] },
+  byId: Map<number, Platform>,
+): Platform[] {
+  return game.platformIds
+    .map((id) => byId.get(id))
+    .filter((platform): platform is Platform => Boolean(platform));
 }

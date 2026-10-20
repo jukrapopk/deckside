@@ -4,7 +4,8 @@ import { Check } from "lucide-react";
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import { findCovers, type CoverOption } from "./artwork-actions";
-import { CoverInitial } from "@/components/cover-art";
+import { Button } from "@/components/button";
+import { CoverArt } from "@/components/cover-art";
 import { inputClass } from "@/components/field";
 
 type Result =
@@ -58,18 +59,12 @@ export function CoverPicker({
     <div className="flex flex-col gap-3">
       <div className="flex gap-3">
         <div className="relative aspect-2/3 w-20 shrink-0 overflow-hidden border border-line">
-          {value ? (
-            <Image
-              src={value}
-              alt=""
-              aria-hidden="true"
-              fill
-              sizes="80px"
-              className="object-cover"
-            />
-          ) : (
-            <CoverInitial title={title} letterClassName="text-4xl" />
-          )}
+          <CoverArt
+            src={value || null}
+            title={title}
+            sizes="80px"
+            letterClassName="text-4xl"
+          />
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -92,24 +87,26 @@ export function CoverPicker({
               autoComplete="off"
               className={inputClass}
             />
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0"
               onClick={search}
               disabled={searching || query.trim().length < 2}
-              className="shrink-0 border border-line px-4 text-base font-medium hover:border-accent hover:text-ink disabled:opacity-40"
             >
               {searching ? "Searching" : "Search"}
-            </button>
+            </Button>
           </div>
 
-          <button
-            type="button"
+          <Button
+            variant="link"
+            size="none"
+            className="self-start"
             onClick={() => onChange("")}
             disabled={!value}
-            className="self-start text-sm text-muted hover:text-ink disabled:opacity-40"
           >
             Remove cover
-          </button>
+          </Button>
         </div>
       </div>
 

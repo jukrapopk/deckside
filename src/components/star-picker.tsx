@@ -1,7 +1,8 @@
 "use client";
 
-import { Star } from "lucide-react";
+import { Button } from "@/components/button";
 import { RATING_MAX } from "@/lib/rating";
+import { StarGlyph } from "./star";
 
 /** Star picker. Radios, so arrow keys work and the value posts as a field. */
 export function StarPicker({
@@ -36,25 +37,21 @@ export function StarPicker({
                   : "border-line bg-surface text-muted peer-hover:text-ink"
               }`}
             >
-              <Star
-                size={16}
-                strokeWidth={2}
-                fill={filled ? "currentColor" : "none"}
-                aria-hidden="true"
-              />
+              <StarGlyph filled={filled} />
             </span>
           </label>
         );
       })}
 
-      <button
-        type="button"
+      <Button
+        variant="link"
+        size="none"
+        className="ml-1 px-2 py-1"
         onClick={() => onChange(null)}
         disabled={value === null}
-        className="ml-1 px-2 py-1 text-sm text-muted hover:text-ink disabled:opacity-40"
       >
         Clear
-      </button>
+      </Button>
     </div>
   );
 }

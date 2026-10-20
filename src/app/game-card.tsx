@@ -8,8 +8,8 @@ import { PlatformIcon } from "@/components/platform-icon";
 import { StarRating } from "@/components/star-rating";
 import { StatusBadge } from "@/components/status-badge";
 import type { GameWithPlatforms } from "@/db/queries";
-import type { Platform } from "@/db/schema";
 import { GRID_TILE } from "@/lib/grid";
+import { indexPlatforms, platformsOf } from "@/lib/platforms";
 
 type GameCardProps = {
   game: GameWithPlatforms;
@@ -18,20 +18,14 @@ type GameCardProps = {
 };
 
 export function GameCard({ game, eager = false }: GameCardProps) {
-  const { title, status, rating, progress, coverUrl, platformIds } = game;
+  const { title, status, rating, progress, coverUrl } = game;
   const platforms = usePlatforms();
 
-  const byId = useMemo(
-    () => new Map(platforms.map((platform) => [platform.id, platform])),
-    [platforms],
-  );
+  const byId = useMemo(() => indexPlatforms(platforms), [platforms]);
 
-  const own = platformIds
-    .map((id) => byId.get(id))
-    .filter((platform): platform is Platform => Boolean(platform))
-    .sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
-    );
+  const own = platformsOf(game, byId).sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+  );
 
   // The tile itself is what responds, so the labels ride with the cover
   // instead of staying put under a zooming image. z-10 keeps a grown card

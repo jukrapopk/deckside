@@ -10,9 +10,12 @@ export function PlatformIcon({
   size?: number;
   className?: string;
 }) {
+  // `platformIcon` returns one of the module-level Lucide components, so the
+  // identity is stable; nothing is created during render.
   const Icon = platformIcon(icon);
 
   return (
+    // eslint-disable-next-line react-hooks/static-components
     <Icon
       size={size}
       strokeWidth={2.25}

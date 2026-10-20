@@ -1,8 +1,9 @@
 "use client";
 
 import { ArrowDown, ArrowUp, Check, SlidersHorizontal } from "lucide-react";
+import { Button } from "@/components/button";
 import { Field, FieldGroup, Select } from "@/components/field";
-import { IconButton } from "@/components/icon-button";
+import { FormFooter } from "@/components/form";
 import { Modal, useModal } from "@/components/modal";
 import {
   STATUSES,
@@ -19,6 +20,7 @@ import {
   type Group,
   type Sort,
 } from "@/lib/view";
+import { TopBarAction } from "./top-bar-action";
 import { useView } from "./view-provider";
 
 /**
@@ -57,21 +59,14 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
 
   return (
     <>
-      <div className="border-l border-line">
-        <IconButton
-          label="View options"
-          size="lg"
-          variant={changed ? "accent" : "ghost"}
-          onClick={modal.openModal}
-          icon={
-            <SlidersHorizontal
-              size={22}
-              strokeWidth={2.25}
-              aria-hidden="true"
-            />
-          }
-        />
-      </div>
+      <TopBarAction
+        label="View options"
+        variant={changed ? "accent" : "ghost"}
+        onClick={modal.openModal}
+        icon={
+          <SlidersHorizontal size={22} strokeWidth={2.25} aria-hidden="true" />
+        }
+      />
 
       <Modal open={modal.open} onClose={modal.closeModal} title="View options">
         <div className="flex flex-col gap-6">
@@ -160,22 +155,17 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
             </Select>
           </Field>
 
-          <div className="flex items-center justify-between gap-3 border-t border-line pt-5">
-            <button
-              type="button"
-              onClick={resetView}
-              className="px-1 py-3 text-base font-medium text-muted hover:text-ink"
-            >
-              Reset
-            </button>
-            <button
-              type="button"
-              onClick={modal.closeModal}
-              className="border border-line px-5 py-3 text-base font-medium hover:border-accent"
-            >
+          <FormFooter
+            left={
+              <Button variant="ghost" size="plain" onClick={resetView}>
+                Reset
+              </Button>
+            }
+          >
+            <Button variant="outline" onClick={modal.closeModal}>
               Done
-            </button>
-          </div>
+            </Button>
+          </FormFooter>
         </div>
       </Modal>
     </>

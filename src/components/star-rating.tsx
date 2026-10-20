@@ -1,5 +1,5 @@
-import { Star } from "lucide-react";
 import { RATING_MAX } from "@/lib/rating";
+import { StarGlyph } from "./star";
 
 /** Read-only star rating. The number is exposed to assistive tech only. */
 export function StarRating({ value }: { value: number }) {
@@ -13,12 +13,9 @@ export function StarRating({ value }: { value: number }) {
         const filled = index < value;
 
         return (
-          <Star
+          <StarGlyph
             key={index}
-            size={16}
-            strokeWidth={2}
-            fill={filled ? "currentColor" : "none"}
-            aria-hidden="true"
+            filled={filled}
             className={filled ? "text-white" : "text-white/35"}
           />
         );

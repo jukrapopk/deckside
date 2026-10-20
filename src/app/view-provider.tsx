@@ -90,6 +90,9 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // The server has no storage, so the saved view can only be read after
+    // mount; the first render must match the server's output until then.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setView(readStored());
     setHydrated(true);
   }, []);

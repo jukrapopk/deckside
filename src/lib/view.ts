@@ -1,5 +1,6 @@
 import type { GameWithPlatforms } from "@/db/queries";
 import type { Platform } from "@/db/schema";
+import { indexPlatforms, platformsOf } from "@/lib/platforms";
 import { STATUSES, STATUS_LABELS } from "@/lib/statuses";
 
 /*
@@ -117,13 +118,11 @@ export function groupGames(
     })).filter((section) => section.games.length > 0);
   }
 
-  const byId = new Map(platforms.map((platform) => [platform.id, platform]));
+  const byId = indexPlatforms(platforms);
   const sections = new Map<string, GameGroup>();
 
   for (const game of games) {
-    const own = game.platformIds
-      .map((id) => byId.get(id))
-      .filter((platform): platform is Platform => Boolean(platform));
+    const own = platformsOf(game, byId);
 
     if (own.length === 0) {
       const section = sections.get("no-platform") ?? {

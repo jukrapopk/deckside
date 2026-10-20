@@ -5,11 +5,13 @@ import { useState, useTransition } from "react";
 import { clearSteamGridDbKey, saveSteamGridDbKey } from "@/app/actions";
 import { AddPlatformDialog, EditPlatformDialog } from "./platform-dialog";
 import { usePlatforms } from "./platforms-provider";
-import { Field, inputClass } from "@/components/field";
-import { IconButton } from "@/components/icon-button";
+import { Button } from "@/components/button";
+import { TextField } from "@/components/field";
+import { FormError, FormFooter } from "@/components/form";
 import { Modal, useModal } from "@/components/modal";
 import { PlatformIcon } from "@/components/platform-icon";
 import { SubmitButton } from "@/components/submit-button";
+import { TopBarAction } from "./top-bar-action";
 
 /**
  * Settings live in the top bar because they belong to the library, not to a
@@ -21,14 +23,11 @@ export function SettingsDialog({ hasKey }: { hasKey: boolean }) {
 
   return (
     <>
-      <div className="border-l border-line">
-        <IconButton
-          label="Settings"
-          size="lg"
-          onClick={modal.openModal}
-          icon={<SettingsIcon size={22} strokeWidth={2.25} aria-hidden="true" />}
-        />
-      </div>
+      <TopBarAction
+        label="Settings"
+        onClick={modal.openModal}
+        icon={<SettingsIcon size={22} strokeWidth={2.25} aria-hidden="true" />}
+      />
 
       <Modal open={modal.open} onClose={modal.closeModal} title="Settings">
         <div className="flex flex-col gap-6">
@@ -96,53 +95,41 @@ function SettingsForm({
       className="flex flex-col gap-5 border-t border-line pt-6"
     >
       <div className="flex flex-col gap-2">
-        <Field label="SteamGridDB API key">
-          <input
-            name="apiKey"
-            type="password"
-            autoComplete="off"
-            spellCheck={false}
-            disabled={hasKey}
-            value={hasKey ? "***************" : undefined}
-            placeholder="Paste your key"
-            className={`${inputClass} disabled:text-muted`}
-          />
-        </Field>
+        <TextField
+          label="SteamGridDB API key"
+          name="apiKey"
+          type="password"
+          autoComplete="off"
+          spellCheck={false}
+          disabled={hasKey}
+          value={hasKey ? "***************" : undefined}
+          placeholder="Paste your key"
+          className="disabled:text-muted"
+        />
 
         {hasKey && (
-          <button
-            type="button"
+          <Button
+            variant="link"
+            size="none"
+            className="self-start"
             disabled={removing}
             onClick={() =>
               startRemove(() => clearSteamGridDbKey().then(onDone))
             }
-            className="self-start text-sm text-muted hover:text-ink disabled:opacity-40"
           >
             {removing ? "Removing" : "Remove key"}
-          </button>
+          </Button>
         )}
       </div>
 
-      {error && (
-        <p role="alert" className="text-base text-danger">
-          {error}
-        </p>
-      )}
+      <FormError message={error} />
 
-      <div className="flex items-center justify-between gap-3 border-t border-line pt-5">
-        <span />
-
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onDone}
-            className="border border-line px-5 py-3 text-base font-medium text-muted hover:text-ink"
-          >
-            Cancel
-          </button>
-          {!hasKey && <SubmitButton label="Save" />}
-        </div>
-      </div>
+      <FormFooter>
+        <Button variant="secondary" onClick={onDone}>
+          Cancel
+        </Button>
+        {!hasKey && <SubmitButton label="Save" />}
+      </FormFooter>
     </form>
   );
 }
