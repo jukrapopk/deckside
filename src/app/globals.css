@@ -76,6 +76,43 @@
 
 :root {
   color-scheme: dark;
+  /*
+    Keep the vertical scrollbar mounted even when the page is short. Collapsing
+    the last overflowing group would otherwise remove it and reflow the page.
+    The modal still hides it while open and pads the lost width as before.
+  */
+  overflow-y: scroll;
+}
+
+/*
+  A native disabled scrollbar can disappear into the dark page, leaving what
+  looks like an unexplained gutter. Draw a quiet rail instead: the track stays
+  visible when there is nothing to scroll, and the thumb only appears with
+  overflow. The standard properties are the Firefox fallback; the pseudo
+  elements keep the rail's border in Chromium and Safari.
+*/
+@supports not selector(::-webkit-scrollbar) {
+  :root {
+    scrollbar-color: var(--color-line) var(--color-surface);
+  }
+}
+
+:root::-webkit-scrollbar {
+  width: 12px;
+}
+
+:root::-webkit-scrollbar-track {
+  background: var(--color-surface);
+  border-left: 1px solid var(--color-line);
+}
+
+:root::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border: 3px solid var(--color-surface);
+}
+
+:root::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
 }
 
 /*
