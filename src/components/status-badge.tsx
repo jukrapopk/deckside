@@ -47,6 +47,7 @@ export function StatusBadge({
       role={decorative ? undefined : "img"}
       aria-label={decorative ? undefined : STATUS_LABELS[status]}
       aria-hidden={decorative || undefined}
+      title={decorative ? undefined : STATUS_LABELS[status]}
       className={`flex size-7 items-center justify-center rounded-full text-white ${STATUS_BADGE[status]} ${className}`}
     >
       <Glyph

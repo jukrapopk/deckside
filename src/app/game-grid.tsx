@@ -85,6 +85,7 @@ export function GameGrid({ games, total, q }: GameGridProps) {
     return (
       <NoMatches
         icon={SearchX}
+        description="The status filter is hiding every game."
         action={
           <button
             type="button"
@@ -121,6 +122,9 @@ export function GameGrid({ games, total, q }: GameGridProps) {
             key={section.key}
             className={headed ? "border-b border-line" : undefined}
           >
+            {/* Keep the card h3s under a heading even when the grid has no
+                visible group header. */}
+            {!headed && <h2 className="sr-only">All games</h2>}
             {headed && (
               <h2 className="text-base font-semibold">
                 <button
@@ -227,6 +231,7 @@ function EmptyLibrary() {
   return (
     <MessageState
       title="Your library is empty"
+      description="Add a game to start tracking what you own, what is next, and what you are playing."
       icon={
         <Gamepad2
           size={40}

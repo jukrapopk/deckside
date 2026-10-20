@@ -33,8 +33,8 @@ export function CoverInitial({
 
 /** Matches the card's width across the grid's breakpoints. */
 const CARD_SIZES =
-  "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, " +
-  "(max-width: 1280px) 25vw, (max-width: 1536px) 20vw, 17vw";
+  "(max-width: 639px) 50vw, (max-width: 1023px) 33vw, " +
+  "(max-width: 1279px) 25vw, (max-width: 1535px) 20vw, 17vw";
 
 /**
  * Cover art with the initial as its empty state. The parent supplies the box:

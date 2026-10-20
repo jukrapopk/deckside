@@ -20,6 +20,7 @@ export function TopBarAction({
         size="lg"
         variant={variant}
         onClick={onClick}
+        className="max-sm:w-14"
         icon={icon}
       />
     </div>

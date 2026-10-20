@@ -9,6 +9,7 @@ import { Button } from "@/components/button";
 import { DialogForm } from "@/components/dialog-form";
 import {
   controlAction,
+  controlHeight,
   Field,
   FieldGroup,
   Select,
@@ -238,7 +239,7 @@ function GameForm(props: GameFormProps) {
               }
               onFocus={(event) => event.target.select()}
               onBlur={() => setProgressText(String(progress))}
-              className="h-11 w-full border border-line bg-surface pl-3 pr-7 text-right text-base tabular-nums text-ink focus:border-accent"
+              className={`${controlHeight} w-full border border-line bg-surface pl-3 pr-7 text-right text-base tabular-nums text-ink focus:border-accent`}
             />
             <span
               aria-hidden="true"

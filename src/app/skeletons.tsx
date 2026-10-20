@@ -10,9 +10,9 @@ export function TopBarSkeleton() {
           <div className="size-5 shrink-0 animate-pulse bg-surface-2 motion-reduce:animate-none" />
           <div className="h-5 min-w-0 max-w-56 flex-1 animate-pulse bg-surface-2 motion-reduce:animate-none" />
         </div>
-        <div className="size-16 shrink-0 border-l border-line" />
-        <div className="size-16 shrink-0 border-l border-line" />
-        <div className="size-16 shrink-0 border-l border-line" />
+        <div className="size-16 shrink-0 border-l border-line max-sm:w-14" />
+        <div className="size-16 shrink-0 border-l border-line max-sm:w-14" />
+        <div className="size-16 shrink-0 border-l border-line max-sm:w-14" />
       </div>
     </header>
   );

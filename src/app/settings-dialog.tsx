@@ -293,7 +293,7 @@ function KeySettings({
         {(checking || checkResult) && (
           <p
             role="status"
-            className={`text-sm ${checkFailed ? "text-danger" : "text-muted"}`}
+            className={`break-words text-sm ${checkFailed ? "text-danger" : "text-muted"}`}
           >
             {checking ? "Checking API key" : checkResult?.message}
           </p>

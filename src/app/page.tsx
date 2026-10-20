@@ -60,6 +60,8 @@ export default function Home({ searchParams }: { searchParams: SearchParams }) {
   return (
     <ViewProvider>
       <div className="flex min-h-[100dvh] flex-col">
+        <h1 className="sr-only">Game Library</h1>
+
         <Suspense fallback={<TopBarSkeleton />}>
           <LibraryBar searchParams={searchParams} />
         </Suspense>

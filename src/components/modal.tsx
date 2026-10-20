@@ -107,7 +107,7 @@ export function Modal({
         </div>
         <IconButton
           label="Close"
-          size="sm"
+          size="md"
           onClick={onClose}
           icon={<X size={18} strokeWidth={2.25} aria-hidden="true" />}
         />

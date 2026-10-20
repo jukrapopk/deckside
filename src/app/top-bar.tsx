@@ -92,6 +92,7 @@ export function TopBar({ q, counts, hasSteamGridDbKey }: TopBarProps) {
     >
       <div className="flex items-stretch">
         <form
+          role="search"
           className="flex min-w-0 flex-1 items-center"
           onSubmit={(event) => {
             event.preventDefault();
@@ -126,7 +127,11 @@ export function TopBar({ q, counts, hasSteamGridDbKey }: TopBarProps) {
               <button
                 type="button"
                 onClick={() => {
-                  if (searchRef.current) searchRef.current.value = "";
+                  const input = searchRef.current;
+                  if (input) {
+                    input.value = "";
+                    input.focus();
+                  }
                   flushSearch("");
                 }}
                 aria-label="Clear search"

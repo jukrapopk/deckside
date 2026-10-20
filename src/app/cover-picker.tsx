@@ -103,7 +103,7 @@ export function CoverPicker({
         )}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <label htmlFor="cover-search" className="sr-only">
               Search SteamGridDB
             </label>
@@ -120,12 +120,12 @@ export function CoverPicker({
               }}
               placeholder="Search SteamGridDB"
               autoComplete="off"
-              className={inputClass}
+              className={`${inputClass} min-w-0`}
             />
             <Button
               variant="outline"
               size="sm"
-              className="shrink-0"
+              className="w-full shrink-0 sm:w-auto"
               onClick={search}
               disabled={searching || !canSearch}
             >
@@ -137,7 +137,7 @@ export function CoverPicker({
 
       {result.status === "found" && (
         <>
-          <p className="text-sm text-muted">
+          <p role="status" className="break-words text-sm text-muted">
             Art for <span className="text-ink">{result.game}</span>
           </p>
           <ul className="grid grid-cols-4 gap-2">
@@ -179,7 +179,7 @@ export function CoverPicker({
       )}
 
       {result.status === "message" && (
-        <p role="status" className="text-sm text-muted">
+        <p role="status" className="break-words text-sm text-muted">
           {result.message}
         </p>
       )}

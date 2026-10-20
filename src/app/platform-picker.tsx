@@ -43,14 +43,14 @@ export function PlatformPicker({
                   : [...value, platform.id],
               )
             }
-            className={`flex items-center gap-2 border px-3 py-2 text-base transition-colors motion-reduce:transition-none ${
+            className={`flex max-w-full min-w-0 items-center gap-2 border px-3 py-2 text-base transition-colors motion-reduce:transition-none ${
               selected
                 ? selectedControl
                 : "border-line text-ink hover:border-accent"
             }`}
           >
-            <PlatformIcon icon={platform.icon} />
-            {platform.name}
+            <PlatformIcon icon={platform.icon} className="shrink-0" />
+            <span className="truncate">{platform.name}</span>
           </button>
         );
       })}

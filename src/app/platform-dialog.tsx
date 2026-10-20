@@ -57,7 +57,7 @@ export function EditPlatformDialog({ platform }: { platform: Platform }) {
     <>
       <IconButton
         label={`Edit ${platform.name}`}
-        size="sm"
+        size="md"
         onClick={() => {
           setSession((value) => value + 1);
           modal.openModal();

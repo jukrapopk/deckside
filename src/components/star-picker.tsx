@@ -15,7 +15,7 @@ export function StarPicker({
   onChange: (rating: number | null) => void;
 }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex flex-wrap items-center gap-x-1 gap-y-2">
       {Array.from({ length: RATING_MAX }, (_, index) => {
         const stars = index + 1;
         const filled = value !== null && stars <= value;
