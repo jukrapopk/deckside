@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { addGame, deleteGame, updateGame } from "@/app/actions";
 import { CoverPicker } from "@/app/cover-picker";
 import { PlatformPicker } from "@/app/platform-picker";
-import { Field, FieldGroup, inputClass } from "@/components/field";
+import { Field, FieldGroup, Select, inputClass } from "@/components/field";
 import { IconButton } from "@/components/icon-button";
 import { Modal, useModal } from "@/components/modal";
 import { StarPicker } from "@/components/star-picker";
@@ -141,17 +141,13 @@ function GameForm(props: GameFormProps) {
       </FieldGroup>
 
       <Field label="Status">
-        <select
-          name="status"
-          defaultValue={existing?.status ?? "backlog"}
-          className={inputClass}
-        >
+        <Select name="status" defaultValue={existing?.status ?? "backlog"}>
           {STATUSES.map((value) => (
             <option key={value} value={value}>
               {STATUS_LABELS[value]}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
 
       <FieldGroup legend="Progress">

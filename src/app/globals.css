@@ -123,6 +123,21 @@ body::after {
   outline-offset: -2px;
 }
 
+/*
+  A native select draws its arrow against the border, which reads as flush at
+  this size. Drawing the chevron as a background gives it a predictable inset
+  without a wrapper to align. The stroke mirrors --color-muted; variables do
+  not resolve inside data URIs.
+*/
+.select-chevron {
+  appearance: none;
+  padding-right: 3rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2393a1b8' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem 1rem;
+}
+
 ::selection {
   background: var(--color-accent-strong);
   color: #ffffff;

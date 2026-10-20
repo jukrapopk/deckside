@@ -10,10 +10,14 @@ import {
 } from "react";
 import { isStatus, type Status } from "@/lib/statuses";
 import {
+  DEFAULT_DIRECTION,
   DEFAULT_GROUP,
   DEFAULT_SORT,
+  isDirection,
   isGroup,
   isSort,
+  SORT_DIRECTIONS,
+  type Direction,
   type Group,
   type Sort,
 } from "@/lib/view";
@@ -23,12 +27,14 @@ const STORAGE_KEY = "game-library:view";
 type View = {
   status?: Status;
   sort: Sort;
+  direction: Direction;
   group: Group;
 };
 
 type ViewControls = View & {
   setStatus: (status?: Status) => void;
   setSort: (sort: Sort) => void;
+  invertDirection: () => void;
   setGroup: (group: Group) => void;
   resetView: () => void;
 };
@@ -36,7 +42,11 @@ type ViewControls = View & {
 const ViewContext = createContext<ViewControls | null>(null);
 
 function defaults(): View {
-  return { sort: DEFAULT_SORT, group: DEFAULT_GROUP };
+  return {
+    sort: DEFAULT_SORT,
+    direction: DEFAULT_DIRECTION,
+    group: DEFAULT_GROUP,
+  };
 }
 
 /** Anything can be in localStorage; keep only values this version knows. */
@@ -55,6 +65,10 @@ function readStored(): View {
         typeof parsed?.sort === "string" && isSort(parsed.sort)
           ? parsed.sort
           : DEFAULT_SORT,
+      direction:
+        typeof parsed?.direction === "string" && isDirection(parsed.direction)
+          ? parsed.direction
+          : DEFAULT_DIRECTION,
       group:
         typeof parsed?.group === "string" && isGroup(parsed.group)
           ? parsed.group
@@ -95,7 +109,19 @@ export function ViewProvider({ children }: { children: ReactNode }) {
     () => ({
       ...view,
       setStatus: (status) => setView((current) => ({ ...current, status })),
-      setSort: (sort) => setView((current) => ({ ...current, sort })),
+      // Each field starts in the direction it reads best in; the button then
+      // flips it.
+      setSort: (sort) =>
+        setView((current) => ({
+          ...current,
+          sort,
+          direction: SORT_DIRECTIONS[sort],
+        })),
+      invertDirection: () =>
+        setView((current) => ({
+          ...current,
+          direction: current.direction === "asc" ? "desc" : "asc",
+        })),
       setGroup: (group) => setView((current) => ({ ...current, group })),
       resetView: () => setView(defaults()),
     }),

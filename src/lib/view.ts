@@ -10,14 +10,25 @@ import { STATUSES, STATUS_LABELS } from "@/lib/statuses";
 */
 
 export const SORTS = [
-  { value: "title-asc", label: "Title A–Z" },
-  { value: "title-desc", label: "Title Z–A" },
-  { value: "added", label: "Recently added" },
-  { value: "rating", label: "Highest rated" },
+  { value: "title", label: "Title" },
+  { value: "added", label: "Date added" },
+  { value: "rating", label: "Rating" },
   { value: "status", label: "Status" },
 ] as const;
 
 export type Sort = (typeof SORTS)[number]["value"];
+
+export const DIRECTIONS = ["asc", "desc"] as const;
+
+export type Direction = (typeof DIRECTIONS)[number];
+
+/** Where each field starts when it is chosen; the button flips it from here. */
+export const SORT_DIRECTIONS: Record<Sort, Direction> = {
+  title: "asc",
+  added: "desc",
+  rating: "desc",
+  status: "asc",
+};
 
 export const GROUPS = [
   { value: "none", label: "None" },
@@ -28,11 +39,16 @@ export const GROUPS = [
 export type Group = (typeof GROUPS)[number]["value"];
 
 /** Alphabetical is the default: it is the only order that needs no upkeep. */
-export const DEFAULT_SORT: Sort = "title-asc";
+export const DEFAULT_SORT: Sort = "title";
+export const DEFAULT_DIRECTION: Direction = "asc";
 export const DEFAULT_GROUP: Group = "none";
 
 export function isSort(value: string): value is Sort {
   return SORTS.some((option) => option.value === value);
+}
+
+export function isDirection(value: string): value is Direction {
+  return DIRECTIONS.some((direction) => direction === value);
 }
 
 export function isGroup(value: string): value is Group {
@@ -47,41 +63,30 @@ function byTitle(a: GameWithPlatforms, b: GameWithPlatforms): number {
   );
 }
 
+/** One comparator per field, written in its natural ascending order. */
+const COMPARATORS: Record<
+  Sort,
+  (a: GameWithPlatforms, b: GameWithPlatforms) => number
+> = {
+  title: byTitle,
+  // `created_at` has second granularity, so break ties by insertion order.
+  added: (a, b) =>
+    a.createdAt.getTime() - b.createdAt.getTime() || a.id - b.id,
+  // Unrated games sort below rated ones instead of counting as zero stars.
+  rating: (a, b) => (a.rating ?? -1) - (b.rating ?? -1) || byTitle(a, b),
+  status: (a, b) =>
+    STATUSES.indexOf(a.status) - STATUSES.indexOf(b.status) || byTitle(a, b),
+};
+
 export function sortGames(
   games: GameWithPlatforms[],
   sort: Sort,
+  direction: Direction,
 ): GameWithPlatforms[] {
-  const sorted = [...games];
+  const order = direction === "asc" ? 1 : -1;
+  const compare = COMPARATORS[sort];
 
-  switch (sort) {
-    case "title-desc":
-      sorted.sort((a, b) => byTitle(b, a));
-      break;
-    case "added":
-      // `created_at` has second granularity, so break ties by insertion order.
-      sorted.sort(
-        (a, b) =>
-          b.createdAt.getTime() - a.createdAt.getTime() || b.id - a.id,
-      );
-      break;
-    case "rating":
-      // Unrated games sit at the bottom rather than counting as zero stars.
-      sorted.sort(
-        (a, b) => (b.rating ?? -1) - (a.rating ?? -1) || byTitle(a, b),
-      );
-      break;
-    case "status":
-      sorted.sort(
-        (a, b) =>
-          STATUSES.indexOf(a.status) - STATUSES.indexOf(b.status) ||
-          byTitle(a, b),
-      );
-      break;
-    default:
-      sorted.sort(byTitle);
-  }
-
-  return sorted;
+  return [...games].sort((a, b) => order * compare(a, b));
 }
 
 export type GameGroup = {

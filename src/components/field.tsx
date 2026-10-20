@@ -1,8 +1,21 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 /** Shared input styling so every control matches across dialogs. */
 export const inputClass =
   "w-full border border-line bg-surface px-3 py-3 text-base text-ink placeholder:text-muted focus:border-accent";
+
+/** The app's select: field chrome plus a chevron inset from the right edge. */
+export function Select({
+  className = "",
+  children,
+  ...props
+}: ComponentProps<"select">) {
+  return (
+    <select className={`${inputClass} select-chevron ${className}`} {...props}>
+      {children}
+    </select>
+  );
+}
 
 /** Label above the control, per the form conventions. */
 export function Field({

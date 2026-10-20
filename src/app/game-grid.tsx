@@ -21,7 +21,7 @@ const ACTION =
   "mt-2 border border-line px-5 py-3 text-base font-medium hover:border-accent";
 
 export function GameGrid({ games, total, q }: GameGridProps) {
-  const { status, sort, group, setStatus } = useView();
+  const { status, sort, direction, group, setStatus } = useView();
   const platforms = usePlatforms();
 
   if (total === 0) return <EmptyLibrary />;
@@ -59,7 +59,7 @@ export function GameGrid({ games, total, q }: GameGridProps) {
     );
   }
 
-  const sorted = sortGames(visible, sort);
+  const sorted = sortGames(visible, sort, direction);
   // The first screenful is worth loading eagerly, whichever group it lands in.
   const eager = new Set(sorted.slice(0, 6).map((game) => game.id));
 

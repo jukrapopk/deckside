@@ -1,7 +1,7 @@
 "use client";
 
-import { Check, SlidersHorizontal } from "lucide-react";
-import { Field, FieldGroup, inputClass } from "@/components/field";
+import { ArrowDown, ArrowUp, Check, SlidersHorizontal } from "lucide-react";
+import { Field, FieldGroup, Select } from "@/components/field";
 import { IconButton } from "@/components/icon-button";
 import { Modal, useModal } from "@/components/modal";
 import {
@@ -11,6 +11,7 @@ import {
   type StatusCounts,
 } from "@/lib/statuses";
 import {
+  DEFAULT_DIRECTION,
   DEFAULT_GROUP,
   DEFAULT_SORT,
   GROUPS,
@@ -27,11 +28,23 @@ import { useView } from "./view-provider";
  */
 export function ViewDialog({ counts }: { counts: StatusCounts }) {
   const modal = useModal();
-  const { status, sort, group, setStatus, setSort, setGroup, resetView } =
-    useView();
+  const {
+    status,
+    sort,
+    direction,
+    group,
+    setStatus,
+    setSort,
+    invertDirection,
+    setGroup,
+    resetView,
+  } = useView();
 
   const changed =
-    status !== undefined || sort !== DEFAULT_SORT || group !== DEFAULT_GROUP;
+    status !== undefined ||
+    sort !== DEFAULT_SORT ||
+    direction !== DEFAULT_DIRECTION ||
+    group !== DEFAULT_GROUP;
 
   const options: { value?: Status; label: string; count: number }[] = [
     { value: undefined, label: "All", count: counts.all },
@@ -102,32 +115,49 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
             </div>
           </FieldGroup>
 
-          <Field label="Sort">
-            <select
-              value={sort}
-              onChange={(event) => setSort(event.target.value as Sort)}
-              className={inputClass}
-            >
-              {SORTS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </Field>
+          <FieldGroup legend="Sort">
+            <div className="flex gap-2">
+              <Select
+                aria-label="Sort by"
+                value={sort}
+                onChange={(event) => setSort(event.target.value as Sort)}
+                className="h-[50px] min-w-0 flex-1"
+              >
+                {SORTS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Select>
+
+              <button
+                type="button"
+                onClick={invertDirection}
+                aria-label={
+                  direction === "asc" ? "Sort descending" : "Sort ascending"
+                }
+                className="flex size-[50px] shrink-0 items-center justify-center border border-line text-muted hover:border-accent hover:text-ink"
+              >
+                {direction === "asc" ? (
+                  <ArrowUp size={18} strokeWidth={2.25} aria-hidden="true" />
+                ) : (
+                  <ArrowDown size={18} strokeWidth={2.25} aria-hidden="true" />
+                )}
+              </button>
+            </div>
+          </FieldGroup>
 
           <Field label="Group by">
-            <select
+            <Select
               value={group}
               onChange={(event) => setGroup(event.target.value as Group)}
-              className={inputClass}
             >
               {GROUPS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
 
           <div className="flex items-center justify-between gap-3 border-t border-line pt-5">
