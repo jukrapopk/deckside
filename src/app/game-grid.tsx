@@ -1,8 +1,8 @@
 "use client";
 
-import { Gamepad2, Search } from "lucide-react";
+import { ChevronDown, Gamepad2, Search } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { GameCard } from "./game-card";
 import { usePlatforms } from "./platforms-provider";
 import { useView } from "./view-provider";
@@ -27,6 +27,23 @@ export function GameGrid({ games, total, q }: GameGridProps) {
   const { status, sort, direction, group, favouritesFirst, setStatus } =
     useView();
   const platforms = usePlatforms();
+  // Collapsing is a browsing aid, not a saved view preference: groups reopen
+  // when the page is reloaded.
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
+    () => new Set(),
+  );
+
+  function toggleSection(key: string) {
+    setCollapsedSections((current) => {
+      const next = new Set(current);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }
 
   if (total === 0) return <EmptyLibrary />;
   if (games.length === 0) {
@@ -65,9 +82,10 @@ export function GameGrid({ games, total, q }: GameGridProps) {
 
   const sorted = sortGames(visible, sort, direction);
   const sections = groupGames(sorted, group, platforms, favouritesFirst);
-  // The first screenful is worth loading eagerly, whichever group it lands in.
+  // The first screenful of the expanded sections is worth loading eagerly.
   const eager = new Set(
     sections
+      .filter((section) => !collapsedSections.has(section.key))
       .flatMap((section) => section.games)
       .slice(0, 6)
       .map((game) => game.id),
@@ -76,7 +94,9 @@ export function GameGrid({ games, total, q }: GameGridProps) {
   return (
     <div className="flex flex-col">
       {sections.map((section) => {
-        const headed = group !== "none" || section.favourite;
+        const headed = group !== "none" || section.favourite === true;
+        const isCollapsed = headed && collapsedSections.has(section.key);
+        const listId = `group-${section.key}-games`;
 
         return (
           <section
@@ -84,36 +104,58 @@ export function GameGrid({ games, total, q }: GameGridProps) {
             className={headed ? "border-b border-line" : undefined}
           >
             {headed && (
-              <h2 className="flex items-center justify-between px-5 pb-0 pt-3 text-base font-semibold">
-                <span className="flex items-center gap-3">
-                  {section.favourite ? (
-                    <span
-                      aria-hidden="true"
-                      className="flex size-7 items-center justify-center"
-                    >
-                      <HeartGlyph filled />
+              <h2 className="text-base font-semibold">
+                <button
+                  type="button"
+                  aria-expanded={!isCollapsed}
+                  aria-controls={listId}
+                  onClick={() => toggleSection(section.key)}
+                  className="flex w-full items-center justify-between px-5 py-3 text-left transition-colors hover:bg-surface-2 motion-reduce:transition-none"
+                >
+                  <span className="flex items-center gap-3">
+                    {section.favourite ? (
+                      <span
+                        aria-hidden="true"
+                        className="flex size-7 items-center justify-center"
+                      >
+                        <HeartGlyph filled />
+                      </span>
+                    ) : section.status ? (
+                      <StatusBadge status={section.status} decorative />
+                    ) : section.platform ? (
+                      <span
+                        aria-hidden="true"
+                        className="flex size-7 items-center justify-center"
+                      >
+                        <PlatformIcon icon={section.platform.icon} />
+                      </span>
+                    ) : (
+                      // "No platform" still indents like the sections above it.
+                      <span aria-hidden="true" className="size-7" />
+                    )}
+                    {section.label}
+                  </span>
+                  <span className="flex items-center gap-3 text-muted">
+                    <span className="text-sm font-normal">
+                      {section.games.length}
                     </span>
-                  ) : section.status ? (
-                    <StatusBadge status={section.status} decorative />
-                  ) : section.platform ? (
-                    <span
+                    <ChevronDown
+                      size={16}
+                      strokeWidth={2.25}
                       aria-hidden="true"
-                      className="flex size-7 items-center justify-center"
-                    >
-                      <PlatformIcon icon={section.platform.icon} />
-                    </span>
-                  ) : (
-                    // "No platform" still indents like the sections above it.
-                    <span aria-hidden="true" className="size-7" />
-                  )}
-                  {section.label}
-                </span>
-                <span className="text-sm font-normal text-muted">
-                  {section.games.length}
-                </span>
+                      className={`shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none ${
+                        isCollapsed ? "-rotate-90" : ""
+                      }`}
+                    />
+                  </span>
+                </button>
               </h2>
             )}
-            <ul className={GRID_COLS}>
+            <ul
+              id={listId}
+              hidden={isCollapsed}
+              className={headed ? `${GRID_COLS} pt-2` : GRID_COLS}
+            >
               {section.games.map((game) => (
                 <GameCard
                   key={game.id}
