@@ -4,13 +4,14 @@ import { Gamepad2, Search } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { GameCard } from "./game-card";
+import { usePlatforms } from "./platforms-provider";
 import { useView } from "./view-provider";
-import type { Game } from "@/db/schema";
+import type { GameWithPlatforms } from "@/db/queries";
 import { GRID_COLS } from "@/lib/grid";
 import { groupGames, sortGames } from "@/lib/view";
 
 type GameGridProps = {
-  games: Game[];
+  games: GameWithPlatforms[];
   /** Library-wide count, before the search narrowed `games`. */
   total: number;
   q: string;
@@ -21,6 +22,7 @@ const ACTION =
 
 export function GameGrid({ games, total, q }: GameGridProps) {
   const { status, sort, group, setStatus } = useView();
+  const platforms = usePlatforms();
 
   if (total === 0) return <EmptyLibrary />;
   if (games.length === 0) {
@@ -63,7 +65,7 @@ export function GameGrid({ games, total, q }: GameGridProps) {
 
   return (
     <div className="flex flex-col">
-      {groupGames(sorted, group).map((section) => (
+      {groupGames(sorted, group, platforms).map((section) => (
         <section key={section.key}>
           {group !== "none" && (
             <h2 className="flex items-baseline justify-between border-b border-line px-5 py-3 text-base font-semibold">

@@ -1,9 +1,10 @@
 "use server";
 
 import { refresh } from "next/cache";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { getDb } from "@/db";
-import { games } from "@/db/schema";
+import { gamePlatforms, games, platforms } from "@/db/schema";
+import { isPlatformIcon } from "@/lib/platforms";
 import { clearSetting, setSetting, STEAMGRIDDB_KEY } from "@/lib/settings";
 import { isStatus, type Status } from "@/lib/statuses";
 import { parseRating } from "@/lib/rating";
@@ -15,19 +16,26 @@ type Fields =
       ok: true;
       values: {
         title: string;
-        platform: string | null;
         status: Status;
         rating: number | null;
         coverUrl: string | null;
       };
+      platformIds: number[];
     }
   | { ok: false; error: string };
 
 function readFields(formData: FormData): Fields {
   const title = String(formData.get("title") ?? "").trim();
-  const platform = String(formData.get("platform") ?? "").trim();
   const status = String(formData.get("status") ?? "backlog");
   const coverUrl = String(formData.get("coverUrl") ?? "").trim();
+  const platformIds = [
+    ...new Set(
+      formData
+        .getAll("platformIds")
+        .map((value) => Number(value))
+        .filter((id) => Number.isInteger(id) && id > 0),
+    ),
+  ];
 
   if (!title) return { ok: false, error: "Title is required." };
   if (title.length > 200) {
@@ -46,19 +54,48 @@ function readFields(formData: FormData): Fields {
     ok: true,
     values: {
       title,
-      platform: platform || null,
       status,
       rating: parsed.rating,
       coverUrl: coverUrl || null,
     },
+    platformIds,
   };
+}
+
+/** Only ids that exist can be linked; the form is not the authority. */
+function validPlatformIds(ids: number[]): number[] {
+  if (ids.length === 0) return [];
+
+  const known = new Set(
+    getDb()
+      .select({ id: platforms.id })
+      .from(platforms)
+      .all()
+      .map((row) => row.id),
+  );
+
+  return ids.filter((id) => known.has(id));
+}
+
+function linksFor(gameId: number, platformIds: number[]) {
+  return platformIds.map((platformId) => ({ gameId, platformId }));
 }
 
 export async function addGame(formData: FormData): Promise<FormState> {
   const fields = readFields(formData);
   if (!fields.ok) return { error: fields.error };
 
-  getDb().insert(games).values(fields.values).run();
+  const platformIds = validPlatformIds(fields.platformIds);
+  const db = getDb();
+
+  db.transaction((tx) => {
+    const inserted = tx.insert(games).values(fields.values).run();
+    const gameId = Number(inserted.lastInsertRowid);
+
+    if (platformIds.length) {
+      tx.insert(gamePlatforms).values(linksFor(gameId, platformIds)).run();
+    }
+  });
 
   refresh();
   return { ok: true };
@@ -73,11 +110,22 @@ export async function updateGame(
   const fields = readFields(formData);
   if (!fields.ok) return { error: fields.error };
 
-  getDb()
-    .update(games)
-    .set({ ...fields.values, updatedAt: new Date() })
-    .where(eq(games.id, id))
-    .run();
+  const platformIds = validPlatformIds(fields.platformIds);
+  const db = getDb();
+
+  db.transaction((tx) => {
+    tx.update(games)
+      .set({ ...fields.values, updatedAt: new Date() })
+      .where(eq(games.id, id))
+      .run();
+
+    // The form always carries the full selection, so replace the set.
+    tx.delete(gamePlatforms).where(eq(gamePlatforms.gameId, id)).run();
+
+    if (platformIds.length) {
+      tx.insert(gamePlatforms).values(linksFor(id, platformIds)).run();
+    }
+  });
 
   refresh();
   return { ok: true };
@@ -87,6 +135,39 @@ export async function deleteGame(id: number): Promise<void> {
   if (!Number.isInteger(id)) return;
 
   getDb().delete(games).where(eq(games.id, id)).run();
+  refresh();
+}
+
+/** The platform list is managed from Settings and picked from a game's form. */
+export async function addPlatform(formData: FormData): Promise<FormState> {
+  const name = String(formData.get("name") ?? "").trim();
+  const icon = String(formData.get("icon") ?? "");
+
+  if (!name) return { error: "Name is required." };
+  if (name.length > 40) {
+    return { error: "Keep the name to 40 characters or fewer." };
+  }
+  if (!isPlatformIcon(icon)) return { error: "Choose an icon." };
+
+  const db = getDb();
+  const existing = db
+    .select({ id: platforms.id })
+    .from(platforms)
+    .where(sql`lower(${platforms.name}) = lower(${name})`)
+    .get();
+
+  if (existing) return { error: "That platform is already in the list." };
+
+  db.insert(platforms).values({ name, icon }).run();
+  refresh();
+  return { ok: true };
+}
+
+export async function deletePlatform(id: number): Promise<void> {
+  if (!Number.isInteger(id)) return;
+
+  // The link rows cascade with the platform.
+  getDb().delete(platforms).where(eq(platforms.id, id)).run();
   refresh();
 }
 

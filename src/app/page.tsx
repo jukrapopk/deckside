@@ -1,8 +1,14 @@
 import { Suspense } from "react";
 import { io } from "next/cache";
-import { countByStatus, listGames, parseFilters } from "@/db/queries";
+import {
+  countByStatus,
+  listGames,
+  listPlatforms,
+  parseFilters,
+} from "@/db/queries";
 import { hasSteamGridDbKey } from "@/lib/settings";
 import { GameGrid } from "./game-grid";
+import { PlatformsProvider } from "./platforms-provider";
 import { GameGridSkeleton, TopBarSkeleton } from "./skeletons";
 import { TopBar } from "./top-bar";
 import { ViewProvider } from "./view-provider";
@@ -26,11 +32,13 @@ async function LibraryBar({ searchParams }: { searchParams: SearchParams }) {
   const filters = await readFilters(searchParams);
 
   return (
-    <TopBar
-      q={filters.q ?? ""}
-      counts={countByStatus()}
-      hasSteamGridDbKey={hasSteamGridDbKey()}
-    />
+    <PlatformsProvider platforms={listPlatforms()}>
+      <TopBar
+        q={filters.q ?? ""}
+        counts={countByStatus()}
+        hasSteamGridDbKey={hasSteamGridDbKey()}
+      />
+    </PlatformsProvider>
   );
 }
 
@@ -38,11 +46,13 @@ async function LibraryGrid({ searchParams }: { searchParams: SearchParams }) {
   const filters = await readFilters(searchParams);
 
   return (
-    <GameGrid
-      games={listGames(filters)}
-      total={countByStatus().all}
-      q={filters.q ?? ""}
-    />
+    <PlatformsProvider platforms={listPlatforms()}>
+      <GameGrid
+        games={listGames(filters)}
+        total={countByStatus().all}
+        q={filters.q ?? ""}
+      />
+    </PlatformsProvider>
   );
 }
 

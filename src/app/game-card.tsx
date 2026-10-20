@@ -1,18 +1,37 @@
+"use client";
+
+import { useMemo } from "react";
 import { EditGameDialog } from "@/app/game-dialog";
+import { usePlatforms } from "@/app/platforms-provider";
 import { CoverArt } from "@/components/cover-art";
+import { PlatformIcon } from "@/components/platform-icon";
 import { StarRating } from "@/components/star-rating";
 import { StatusBadge } from "@/components/status-badge";
-import type { Game } from "@/db/schema";
+import type { GameWithPlatforms } from "@/db/queries";
+import type { Platform } from "@/db/schema";
 import { GRID_TILE } from "@/lib/grid";
 
 type GameCardProps = {
-  game: Game;
+  game: GameWithPlatforms;
   /** First row of covers is above the fold, so load it eagerly. */
   eager?: boolean;
 };
 
 export function GameCard({ game, eager = false }: GameCardProps) {
-  const { title, platform, status, rating, coverUrl } = game;
+  const { title, status, rating, coverUrl, platformIds } = game;
+  const platforms = usePlatforms();
+
+  const byId = useMemo(
+    () => new Map(platforms.map((platform) => [platform.id, platform])),
+    [platforms],
+  );
+
+  const own = platformIds
+    .map((id) => byId.get(id))
+    .filter((platform): platform is Platform => Boolean(platform))
+    .sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+    );
 
   // The tile itself is what responds, so the labels ride with the cover
   // instead of staying put under a zooming image. z-10 keeps a grown card
@@ -53,7 +72,20 @@ export function GameCard({ game, eager = false }: GameCardProps) {
           </h3>
           <StatusBadge status={status} className="shrink-0" />
         </div>
-        <p className="min-h-6 truncate text-base text-white/75">{platform}</p>
+        {/* Icons only: the tile is the quietest place for a word, and the
+            name is still there on hover and for a screen reader. */}
+        <div className="flex min-h-6 items-center gap-3 text-white/75">
+          {own.map((platform) => (
+            <span
+              key={platform.id}
+              role="img"
+              aria-label={platform.name}
+              title={platform.name}
+            >
+              <PlatformIcon icon={platform.icon} size={18} />
+            </span>
+          ))}
+        </div>
       </div>
     </li>
   );

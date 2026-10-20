@@ -1,4 +1,5 @@
-import type { Game } from "@/db/schema";
+import type { GameWithPlatforms } from "@/db/queries";
+import type { Platform } from "@/db/schema";
 import { STATUSES, STATUS_LABELS } from "@/lib/statuses";
 
 /*
@@ -39,14 +40,17 @@ export function isGroup(value: string): value is Group {
 }
 
 /** Case-insensitive title order, with the id as a stable tie-break. */
-function byTitle(a: Game, b: Game): number {
+function byTitle(a: GameWithPlatforms, b: GameWithPlatforms): number {
   return (
     a.title.localeCompare(b.title, undefined, { sensitivity: "base" }) ||
     a.id - b.id
   );
 }
 
-export function sortGames(games: Game[], sort: Sort): Game[] {
+export function sortGames(
+  games: GameWithPlatforms[],
+  sort: Sort,
+): GameWithPlatforms[] {
   const sorted = [...games];
 
   switch (sort) {
@@ -83,10 +87,18 @@ export function sortGames(games: Game[], sort: Sort): Game[] {
 export type GameGroup = {
   key: string;
   label: string;
-  games: Game[];
+  games: GameWithPlatforms[];
 };
 
-export function groupGames(games: Game[], group: Group): GameGroup[] {
+/**
+ * A game can sit on several platforms, so the platform grouping shows it in
+ * each one. Games with none get their own section rather than disappearing.
+ */
+export function groupGames(
+  games: GameWithPlatforms[],
+  group: Group,
+  platforms: Platform[],
+): GameGroup[] {
   if (group === "none") {
     return [{ key: "all", label: "", games }];
   }
@@ -100,23 +112,40 @@ export function groupGames(games: Game[], group: Group): GameGroup[] {
     })).filter((section) => section.games.length > 0);
   }
 
-  const byPlatform = new Map<string, Game[]>();
+  const byId = new Map(platforms.map((platform) => [platform.id, platform]));
+  const sections = new Map<string, GameGroup>();
+
   for (const game of games) {
-    const platform = game.platform?.trim() || "";
-    const list = byPlatform.get(platform) ?? [];
-    list.push(game);
-    byPlatform.set(platform, list);
+    const own = game.platformIds
+      .map((id) => byId.get(id))
+      .filter((platform): platform is Platform => Boolean(platform));
+
+    if (own.length === 0) {
+      const section = sections.get("no-platform") ?? {
+        key: "no-platform",
+        label: "No platform",
+        games: [],
+      };
+      section.games.push(game);
+      sections.set("no-platform", section);
+      continue;
+    }
+
+    for (const platform of own) {
+      const key = String(platform.id);
+      const section = sections.get(key) ?? {
+        key,
+        label: platform.name,
+        games: [],
+      };
+      section.games.push(game);
+      sections.set(key, section);
+    }
   }
 
-  return [...byPlatform.entries()]
-    .sort(([a], [b]) => {
-      if (!a) return 1;
-      if (!b) return -1;
-      return a.localeCompare(b, undefined, { sensitivity: "base" });
-    })
-    .map(([platform, list]) => ({
-      key: platform || "no-platform",
-      label: platform || "No platform",
-      games: list,
-    }));
+  return [...sections.values()].sort((a, b) => {
+    if (a.key === "no-platform") return 1;
+    if (b.key === "no-platform") return -1;
+    return a.label.localeCompare(b.label, undefined, { sensitivity: "base" });
+  });
 }

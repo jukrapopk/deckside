@@ -4,6 +4,7 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { addGame, deleteGame, updateGame } from "@/app/actions";
 import { CoverPicker } from "@/app/cover-picker";
+import { PlatformPicker } from "@/app/platform-picker";
 import { Field, FieldGroup, inputClass } from "@/components/field";
 import { IconButton } from "@/components/icon-button";
 import { Modal, useModal } from "@/components/modal";
@@ -14,7 +15,7 @@ import { STATUSES, STATUS_LABELS, type Status } from "@/lib/statuses";
 export type GameValues = {
   id: number;
   title: string;
-  platform: string | null;
+  platformIds: number[];
   status: Status;
   rating: number | null;
   coverUrl: string | null;
@@ -90,6 +91,9 @@ function GameForm(props: GameFormProps) {
 
   const [rating, setRating] = useState<number | null>(existing?.rating ?? null);
   const [title, setTitle] = useState(existing?.title ?? "");
+  const [platformIds, setPlatformIds] = useState<number[]>(
+    existing?.platformIds ?? [],
+  );
   const [coverUrl, setCoverUrl] = useState(existing?.coverUrl ?? "");
   const [error, setError] = useState<string>();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -127,15 +131,12 @@ function GameForm(props: GameFormProps) {
         <CoverPicker title={title} value={coverUrl} onChange={setCoverUrl} />
       </FieldGroup>
 
-      <Field label="Platform">
-        <input
-          name="platform"
-          autoComplete="off"
-          placeholder="Optional"
-          defaultValue={existing?.platform ?? ""}
-          className={inputClass}
-        />
-      </Field>
+      <FieldGroup legend="Platforms">
+        <PlatformPicker value={platformIds} onChange={setPlatformIds} />
+        {platformIds.map((id) => (
+          <input key={id} type="hidden" name="platformIds" value={id} />
+        ))}
+      </FieldGroup>
 
       <Field label="Status">
         <select
