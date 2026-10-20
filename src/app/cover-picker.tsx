@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import { findCovers, type CoverOption } from "./artwork-actions";
@@ -55,17 +55,40 @@ export function CoverPicker({
     });
   }
 
+  const frame =
+    "relative aspect-2/3 w-20 shrink-0 overflow-hidden border border-line";
+  const preview = (
+    <CoverArt
+      src={value || null}
+      title={title}
+      sizes="80px"
+      letterClassName="text-4xl"
+    />
+  );
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex gap-3">
-        <div className="relative aspect-2/3 w-20 shrink-0 overflow-hidden border border-line">
-          <CoverArt
-            src={value || null}
-            title={title}
-            sizes="80px"
-            letterClassName="text-4xl"
-          />
-        </div>
+        {value ? (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            aria-label="Remove cover"
+            title="Remove cover"
+            className={`group ${frame} cursor-pointer`}
+          >
+            {preview}
+            <span
+              aria-hidden="true"
+              className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-bg/80 text-xs font-medium text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none"
+            >
+              <X size={20} strokeWidth={2.25} />
+              Remove
+            </span>
+          </button>
+        ) : (
+          <div className={frame}>{preview}</div>
+        )}
 
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex gap-2">

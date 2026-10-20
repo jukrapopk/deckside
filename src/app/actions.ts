@@ -5,7 +5,13 @@ import { and, eq, ne, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { gamePlatforms, games, platforms } from "@/db/schema";
 import { isPlatformIcon, type PlatformIconKey } from "@/lib/platforms";
-import { clearSetting, setSetting, STEAMGRIDDB_KEY } from "@/lib/settings";
+import {
+  clearSetting,
+  setSetting,
+  STEAMGRIDDB_KEY,
+  steamGridDbKey,
+} from "@/lib/settings";
+import { searchGames, SteamGridDbError } from "@/lib/steamgriddb";
 import { isStatus, type Status } from "@/lib/statuses";
 import { parseRating } from "@/lib/rating";
 
@@ -233,21 +239,56 @@ export async function deletePlatform(id: number): Promise<void> {
 }
 
 /**
- * The key is write-only from the UI's point of view: it is stored here and
- * used by server actions, never sent back to the browser.
+ * Saves the key. An empty value is a valid save: it clears the stored key.
+ * Checking is a separate action, so this does not validate against the API.
  */
-export async function saveSteamGridDbKey(formData: FormData): Promise<FormState> {
-  const key = String(formData.get("apiKey") ?? "").trim();
+export async function saveSteamGridDbKey(key: string): Promise<FormState> {
+  const candidate = key.trim();
 
-  if (!key) return { error: "Enter a key first." };
-  if (key.length > 200) return { error: "That key is too long." };
+  if (candidate.length > 200) return { error: "That key is too long." };
 
-  setSetting(STEAMGRIDDB_KEY, key);
+  if (candidate) {
+    setSetting(STEAMGRIDDB_KEY, candidate);
+  } else {
+    clearSetting(STEAMGRIDDB_KEY);
+  }
+
   refresh();
   return { ok: true };
 }
 
-export async function clearSteamGridDbKey(): Promise<void> {
-  clearSetting(STEAMGRIDDB_KEY);
-  refresh();
+/**
+ * One search is enough to know whether SteamGridDB accepts the key. The
+ * candidate comes from the field when it is being edited; otherwise the saved
+ * (or environment) key is tested.
+ */
+export async function checkSteamGridDbKey(key?: string): Promise<FormState> {
+  const candidate = key?.trim() || steamGridDbKey();
+
+  if (!candidate) return { error: "Enter a key first." };
+
+  return validateSteamGridDbKey(candidate);
+}
+
+async function validateSteamGridDbKey(key: string): Promise<FormState> {
+  if (key.length > 200) return { error: "That key is too long." };
+
+  try {
+    // Any search proves auth; the result itself does not matter.
+    await searchGames(key, "portal");
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof SteamGridDbError) {
+      if (error.status === 401 || error.status === 403) {
+        return { error: "SteamGridDB rejected that key." };
+      }
+      if (error.status === 429) {
+        return { error: "SteamGridDB is rate limiting. Try again in a minute." };
+      }
+    }
+
+    return {
+      error: "Could not reach SteamGridDB. Check the connection and retry.",
+    };
+  }
 }
