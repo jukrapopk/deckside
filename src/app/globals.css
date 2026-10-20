@@ -82,9 +82,11 @@
   /*
     Keep the vertical scrollbar mounted even when the page is short. Collapsing
     the last overflowing group would otherwise remove it and reflow the page.
-    The modal still hides it while open and pads the lost width as before.
+    The stable gutter also holds the layout width while a modal hides the
+    scrollbar, so the centred dialog does not slide as it closes.
   */
   overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
 /*

@@ -54,22 +54,17 @@ export function Modal({
 
   // A modal makes the rest of the page inert, so it should also stop the page
   // scrolling: otherwise its scrollbar sits next to the dialog body's and the
-  // two read as one nested control. The padding replaces the width the
-  // scrollbar gave back, so nothing shifts while the dialog is up.
+  // two read as one nested control. The root's stable gutter holds the layout
+  // width while it is hidden, so the centred dialog does not slide.
   useEffect(() => {
     if (!open) return;
 
     const root = document.documentElement;
-    const scrollbar = window.innerWidth - root.clientWidth;
     const previousOverflow = root.style.overflow;
-    const previousPadding = root.style.paddingRight;
-
     root.style.overflow = "hidden";
-    if (scrollbar > 0) root.style.paddingRight = `${scrollbar}px`;
 
     return () => {
       root.style.overflow = previousOverflow;
-      root.style.paddingRight = previousPadding;
     };
   }, [open]);
 
