@@ -14,6 +14,7 @@ export const SORTS = [
   { value: "title", label: "Title" },
   { value: "added", label: "Date added" },
   { value: "rating", label: "Rating" },
+  { value: "progress", label: "Progress" },
   { value: "status", label: "Status" },
 ] as const;
 
@@ -28,6 +29,7 @@ export const SORT_DIRECTIONS: Record<Sort, Direction> = {
   title: "asc",
   added: "desc",
   rating: "desc",
+  progress: "desc",
   status: "asc",
 };
 
@@ -75,6 +77,7 @@ const COMPARATORS: Record<
     a.createdAt.getTime() - b.createdAt.getTime() || a.id - b.id,
   // Unrated games sort below rated ones instead of counting as zero stars.
   rating: (a, b) => (a.rating ?? -1) - (b.rating ?? -1) || byTitle(a, b),
+  progress: (a, b) => a.progress - b.progress || byTitle(a, b),
   status: (a, b) =>
     STATUSES.indexOf(a.status) - STATUSES.indexOf(b.status) || byTitle(a, b),
 };
