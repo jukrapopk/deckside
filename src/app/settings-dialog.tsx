@@ -27,12 +27,7 @@ export function SettingsDialog({ hasKey }: { hasKey: boolean }) {
         />
       </div>
 
-      <Modal
-        open={modal.open}
-        onClose={modal.closeModal}
-        title="Settings"
-        description="Cover art and local preferences."
-      >
+      <Modal open={modal.open} onClose={modal.closeModal} title="Settings">
         <SettingsForm hasKey={hasKey} onDone={modal.closeModal} />
       </Modal>
     </>
@@ -62,33 +57,33 @@ function SettingsForm({
 
   return (
     <form action={submit} className="flex flex-col gap-5">
-      <Field label="SteamGridDB API key">
-        <input
-          name="apiKey"
-          type="password"
-          autoComplete="off"
-          spellCheck={false}
-          placeholder={
-            hasKey
-              ? "A key is saved — enter a new one to replace it"
-              : "Paste your key"
-          }
-          className={inputClass}
-        />
-      </Field>
+      <div className="flex flex-col gap-2">
+        <Field label="SteamGridDB API key">
+          <input
+            name="apiKey"
+            type="password"
+            autoComplete="off"
+            spellCheck={false}
+            disabled={hasKey}
+            value={hasKey ? "***************" : undefined}
+            placeholder="Paste your key"
+            className={`${inputClass} disabled:text-muted`}
+          />
+        </Field>
 
-      <p className="text-sm text-muted">
-        Used to search cover art in the edit dialog. Create a key on the{" "}
-        <a
-          href="https://www.steamgriddb.com/profile/preferences"
-          target="_blank"
-          rel="noreferrer"
-          className="text-ink underline underline-offset-2 hover:text-white"
-        >
-          SteamGridDB preferences page
-        </a>
-        .
-      </p>
+        {hasKey && (
+          <button
+            type="button"
+            disabled={removing}
+            onClick={() =>
+              startRemove(() => clearSteamGridDbKey().then(onDone))
+            }
+            className="self-start text-sm text-muted hover:text-ink disabled:opacity-40"
+          >
+            {removing ? "Removing" : "Remove key"}
+          </button>
+        )}
+      </div>
 
       {error && (
         <p role="alert" className="text-base text-danger">
@@ -97,20 +92,7 @@ function SettingsForm({
       )}
 
       <div className="flex items-center justify-between gap-3 border-t border-line pt-5">
-        {hasKey ? (
-          <button
-            type="button"
-            disabled={removing}
-            onClick={() =>
-              startRemove(() => clearSteamGridDbKey().then(onDone))
-            }
-            className="px-1 py-3 text-base font-medium text-muted hover:text-danger disabled:opacity-60"
-          >
-            {removing ? "Removing" : "Remove key"}
-          </button>
-        ) : (
-          <span />
-        )}
+        <span />
 
         <div className="flex gap-3">
           <button
@@ -120,7 +102,7 @@ function SettingsForm({
           >
             Cancel
           </button>
-          <SubmitButton label="Save" />
+          {!hasKey && <SubmitButton label="Save" />}
         </div>
       </div>
     </form>

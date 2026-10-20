@@ -108,7 +108,7 @@ export function CoverPicker({
             disabled={!value}
             className="self-start text-sm text-muted hover:text-ink disabled:opacity-40"
           >
-            Use the initial instead
+            Remove cover
           </button>
         </div>
       </div>

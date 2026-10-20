@@ -34,12 +34,7 @@ export function AddGameDialog() {
         />
       </div>
 
-      <Modal
-        open={modal.open}
-        onClose={modal.closeModal}
-        title="Add game"
-        description="Only the title is required."
-      >
+      <Modal open={modal.open} onClose={modal.closeModal} title="Add new game">
         <GameForm
           key={modal.open ? "open" : "closed"}
           mode="add"
@@ -69,12 +64,7 @@ export function EditGameDialog({
         icon={<Pencil size={18} strokeWidth={2.25} aria-hidden="true" />}
       />
 
-      <Modal
-        open={modal.open}
-        onClose={modal.closeModal}
-        title="Edit game"
-        description={game.title}
-      >
+      <Modal open={modal.open} onClose={modal.closeModal} title={game.title}>
         <GameForm
           key={modal.open ? "open" : "closed"}
           mode="edit"
@@ -121,7 +111,7 @@ function GameForm(props: GameFormProps) {
 
   return (
     <form action={submit} className="flex flex-col gap-5">
-      <Field label="Title">
+      <Field label={props.mode === "add" ? "Title *" : "Title"}>
         <input
           name="title"
           required

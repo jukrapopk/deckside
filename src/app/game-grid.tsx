@@ -21,22 +21,12 @@ export function GameGrid({ games, total, filters }: GameGridProps) {
     return <NoMatches filters={filters} />;
   }
 
-  const filtered = Boolean(filters.q || filters.status);
-
   return (
-    <div className="flex flex-col">
-      <p className="border-b border-line px-5 py-3 text-base text-muted">
-        {filtered
-          ? `${games.length} of ${total} games`
-          : `${total} ${total === 1 ? "game" : "games"}`}
-      </p>
-
-      <ul className={GRID_COLS}>
-        {games.map((game, index) => (
-          <GameCard key={game.id} game={game} eager={index < 6} />
-        ))}
-      </ul>
-    </div>
+    <ul className={GRID_COLS}>
+      {games.map((game, index) => (
+        <GameCard key={game.id} game={game} eager={index < 6} />
+      ))}
+    </ul>
   );
 }
 
