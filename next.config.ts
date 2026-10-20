@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  // Dev-only: allow the Tailscale address used to open this machine from other
+  // devices. Next already allows localhost and whatever host it started with.
+  allowedDevOrigins: ["100.100.1.1"],
   cacheComponents: true,
   partialPrefetching: true,
   // Keep the native SQLite binding out of the bundle; it is required at runtime.
