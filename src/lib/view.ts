@@ -45,6 +45,8 @@ export type Group = (typeof GROUPS)[number]["value"];
 export const DEFAULT_SORT: Sort = "title";
 export const DEFAULT_DIRECTION: Direction = "asc";
 export const DEFAULT_GROUP: Group = "none";
+/** Off by default: the duplicated top strip is a deliberate way to browse. */
+export const DEFAULT_FAVOURITES_FIRST = false;
 
 export function isSort(value: string): value is Sort {
   return SORTS.some((option) => option.value === value);
@@ -101,15 +103,42 @@ export type GameGroup = {
   status?: Status;
   /** Set when this section stands for a platform, so the header can icon it. */
   platform?: Platform;
+  /** Set on the synthetic Favourites section at the top. */
+  favourite?: boolean;
 };
 
 /**
  * A game can sit on several platforms, so the platform grouping shows it in
  * each one. Games with none get their own section rather than disappearing.
  * Each section carries the status or platform it stands for, so the grid
- * header can show the same mark as the tiles.
+ * header can show the same mark as the tiles. With `favouritesFirst`, a
+ * Favourites section repeats them at the top; they keep their own place too.
  */
 export function groupGames(
+  games: GameWithPlatforms[],
+  group: Group,
+  platforms: Platform[],
+  favouritesFirst = false,
+): GameGroup[] {
+  const sections = groupSections(games, group, platforms);
+
+  if (!favouritesFirst) return sections;
+
+  const favourites = games.filter((game) => game.favourite);
+  if (favourites.length === 0) return sections;
+
+  return [
+    {
+      key: "favourites",
+      label: "Favourites",
+      favourite: true,
+      games: favourites,
+    },
+    ...sections,
+  ];
+}
+
+function groupSections(
   games: GameWithPlatforms[],
   group: Group,
   platforms: Platform[],

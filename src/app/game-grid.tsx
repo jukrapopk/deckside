@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { GameCard } from "./game-card";
 import { usePlatforms } from "./platforms-provider";
 import { useView } from "./view-provider";
+import { HeartGlyph } from "@/components/heart";
 import { PlatformIcon } from "@/components/platform-icon";
 import { StatusBadge } from "@/components/status-badge";
 import type { GameWithPlatforms } from "@/db/queries";
@@ -23,7 +24,8 @@ const ACTION =
   "mt-2 border border-line px-5 py-3 text-base font-medium hover:border-accent";
 
 export function GameGrid({ games, total, q }: GameGridProps) {
-  const { status, sort, direction, group, setStatus } = useView();
+  const { status, sort, direction, group, favouritesFirst, setStatus } =
+    useView();
   const platforms = usePlatforms();
 
   if (total === 0) return <EmptyLibrary />;
@@ -62,17 +64,30 @@ export function GameGrid({ games, total, q }: GameGridProps) {
   }
 
   const sorted = sortGames(visible, sort, direction);
+  const sections = groupGames(sorted, group, platforms, favouritesFirst);
   // The first screenful is worth loading eagerly, whichever group it lands in.
-  const eager = new Set(sorted.slice(0, 6).map((game) => game.id));
+  const eager = new Set(
+    sections
+      .flatMap((section) => section.games)
+      .slice(0, 6)
+      .map((game) => game.id),
+  );
 
   return (
     <div className="flex flex-col">
-      {groupGames(sorted, group, platforms).map((section) => (
+      {sections.map((section) => (
         <section key={section.key}>
-          {group !== "none" && (
+          {(group !== "none" || section.favourite) && (
             <h2 className="flex items-center justify-between border-b border-line px-5 py-3 text-base font-semibold">
               <span className="flex items-center gap-3">
-                {section.status ? (
+                {section.favourite ? (
+                  <span
+                    aria-hidden="true"
+                    className="flex size-7 items-center justify-center"
+                  >
+                    <HeartGlyph filled />
+                  </span>
+                ) : section.status ? (
                   <StatusBadge status={section.status} decorative />
                 ) : section.platform ? (
                   <span

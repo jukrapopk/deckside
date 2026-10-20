@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/button";
 import { Field, FieldGroup, Select } from "@/components/field";
 import { FormFooter } from "@/components/form";
+import { HeartGlyph } from "@/components/heart";
 import { Modal, useModal } from "@/components/modal";
 import { StatusBadge } from "@/components/status-badge";
 import {
@@ -19,6 +20,7 @@ import {
 } from "@/lib/statuses";
 import {
   DEFAULT_DIRECTION,
+  DEFAULT_FAVOURITES_FIRST,
   DEFAULT_GROUP,
   DEFAULT_SORT,
   GROUPS,
@@ -30,9 +32,9 @@ import { TopBarAction } from "./top-bar-action";
 import { useView } from "./view-provider";
 
 /**
- * One place for the three things that decide what the grid shows. Choices
- * apply as they are made, so the dialog dismisses rather than commits; they
- * are remembered by the provider, not carried in the URL.
+ * One place for the choices that decide what the grid shows. Changes apply as
+ * they are made, so the dialog dismisses rather than commits; they are
+ * remembered by the provider, not carried in the URL.
  */
 export function ViewDialog({ counts }: { counts: StatusCounts }) {
   const modal = useModal();
@@ -41,10 +43,12 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
     sort,
     direction,
     group,
+    favouritesFirst,
     setStatus,
     setSort,
     invertDirection,
     setGroup,
+    setFavouritesFirst,
     resetView,
   } = useView();
 
@@ -52,7 +56,8 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
     status !== undefined ||
     sort !== DEFAULT_SORT ||
     direction !== DEFAULT_DIRECTION ||
-    group !== DEFAULT_GROUP;
+    group !== DEFAULT_GROUP ||
+    favouritesFirst !== DEFAULT_FAVOURITES_FIRST;
 
   const options: { value?: Status; label: string; count: number }[] = [
     { value: undefined, label: "All", count: counts.all },
@@ -165,6 +170,33 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
               ))}
             </Select>
           </Field>
+
+          <FieldGroup legend="Favourites">
+            <button
+              type="button"
+              aria-label="Show favourites at top"
+              aria-pressed={favouritesFirst}
+              onClick={() => setFavouritesFirst(!favouritesFirst)}
+              className={`flex items-center justify-between border border-line px-4 py-3 text-left text-base transition-colors motion-reduce:transition-none ${
+                favouritesFirst
+                  ? "bg-accent-strong text-white"
+                  : "text-ink hover:bg-surface-2"
+              }`}
+            >
+              <span className="flex items-center gap-3">
+                <span
+                  aria-hidden="true"
+                  className="flex size-7 items-center justify-center"
+                >
+                  <HeartGlyph filled={favouritesFirst} />
+                </span>
+                Show at top
+              </span>
+              <span className={favouritesFirst ? "text-white" : "text-muted"}>
+                {favouritesFirst ? "On" : "Off"}
+              </span>
+            </button>
+          </FieldGroup>
 
           <FormFooter
             left={

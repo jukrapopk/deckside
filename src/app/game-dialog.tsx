@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, Pencil, Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useState, type CSSProperties } from "react";
 import { addGame, deleteGame, updateGame } from "@/app/actions";
 import { CoverPicker } from "@/app/cover-picker";
@@ -9,6 +9,7 @@ import { Button } from "@/components/button";
 import { DeleteButton } from "@/components/delete-button";
 import { Field, FieldGroup, Select, TextField } from "@/components/field";
 import { FormError, FormFooter } from "@/components/form";
+import { HeartGlyph } from "@/components/heart";
 import { IconButton } from "@/components/icon-button";
 import { Modal, useModal } from "@/components/modal";
 import { StarPicker } from "@/components/star-picker";
@@ -154,12 +155,7 @@ function GameForm(props: GameFormProps) {
               : "border-line bg-surface text-muted hover:border-accent hover:text-ink"
           }`}
         >
-          <Heart
-            size={20}
-            strokeWidth={2.25}
-            fill={favourite ? "currentColor" : "none"}
-            aria-hidden="true"
-          />
+          <HeartGlyph filled={favourite} size={20} />
         </button>
       </div>
 

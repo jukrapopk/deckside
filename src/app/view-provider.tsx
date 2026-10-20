@@ -11,6 +11,7 @@ import {
 import { isStatus, type Status } from "@/lib/statuses";
 import {
   DEFAULT_DIRECTION,
+  DEFAULT_FAVOURITES_FIRST,
   DEFAULT_GROUP,
   DEFAULT_SORT,
   isDirection,
@@ -29,6 +30,7 @@ type View = {
   sort: Sort;
   direction: Direction;
   group: Group;
+  favouritesFirst: boolean;
 };
 
 type ViewControls = View & {
@@ -36,6 +38,7 @@ type ViewControls = View & {
   setSort: (sort: Sort) => void;
   invertDirection: () => void;
   setGroup: (group: Group) => void;
+  setFavouritesFirst: (favouritesFirst: boolean) => void;
   resetView: () => void;
 };
 
@@ -46,6 +49,7 @@ function defaults(): View {
     sort: DEFAULT_SORT,
     direction: DEFAULT_DIRECTION,
     group: DEFAULT_GROUP,
+    favouritesFirst: DEFAULT_FAVOURITES_FIRST,
   };
 }
 
@@ -73,6 +77,7 @@ function readStored(): View {
         typeof parsed?.group === "string" && isGroup(parsed.group)
           ? parsed.group
           : DEFAULT_GROUP,
+      favouritesFirst: parsed?.favouritesFirst === true,
     };
   } catch {
     return defaults();
@@ -80,10 +85,10 @@ function readStored(): View {
 }
 
 /**
- * Filter, sort, and grouping live here rather than in the URL: they are how
- * this browser likes to look at the library, not part of a shared address.
- * Storage is read after mount so the server-rendered order stays the default
- * and hydration has nothing to disagree about.
+ * Filter, sort, grouping, and the favourites strip live here rather than in
+ * the URL: they are how this browser likes to look at the library, not part of
+ * a shared address. Storage is read after mount so the server-rendered order
+ * stays the default and hydration has nothing to disagree about.
  */
 export function ViewProvider({ children }: { children: ReactNode }) {
   const [view, setView] = useState<View>(defaults);
@@ -126,6 +131,8 @@ export function ViewProvider({ children }: { children: ReactNode }) {
           direction: current.direction === "asc" ? "desc" : "asc",
         })),
       setGroup: (group) => setView((current) => ({ ...current, group })),
+      setFavouritesFirst: (favouritesFirst) =>
+        setView((current) => ({ ...current, favouritesFirst })),
       resetView: () => setView(defaults()),
     }),
     [view],

@@ -1,10 +1,10 @@
 "use client";
 
-import { Heart } from "lucide-react";
 import { useMemo } from "react";
 import { EditGameDialog } from "@/app/game-dialog";
 import { usePlatforms } from "@/app/platforms-provider";
 import { CoverArt } from "@/components/cover-art";
+import { HeartGlyph } from "@/components/heart";
 import { PlatformIcon } from "@/components/platform-icon";
 import { StarRating } from "@/components/star-rating";
 import { StatusBadge } from "@/components/status-badge";
@@ -47,12 +47,7 @@ export function GameCard({ game, eager = false }: GameCardProps) {
           title="Favourite"
           className="absolute left-0 top-0 flex size-10 items-center justify-center text-white/85 drop-shadow-[0_1px_3px_rgba(15,22,34,0.9)]"
         >
-          <Heart
-            size={18}
-            strokeWidth={2.25}
-            fill="currentColor"
-            aria-hidden="true"
-          />
+          <HeartGlyph filled />
         </span>
       )}
 
