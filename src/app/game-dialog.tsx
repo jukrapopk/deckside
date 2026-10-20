@@ -28,16 +28,27 @@ export type GameValues = {
   coverUrl: string | null;
 };
 
-export function AddGameDialog() {
+export function AddGameDialog({
+  trigger = "top-bar",
+}: {
+  trigger?: "top-bar" | "empty";
+}) {
   const modal = useModal();
 
   return (
     <>
-      <TopBarAction
-        label="Add game"
-        onClick={modal.openModal}
-        icon={<Plus size={22} strokeWidth={2.25} aria-hidden="true" />}
-      />
+      {trigger === "top-bar" ? (
+        <TopBarAction
+          label="Add game"
+          onClick={modal.openModal}
+          icon={<Plus size={22} strokeWidth={2.25} aria-hidden="true" />}
+        />
+      ) : (
+        <Button variant="primary" onClick={modal.openModal}>
+          <Plus size={18} strokeWidth={2.25} aria-hidden="true" />
+          Add game
+        </Button>
+      )}
 
       <Modal open={modal.open} onClose={modal.closeModal} title="Add new game">
         <GameForm

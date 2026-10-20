@@ -1,9 +1,16 @@
 "use client";
 
-import { ChevronDown, Gamepad2, Search } from "lucide-react";
+import {
+  ChevronDown,
+  Gamepad2,
+  Search,
+  SearchX,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { GameCard } from "./game-card";
+import { AddGameDialog } from "./game-dialog";
 import { usePlatforms } from "./platforms-provider";
 import { useView } from "./view-provider";
 import { HeartGlyph } from "@/components/heart";
@@ -64,11 +71,7 @@ export function GameGrid({ games, total, q }: GameGridProps) {
   if (visible.length === 0) {
     return (
       <NoMatches
-        description={
-          statuses.length === 0
-            ? "No statuses are selected."
-            : "Nothing matches the selected statuses."
-        }
+        icon={SearchX}
         action={
           <button
             type="button"
@@ -182,14 +185,20 @@ function MessageState({
 }: {
   icon: ReactNode;
   title: string;
-  description: string;
+  description?: string;
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-4 px-6 py-24 text-center">
+    <div
+      className={`flex flex-col items-center px-6 py-24 text-center ${
+        description ? "gap-4" : "gap-6"
+      }`}
+    >
       {icon}
       <h2 className="text-xl font-semibold">{title}</h2>
-      <p className="max-w-[45ch] text-base text-muted">{description}</p>
+      {description && (
+        <p className="max-w-[45ch] text-base text-muted">{description}</p>
+      )}
       {action}
     </div>
   );
@@ -199,7 +208,6 @@ function EmptyLibrary() {
   return (
     <MessageState
       title="Your library is empty"
-      description="Use the add button in the top bar to record the first thing you own, want to play next, or have finished."
       icon={
         <Gamepad2
           size={40}
@@ -208,6 +216,7 @@ function EmptyLibrary() {
           className="text-muted"
         />
       }
+      action={<AddGameDialog trigger="empty" />}
     />
   );
 }
@@ -215,16 +224,18 @@ function EmptyLibrary() {
 function NoMatches({
   description,
   action,
+  icon: Icon = Search,
 }: {
-  description: string;
+  description?: string;
   action: ReactNode;
+  icon?: LucideIcon;
 }) {
   return (
     <MessageState
       title="No games found"
       description={description}
       icon={
-        <Search
+        <Icon
           size={40}
           strokeWidth={1.75}
           aria-hidden="true"
