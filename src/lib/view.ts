@@ -1,7 +1,7 @@
 import type { GameWithPlatforms } from "@/db/queries";
 import type { Platform } from "@/db/schema";
 import { indexPlatforms, platformsOf } from "@/lib/platforms";
-import { STATUSES, STATUS_LABELS } from "@/lib/statuses";
+import { STATUSES, STATUS_LABELS, type Status } from "@/lib/statuses";
 
 /*
   View preferences (which games show, and in what order) are a client concern:
@@ -97,11 +97,17 @@ export type GameGroup = {
   key: string;
   label: string;
   games: GameWithPlatforms[];
+  /** Set when this section stands for a status, so the header can badge it. */
+  status?: Status;
+  /** Set when this section stands for a platform, so the header can icon it. */
+  platform?: Platform;
 };
 
 /**
  * A game can sit on several platforms, so the platform grouping shows it in
  * each one. Games with none get their own section rather than disappearing.
+ * Each section carries the status or platform it stands for, so the grid
+ * header can show the same mark as the tiles.
  */
 export function groupGames(
   games: GameWithPlatforms[],
@@ -117,6 +123,7 @@ export function groupGames(
     return STATUSES.map((status) => ({
       key: status,
       label: STATUS_LABELS[status],
+      status,
       games: games.filter((game) => game.status === status),
     })).filter((section) => section.games.length > 0);
   }
@@ -143,6 +150,7 @@ export function groupGames(
       const section = sections.get(key) ?? {
         key,
         label: platform.name,
+        platform,
         games: [],
       };
       section.games.push(game);

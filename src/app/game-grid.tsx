@@ -6,6 +6,8 @@ import type { ReactNode } from "react";
 import { GameCard } from "./game-card";
 import { usePlatforms } from "./platforms-provider";
 import { useView } from "./view-provider";
+import { PlatformIcon } from "@/components/platform-icon";
+import { StatusBadge } from "@/components/status-badge";
 import type { GameWithPlatforms } from "@/db/queries";
 import { GRID_COLS } from "@/lib/grid";
 import { groupGames, sortGames } from "@/lib/view";
@@ -68,8 +70,23 @@ export function GameGrid({ games, total, q }: GameGridProps) {
       {groupGames(sorted, group, platforms).map((section) => (
         <section key={section.key}>
           {group !== "none" && (
-            <h2 className="flex items-baseline justify-between border-b border-line px-5 py-3 text-base font-semibold">
-              {section.label}
+            <h2 className="flex items-center justify-between border-b border-line px-5 py-3 text-base font-semibold">
+              <span className="flex items-center gap-3">
+                {section.status ? (
+                  <StatusBadge status={section.status} decorative />
+                ) : section.platform ? (
+                  <span
+                    aria-hidden="true"
+                    className="flex size-7 items-center justify-center"
+                  >
+                    <PlatformIcon icon={section.platform.icon} />
+                  </span>
+                ) : (
+                  // "No platform" still indents like the sections above it.
+                  <span aria-hidden="true" className="size-7" />
+                )}
+                {section.label}
+              </span>
               <span className="text-sm font-normal text-muted">
                 {section.games.length}
               </span>
