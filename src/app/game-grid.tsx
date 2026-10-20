@@ -130,30 +130,34 @@ export function GameGrid({ games, total, q }: GameGridProps) {
                   onClick={() => toggleSection(section.key)}
                   className="flex w-full items-center justify-between px-5 py-3 text-left transition-colors hover:bg-surface-2 motion-reduce:transition-none"
                 >
-                  <span className="flex items-center gap-3">
+                  <span className="flex min-w-0 items-center gap-3">
                     {section.favourite ? (
                       <span
                         aria-hidden="true"
-                        className="flex size-7 items-center justify-center"
+                        className="flex size-7 shrink-0 items-center justify-center"
                       >
                         <HeartGlyph filled />
                       </span>
                     ) : section.status ? (
-                      <StatusBadge status={section.status} decorative />
+                      <StatusBadge
+                        status={section.status}
+                        decorative
+                        className="shrink-0"
+                      />
                     ) : section.platform ? (
                       <span
                         aria-hidden="true"
-                        className="flex size-7 items-center justify-center"
+                        className="flex size-7 shrink-0 items-center justify-center"
                       >
                         <PlatformIcon icon={section.platform.icon} />
                       </span>
                     ) : (
                       // "No platform" still indents like the sections above it.
-                      <span aria-hidden="true" className="size-7" />
+                      <span aria-hidden="true" className="size-7 shrink-0" />
                     )}
-                    {section.label}
+                    <span className="truncate">{section.label}</span>
                   </span>
-                  <span className="flex items-center gap-3 text-muted">
+                  <span className="flex shrink-0 items-center gap-3 text-muted">
                     <span className="text-sm font-normal">
                       {section.games.length}
                     </span>
@@ -210,7 +214,9 @@ function MessageState({
       {icon}
       <h2 className="text-xl font-semibold">{title}</h2>
       {description && (
-        <p className="max-w-[45ch] text-base text-muted">{description}</p>
+        <p className="max-w-[45ch] break-words text-base text-muted">
+          {description}
+        </p>
       )}
       {action}
     </div>

@@ -21,20 +21,21 @@ export function StarPicker({
         const filled = value !== null && stars <= value;
 
         return (
-          <label key={stars} className="cursor-pointer">
+          <label key={stars} className="group cursor-pointer">
             <input
               type="radio"
               name={name}
               value={stars}
               checked={value === stars}
               onChange={() => onChange(stars)}
+              aria-label={`${stars} star${stars === 1 ? "" : "s"}`}
               className="peer sr-only"
             />
             <span
               className={`flex size-9 items-center justify-center border peer-focus-visible:border-2 peer-focus-visible:border-accent ${
                 filled
                   ? "border-accent bg-accent-strong text-white"
-                  : "border-line bg-surface text-muted peer-hover:text-ink"
+                  : "border-line bg-surface text-muted group-hover:text-ink"
               }`}
             >
               <StarGlyph filled={filled} />

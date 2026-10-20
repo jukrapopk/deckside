@@ -1,7 +1,7 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "./button";
 
 /**
@@ -17,10 +17,29 @@ export function DeleteButton({
 }) {
   const [confirming, setConfirming] = useState(false);
   const [deleting, startDelete] = useTransition();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const keepRef = useRef<HTMLButtonElement>(null);
+  const restoreFocus = useRef(false);
+
+  // The trigger is replaced by the confirmation, so focus would otherwise
+  // fall to the page. It lands on the safe option when the pair appears,
+  // and returns to the trigger when the confirmation is dismissed.
+  useEffect(() => {
+    if (confirming) {
+      keepRef.current?.focus();
+      return;
+    }
+
+    if (restoreFocus.current) {
+      restoreFocus.current = false;
+      triggerRef.current?.focus();
+    }
+  }, [confirming]);
 
   if (!confirming) {
     return (
       <Button
+        ref={triggerRef}
         variant="dangerGhost"
         size="plain"
         onClick={() => setConfirming(true)}
@@ -42,9 +61,13 @@ export function DeleteButton({
         {deleting ? "Deleting" : "Delete"}
       </Button>
       <Button
+        ref={keepRef}
         variant="secondary"
         size="sm"
-        onClick={() => setConfirming(false)}
+        onClick={() => {
+          restoreFocus.current = true;
+          setConfirming(false);
+        }}
       >
         Keep
       </Button>

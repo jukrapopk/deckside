@@ -82,9 +82,17 @@ export function CoverPicker({
             className={`group ${frame} cursor-pointer`}
           >
             {preview}
+            {/* Touch has no hover, so the remove action needs a visible mark.
+                On a fine pointer the full label appears on hover instead. */}
             <span
               aria-hidden="true"
-              className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-bg/80 text-xs font-medium text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none"
+              className="absolute right-0 top-0 hidden size-6 items-center justify-center bg-bg/85 text-white pointer-coarse:flex"
+            >
+              <X size={14} strokeWidth={2.5} />
+            </span>
+            <span
+              aria-hidden="true"
+              className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-bg/80 text-xs font-medium text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 pointer-coarse:hidden motion-reduce:transition-none"
             >
               <X size={20} strokeWidth={2.25} />
               Remove

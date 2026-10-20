@@ -95,11 +95,15 @@ export function Modal({
           scroller. This `max-height` also beats the browser's own modal cap,
           which would otherwise make the dialog a second scroll container. */}
       <div className="flex shrink-0 items-start justify-between gap-4 border-b border-line px-5 py-4">
-        <div>
-          <h2 id={headingId} className="text-lg font-semibold">
+        {/* A game title can be a single long word; without min-w-0 and
+            break-words it would push the close button out of the dialog. */}
+        <div className="min-w-0">
+          <h2 id={headingId} className="break-words text-lg font-semibold">
             {title}
           </h2>
-          {description && <p className="mt-1 text-sm text-muted">{description}</p>}
+          {description && (
+            <p className="mt-1 break-words text-sm text-muted">{description}</p>
+          )}
         </div>
         <IconButton
           label="Close"

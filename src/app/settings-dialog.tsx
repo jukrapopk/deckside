@@ -70,9 +70,9 @@ function PlatformSettings() {
             key={platform.id}
             className="flex items-center justify-between gap-3 px-3 py-2"
           >
-            <span className="flex items-center gap-3">
-              <PlatformIcon icon={platform.icon} />
-              {platform.name}
+            <span className="flex min-w-0 items-center gap-3">
+              <PlatformIcon icon={platform.icon} className="shrink-0" />
+              <span className="truncate">{platform.name}</span>
             </span>
             <EditPlatformDialog platform={platform} />
           </li>
@@ -148,14 +148,12 @@ function KeySettings({
   const canCheck = (hasKey && !editing) || key.trim().length > 0;
   const checkFailed = checkResult?.ok === false;
   const checkPassed = checkResult?.ok === true;
-  const checkLabel = checking
-    ? "Checking API key"
-    : checkFailed
-      ? "API key check failed"
-      : checkPassed
-        ? "API key works"
-        : "Check API key";
-  const checkTitle = checkFailed ? checkResult.message : checkLabel;
+  const checkLabel = "Check API key";
+  const checkTitle = checkFailed
+    ? checkResult.message
+    : checkPassed
+      ? "API key works — check again"
+      : "Check API key";
 
   useEffect(() => {
     if (editing) keyInput.current?.focus();
@@ -272,8 +270,12 @@ function KeySettings({
             title={checkTitle}
             onClick={checkKey}
             disabled={checking || saving || !canCheck}
-            className={`text-white transition-[background-color,filter] hover:brightness-110 disabled:opacity-60 motion-reduce:transition-none ${
-              checkFailed ? "bg-danger-strong" : "bg-status-completed"
+            className={`border transition-[color,background-color,border-color,filter] disabled:opacity-60 motion-reduce:transition-none ${
+              checkFailed
+                ? "border-danger-strong bg-danger-strong text-white hover:brightness-110"
+                : checkPassed
+                  ? "border-status-completed bg-status-completed text-white hover:brightness-110"
+                  : "border-line text-muted hover:border-accent hover:text-ink"
             }`}
           >
             {checking ? (
@@ -288,9 +290,14 @@ function KeySettings({
           </KeyActionButton>
         </div>
 
-        <span className="sr-only" role="status">
-          {checking ? "Checking API key" : checkResult?.message}
-        </span>
+        {(checking || checkResult) && (
+          <p
+            role="status"
+            className={`text-sm ${checkFailed ? "text-danger" : "text-muted"}`}
+          >
+            {checking ? "Checking API key" : checkResult?.message}
+          </p>
+        )}
       </div>
 
       <FormError message={saveError} />

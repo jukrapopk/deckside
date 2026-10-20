@@ -2,11 +2,13 @@ import { GRID_COLS, GRID_TILE } from "@/lib/grid";
 
 export function TopBarSkeleton() {
   return (
-    <header className="border-b border-line">
+    <header className="sticky top-0 z-20 border-b border-line bg-bg/95 backdrop-blur">
       <div className="flex items-stretch">
-        <div className="flex h-16 flex-1 items-center gap-4 px-5">
+        {/* The placeholder bar has to shrink with the search field; a fixed
+            width here overflowed the header on narrow phones. */}
+        <div className="flex h-16 min-w-0 flex-1 items-center gap-4 px-5">
           <div className="size-5 shrink-0 animate-pulse bg-surface-2 motion-reduce:animate-none" />
-          <div className="h-5 w-56 animate-pulse bg-surface-2 motion-reduce:animate-none" />
+          <div className="h-5 min-w-0 max-w-56 flex-1 animate-pulse bg-surface-2 motion-reduce:animate-none" />
         </div>
         <div className="size-16 shrink-0 border-l border-line" />
         <div className="size-16 shrink-0 border-l border-line" />

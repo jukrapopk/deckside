@@ -33,7 +33,8 @@ export function CoverInitial({
 
 /** Matches the card's width across the grid's breakpoints. */
 const CARD_SIZES =
-  "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw";
+  "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, " +
+  "(max-width: 1280px) 25vw, (max-width: 1536px) 20vw, 17vw";
 
 /**
  * Cover art with the initial as its empty state. The parent supplies the box:
@@ -63,7 +64,7 @@ export function CoverArt({
       alt=""
       aria-hidden="true"
       fill
-      priority={eager}
+      loading={eager ? "eager" : "lazy"}
       sizes={sizes}
       className="object-cover"
     />

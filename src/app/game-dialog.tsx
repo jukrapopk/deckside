@@ -155,7 +155,7 @@ function GameForm(props: GameFormProps) {
       <div className="flex items-end gap-2">
         <div className="min-w-0 flex-1">
           <TextField
-            label={props.mode === "add" ? "Title *" : "Title"}
+            label="Title *"
             name="title"
             required
             maxLength={TITLE_MAX_LENGTH}

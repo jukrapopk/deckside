@@ -25,9 +25,28 @@ export function TopBar({ q, counts, hasSteamGridDbKey }: TopBarProps) {
   // What the URL should hold, so a debounced echo of an in-flight search is
   // skipped even before the next render arrives.
   const committedQ = useRef(q);
+  // The query the field was last synced to, so we can tell uncommitted typing
+  // from a navigation that changed the URL.
+  const syncedQ = useRef(q);
 
   useEffect(() => {
     committedQ.current = q;
+  }, [q]);
+
+  // The field is uncontrolled so typing never fights the router. When the
+  // query changes from somewhere else — the empty state's clear link, or
+  // back/forward — pull the new value in, unless the field holds typing that
+  // has not been committed yet.
+  useEffect(() => {
+    const input = searchRef.current;
+    if (!input) return;
+
+    const typing =
+      document.activeElement === input &&
+      input.value.trim() !== syncedQ.current;
+
+    if (!typing && input.value !== q) input.value = q;
+    syncedQ.current = q;
   }, [q]);
 
   useEffect(() => {
@@ -99,7 +118,9 @@ export function TopBar({ q, counts, hasSteamGridDbKey }: TopBarProps) {
               defaultValue={q}
               onChange={(event) => queueSearch(event.target.value)}
               placeholder="Search"
-              className="h-16 w-full min-w-0 border-0 bg-transparent pl-14 pr-12 text-lg text-ink outline-none placeholder:text-muted"
+              className={`h-16 w-full min-w-0 border-0 bg-transparent pl-14 text-lg text-ink outline-none placeholder:text-muted max-sm:pl-12 ${
+                q ? "pr-12" : "pr-4"
+              }`}
             />
             {q && (
               <button

@@ -119,7 +119,7 @@ function PlatformForm(props: PlatformFormProps) {
       submitLabel={props.mode === "edit" ? "Save" : "Add platform"}
     >
       <TextField
-        label="Name"
+        label="Name *"
         name="name"
         required
         maxLength={PLATFORM_NAME_MAX_LENGTH}

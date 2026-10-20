@@ -80,7 +80,7 @@ export function GameCard({ game, eager = false }: GameCardProps) {
           to the pencil, which would otherwise keep it pinned visible. */}
       <EditGameDialog
         game={game}
-        triggerClassName="opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100 motion-reduce:transition-none"
+        triggerClassName="opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100 motion-reduce:transition-none"
       />
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-4">
@@ -101,8 +101,9 @@ export function GameCard({ game, eager = false }: GameCardProps) {
           <StatusBadge status={status} className="shrink-0" />
         </div>
         {/* Icons only: the tile is the quietest place for a word, and the
-            name is still there on hover and for a screen reader. */}
-        <div className="flex min-h-6 items-center gap-3 text-white/75">
+            name is still there on hover and for a screen reader. Wrapping
+            keeps every platform visible when a game has more than a row. */}
+        <div className="flex min-h-6 flex-wrap items-center gap-3 text-white/75">
           {own.map((platform) => (
             <span
               key={platform.id}
