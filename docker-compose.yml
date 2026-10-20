@@ -1,16 +1,24 @@
+name: deckside
+
 services:
   web:
     build: .
-    image: game-library:latest
+    image: deckside:latest
+    init: true
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      # Local-only by default. Set BIND_ADDRESS to a private LAN/Tailscale
+      # address to open it to another trusted device.
+      - "${BIND_ADDRESS:-127.0.0.1}:3000:3000"
     environment:
-      DATABASE_PATH: /data/game-library.db
+      DATABASE_PATH: /data/deckside.db
       MIGRATIONS_PATH: /app/drizzle
+      STEAMGRIDDB_API_KEY: ${STEAMGRIDDB_API_KEY:-}
+    security_opt:
+      - no-new-privileges:true
     volumes:
       # Named volume keeps the SQLite file across container rebuilds.
-      - game-library-data:/data
+      - data:/data
     healthcheck:
       test:
         [
@@ -25,4 +33,4 @@ services:
       start_period: 20s
 
 volumes:
-  game-library-data:
+  data:

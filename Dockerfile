@@ -26,7 +26,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-ENV DATABASE_PATH=/data/game-library.db
+ENV DATABASE_PATH=/data/deckside.db
 ENV MIGRATIONS_PATH=/app/drizzle
 
 RUN addgroup --system --gid 1001 nodejs \

@@ -5,7 +5,13 @@ node_modules
 npm-debug.log*
 .env*
 data
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.tsbuildinfo
 Dockerfile
 docker-compose.yml
 .dockerignore
 README.md
+AGENTS.md

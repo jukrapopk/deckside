@@ -128,7 +128,8 @@ server action.
 | `STEAMGRIDDB_API_KEY` | unset | Overrides the key saved in Settings |
 | `ALLOWED_DEV_ORIGINS` | unset | Extra dev hosts, comma-separated (LAN/Tailscale) |
 
-Copy `.env.example` to `.env.local` for a starting point.
+Copy `.env.example` to `.env.local` for local Next development. Docker Compose
+reads its variables from the shell or a `.env` file in the project root.
 
 ## Security and privacy
 
@@ -152,7 +153,12 @@ development is the focus.
 docker compose up --build
 ```
 
-The image runs as a non-root user and stores the database on a named volume at `/data`.
+The image runs as a non-root user and stores `/data/deckside.db` on the
+`deckside_data` volume. By default Compose publishes the port on `127.0.0.1`;
+set `BIND_ADDRESS` to a private LAN or Tailscale address (or `0.0.0.0` on a
+trusted network) to reach it from another device. Pass `STEAMGRIDDB_API_KEY`
+through the environment to keep the key out of the database.
+
 Set `BUILD_STANDALONE=1` to produce the standalone output the Dockerfile expects;
 `npm run build` on its own does not, because standalone output is incompatible with
 `next start`.
