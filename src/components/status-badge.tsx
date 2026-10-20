@@ -27,22 +27,26 @@ const STATUS_ICONS: Record<Status, LucideIcon> = {
 };
 
 /**
- * Status indicator: a coloured circle with a white glyph. The label is
- * exposed to assistive tech only.
+ * Status indicator: a coloured circle with a white glyph. The status name is
+ * announced to screen readers unless `decorative` is set.
  */
 export function StatusBadge({
   status,
   className = "",
+  decorative = false,
 }: {
   status: Status;
   className?: string;
+  /** The row already names the status; hide this duplicate from assistive tech. */
+  decorative?: boolean;
 }) {
   const Glyph = STATUS_ICONS[status];
 
   return (
     <span
-      role="img"
-      aria-label={STATUS_LABELS[status]}
+      role={decorative ? undefined : "img"}
+      aria-label={decorative ? undefined : STATUS_LABELS[status]}
+      aria-hidden={decorative || undefined}
       className={`flex size-7 items-center justify-center rounded-full text-white ${STATUS_BADGE[status]} ${className}`}
     >
       <Glyph

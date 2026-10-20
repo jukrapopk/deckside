@@ -1,10 +1,16 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Check, SlidersHorizontal } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  LayoutGrid,
+  SlidersHorizontal,
+} from "lucide-react";
 import { Button } from "@/components/button";
 import { Field, FieldGroup, Select } from "@/components/field";
 import { FormFooter } from "@/components/form";
 import { Modal, useModal } from "@/components/modal";
+import { StatusBadge } from "@/components/status-badge";
 import {
   STATUSES,
   STATUS_LABELS,
@@ -87,22 +93,27 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
                         : "text-ink hover:bg-surface-2"
                     }`}
                   >
-                    {option.label}
+                    <span className="flex items-center gap-3">
+                      {option.value ? (
+                        <StatusBadge status={option.value} decorative />
+                      ) : (
+                        <span
+                          aria-hidden="true"
+                          className="flex size-7 items-center justify-center"
+                        >
+                          <LayoutGrid
+                            size={16}
+                            strokeWidth={3}
+                            aria-hidden="true"
+                          />
+                        </span>
+                      )}
+                      {option.label}
+                    </span>
                     {/* Full white on the accent fill: 80% white measures
                         3.83:1 there, under AA for this size. */}
-                    <span
-                      className={`flex items-center gap-3 ${
-                        active ? "text-white" : "text-muted"
-                      }`}
-                    >
+                    <span className={active ? "text-white" : "text-muted"}>
                       {option.count}
-                      {active && (
-                        <Check
-                          size={18}
-                          strokeWidth={3}
-                          aria-hidden="true"
-                        />
-                      )}
                     </span>
                   </button>
                 );
