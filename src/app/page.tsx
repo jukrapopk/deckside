@@ -7,6 +7,7 @@ import {
   parseFilters,
 } from "@/db/queries";
 import { hasSteamGridDbKey } from "@/lib/settings";
+import { SITE_NAME } from "@/lib/site";
 import { GameGrid } from "./game-grid";
 import { PlatformsProvider } from "./platforms-provider";
 import { GameGridSkeleton, TopBarSkeleton } from "./skeletons";
@@ -60,7 +61,7 @@ export default function Home({ searchParams }: { searchParams: SearchParams }) {
   return (
     <ViewProvider>
       <div className="flex min-h-[100dvh] flex-col">
-        <h1 className="sr-only">Game Library</h1>
+        <h1 className="sr-only">{SITE_NAME}</h1>
 
         <Suspense fallback={<TopBarSkeleton />}>
           <LibraryBar searchParams={searchParams} />

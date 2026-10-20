@@ -1,7 +1,7 @@
-# Game Library
+# Deckside
 
-A personal game library: track what you own, what is up next, what you are
-playing, and what you have finished or dropped.
+Deckside is a personal game library: track what you own, what is up next, what
+you are playing, and what you have finished or dropped.
 
 Built with Next.js 16 (App Router, Cache Components), SQLite, and Drizzle ORM.
 
