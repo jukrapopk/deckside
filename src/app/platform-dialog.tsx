@@ -3,14 +3,16 @@
 import { Pencil, Plus } from "lucide-react";
 import { useState } from "react";
 import { addPlatform, deletePlatform, updatePlatform } from "@/app/actions";
-import { Button } from "@/components/button";
-import { DeleteButton } from "@/components/delete-button";
-import { FieldGroup, TextField } from "@/components/field";
-import { FormError, FormFooter } from "@/components/form";
+import { DialogForm } from "@/components/dialog-form";
+import {
+  FieldGroup,
+  selectedControl,
+  TextField,
+} from "@/components/field";
 import { IconButton } from "@/components/icon-button";
 import { Modal, useModal } from "@/components/modal";
-import { SubmitButton } from "@/components/submit-button";
 import type { Platform } from "@/db/schema";
+import { PLATFORM_NAME_MAX_LENGTH } from "@/lib/limits";
 import {
   DEFAULT_PLATFORM_ICON,
   isPlatformIcon,
@@ -105,12 +107,22 @@ function PlatformForm(props: PlatformFormProps) {
   }
 
   return (
-    <form action={submit} className="flex flex-col gap-5">
+    <DialogForm
+      action={submit}
+      error={error}
+      onClose={props.onDone}
+      onDelete={
+        props.mode === "edit"
+          ? () => deletePlatform(props.platform.id)
+          : undefined
+      }
+      submitLabel={props.mode === "edit" ? "Save" : "Add platform"}
+    >
       <TextField
         label="Name"
         name="name"
         required
-        maxLength={40}
+        maxLength={PLATFORM_NAME_MAX_LENGTH}
         autoComplete="off"
         value={name}
         onChange={(event) => setName(event.target.value)}
@@ -131,7 +143,7 @@ function PlatformForm(props: PlatformFormProps) {
                 onClick={() => setIcon(key)}
                 className={`flex h-12 items-center justify-center border transition-colors motion-reduce:transition-none ${
                   active
-                    ? "border-accent-strong bg-accent-strong text-white"
+                    ? selectedControl
                     : "border-line text-muted hover:text-ink"
                 }`}
               >
@@ -143,24 +155,6 @@ function PlatformForm(props: PlatformFormProps) {
 
         <input type="hidden" name="icon" value={icon} />
       </FieldGroup>
-
-      <FormError message={error} />
-
-      <FormFooter
-        left={
-          props.mode === "edit" ? (
-            <DeleteButton
-              onDelete={() => deletePlatform(props.platform.id)}
-              onDone={props.onDone}
-            />
-          ) : undefined
-        }
-      >
-        <Button variant="secondary" onClick={props.onDone}>
-          Cancel
-        </Button>
-        <SubmitButton label={props.mode === "edit" ? "Save" : "Add platform"} />
-      </FormFooter>
-    </form>
+    </DialogForm>
   );
 }

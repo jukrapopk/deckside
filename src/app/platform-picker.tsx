@@ -1,5 +1,6 @@
 "use client";
 
+import { selectedControl } from "@/components/field";
 import { PlatformIcon } from "@/components/platform-icon";
 import { usePlatforms } from "./platforms-provider";
 
@@ -44,7 +45,7 @@ export function PlatformPicker({
             }
             className={`flex items-center gap-2 border px-3 py-2 text-base transition-colors motion-reduce:transition-none ${
               selected
-                ? "border-accent-strong bg-accent-strong text-white"
+                ? selectedControl
                 : "border-line text-ink hover:border-accent"
             }`}
           >

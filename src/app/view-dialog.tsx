@@ -9,7 +9,13 @@ import {
   Minus,
 } from "lucide-react";
 import { Button } from "@/components/button";
-import { Field, FieldGroup, Select } from "@/components/field";
+import {
+  controlAction,
+  controlHeight,
+  Field,
+  FieldGroup,
+  Select,
+} from "@/components/field";
 import { FormFooter } from "@/components/form";
 import { HeartGlyph } from "@/components/heart";
 import { Modal, useModal } from "@/components/modal";
@@ -169,7 +175,7 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
                 aria-label="Sort by"
                 value={sort}
                 onChange={(event) => setSort(event.target.value as Sort)}
-                className="h-[50px] min-w-0 flex-1"
+                className={`${controlHeight} min-w-0 flex-1`}
               >
                 {SORTS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -184,7 +190,7 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
                 aria-label={
                   direction === "asc" ? "Sort descending" : "Sort ascending"
                 }
-                className="flex size-[50px] shrink-0 items-center justify-center border border-line text-muted hover:border-accent hover:text-ink"
+                className={`${controlAction} border border-line text-muted hover:border-accent hover:text-ink`}
               >
                 {direction === "asc" ? (
                   <ArrowUp size={18} strokeWidth={2.25} aria-hidden="true" />

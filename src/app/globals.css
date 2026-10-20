@@ -36,6 +36,9 @@
   --color-accent: #7fb4e8;
   --color-accent-strong: #225a9b;
 
+  /* The unfilled progress track, on tiles and in the form. */
+  --color-track: rgb(255 255 255 / 0.15);
+
   /*
     Semantic colour, the deliberate exception to the single-accent rule. Each
     one fills the badge circle behind a white glyph, measured white-on-fill:
@@ -200,7 +203,7 @@ body::after {
   background: linear-gradient(
     to right,
     var(--color-accent) var(--progress, 0%),
-    rgb(255 255 255 / 0.15) var(--progress, 0%)
+    var(--color-track) var(--progress, 0%)
   );
 }
 
@@ -217,7 +220,7 @@ body::after {
 
 .progress-range::-moz-range-track {
   height: 6px;
-  background: rgb(255 255 255 / 0.15);
+  background: var(--color-track);
 }
 
 .progress-range::-moz-range-progress {

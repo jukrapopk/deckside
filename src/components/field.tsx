@@ -4,6 +4,17 @@ import type { ComponentProps, ReactNode } from "react";
 export const inputClass =
   "w-full border border-line bg-surface px-3 py-3 text-base text-ink placeholder:text-muted focus:border-accent";
 
+/** The height shared by a field row's input and its square actions. */
+export const controlHeight = "h-[50px]";
+
+/** A square action that sits on a field row, beside the input. */
+export const controlAction =
+  "flex size-[50px] shrink-0 items-center justify-center";
+
+/** The filled state of a selectable field control. */
+export const selectedControl =
+  "border-accent-strong bg-accent-strong text-white";
+
 /** The app's select: field chrome plus a chevron inset from the right edge. */
 export function Select({
   className = "",

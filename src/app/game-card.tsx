@@ -10,6 +10,7 @@ import { StarRating } from "@/components/star-rating";
 import { StatusBadge } from "@/components/status-badge";
 import type { GameWithPlatforms } from "@/db/queries";
 import { GRID_TILE } from "@/lib/grid";
+import { PROGRESS_MAX, PROGRESS_MIN } from "@/lib/limits";
 import { indexPlatforms, platformsOf } from "@/lib/platforms";
 
 type GameCardProps = {
@@ -62,14 +63,14 @@ export function GameCard({ game, eager = false }: GameCardProps) {
           colour, under the labels so it cannot move the title block. Zero
           means untracked, so the tile stays clean until there is something
           to show. */}
-      {progress > 0 && (
+      {progress > PROGRESS_MIN && (
         <div
           role="progressbar"
           aria-label={`${title} progress`}
-          aria-valuemin={0}
-          aria-valuemax={100}
+          aria-valuemin={PROGRESS_MIN}
+          aria-valuemax={PROGRESS_MAX}
           aria-valuenow={progress}
-          className="absolute inset-x-0 bottom-0 h-1.5 bg-white/15"
+          className="absolute inset-x-0 bottom-0 h-1.5 bg-track"
         >
           <div className="h-full bg-accent" style={{ width: `${progress}%` }} />
         </div>

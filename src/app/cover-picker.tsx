@@ -7,6 +7,7 @@ import { findCovers, type CoverOption } from "./artwork-actions";
 import { Button } from "@/components/button";
 import { CoverArt } from "@/components/cover-art";
 import { inputClass } from "@/components/field";
+import { STEAMGRIDDB_QUERY_MIN_LENGTH } from "@/lib/limits";
 
 type Result =
   | { status: "idle" }
@@ -19,6 +20,9 @@ type Result =
  * selection at full size.
  */
 const VISIBLE_OPTIONS = 8;
+
+/** The ratio and frame shared by the preview and each option. */
+const COVER_FRAME = "relative aspect-2/3 overflow-hidden border";
 
 /**
  * Cover art picker. Writes the chosen URL into the game form's hidden field,
@@ -38,15 +42,16 @@ export function CoverPicker({
   // does not ask for the same words twice.
   const [typed, setTyped] = useState<string | null>(null);
   const query = typed ?? title;
+  const searchTerm = query.trim();
+  const canSearch = searchTerm.length >= STEAMGRIDDB_QUERY_MIN_LENGTH;
   const [result, setResult] = useState<Result>({ status: "idle" });
   const [searching, startSearch] = useTransition();
 
   function search() {
-    const term = query.trim();
-    if (term.length < 2) return;
+    if (!canSearch) return;
 
     startSearch(async () => {
-      const response = await findCovers(term);
+      const response = await findCovers(searchTerm);
       setResult(
         response.ok
           ? { status: "found", game: response.game, options: response.options }
@@ -55,8 +60,7 @@ export function CoverPicker({
     });
   }
 
-  const frame =
-    "relative aspect-2/3 w-20 shrink-0 overflow-hidden border border-line";
+  const frame = `${COVER_FRAME} w-20 shrink-0 border-line`;
   const preview = (
     <CoverArt
       src={value || null}
@@ -115,7 +119,7 @@ export function CoverPicker({
               size="sm"
               className="shrink-0"
               onClick={search}
-              disabled={searching || query.trim().length < 2}
+              disabled={searching || !canSearch}
             >
               {searching ? "Searching" : "Search"}
             </Button>
@@ -139,7 +143,7 @@ export function CoverPicker({
                     onClick={() => onChange(option.url)}
                     aria-label={`Cover art option ${index + 1}`}
                     aria-pressed={selected}
-                    className={`relative block aspect-2/3 w-full overflow-hidden border transition-colors motion-reduce:transition-none ${
+                    className={`${COVER_FRAME} block w-full transition-colors motion-reduce:transition-none ${
                       selected
                         ? "border-accent"
                         : "border-line hover:border-accent"

@@ -56,9 +56,9 @@ scripts/seed.ts   sample data
 
 `src/components/` holds the primitives that dialogs and forms are built from, so an
 affordance is defined once and reused: `Modal` and its `useModal` hook, `IconButton`,
-`Field`/`FieldGroup`, `StarRating`, `StarPicker`, `StatusBadge`, `CoverArt`, and
-`SubmitButton`. Adding and editing a game are two configurations of the same dialog
-rather than two separate forms.
+`Field`/`FieldGroup`, `DialogForm`, `StarRating`, `StarPicker`, `StatusBadge`,
+`CoverArt`, and `SubmitButton`. Adding and editing a game are two configurations of
+the same dialog rather than two separate forms.
 
 - `src/db/index.ts` opens a single `better-sqlite3` connection lazily, in WAL mode.
   It is lazy so that `next build` does not create the database as a side effect.

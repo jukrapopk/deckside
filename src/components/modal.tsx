@@ -1,7 +1,13 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { IconButton } from "./icon-button";
 
 /** Open/close state for a `<Modal>`. */
@@ -21,7 +27,7 @@ type ModalProps = {
   title: string;
   /** Short line under the title. Keep it to one sentence. */
   description?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 /**

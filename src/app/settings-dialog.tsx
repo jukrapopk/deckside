@@ -9,21 +9,27 @@ import {
   Settings as SettingsIcon,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState, useTransition } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+  type ReactNode,
+} from "react";
 import { checkSteamGridDbKey, saveSteamGridDbKey } from "@/app/actions";
-import { AddPlatformDialog, EditPlatformDialog } from "./platform-dialog";
-import { usePlatforms } from "./platforms-provider";
 import { Button } from "@/components/button";
-import { inputClass } from "@/components/field";
+import { controlAction, inputClass } from "@/components/field";
 import { FormError, FormFooter } from "@/components/form";
 import { Modal, useModal } from "@/components/modal";
 import { PlatformIcon } from "@/components/platform-icon";
+import { AddPlatformDialog, EditPlatformDialog } from "./platform-dialog";
+import { usePlatforms } from "./platforms-provider";
 import { TopBarAction } from "./top-bar-action";
 
 /**
  * Settings live in the top bar because they belong to the library, not to a
- * game. The key is write-only here: it goes in, and the browser never gets it
- * back — the form shows only whether one is saved.
+ * game. The saved key never leaves the server: the form only ever learns
+ * whether one exists.
  */
 export function SettingsDialog({ hasKey }: { hasKey: boolean }) {
   const modal = useModal();
@@ -81,6 +87,48 @@ function PlatformSettings() {
 
 const MASKED_KEY = "***************";
 
+type CheckResult = { ok: boolean; message: string };
+
+function Spinner() {
+  return (
+    <LoaderCircle
+      size={18}
+      strokeWidth={2.25}
+      aria-hidden="true"
+      className="animate-spin motion-reduce:animate-none"
+    />
+  );
+}
+
+function KeyActionButton({
+  label,
+  title = label,
+  onClick,
+  disabled,
+  className,
+  children,
+}: {
+  label: string;
+  title?: string;
+  onClick: () => void;
+  disabled?: boolean;
+  className: string;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={title}
+      onClick={onClick}
+      disabled={disabled}
+      className={`${controlAction} ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
 function KeySettings({
   hasKey,
   onDone,
@@ -91,16 +139,13 @@ function KeySettings({
   const [editing, setEditing] = useState(false);
   const [key, setKey] = useState("");
   const [saveError, setSaveError] = useState<string>();
-  const [checkResult, setCheckResult] = useState<{
-    ok: boolean;
-    message: string;
-  }>();
+  const [checkResult, setCheckResult] = useState<CheckResult>();
   const [checking, startCheck] = useTransition();
   const [saving, startSave] = useTransition();
   const keyInput = useRef<HTMLInputElement>(null);
 
   const editable = !hasKey || editing;
-  const canCheck = hasKey && !editing ? true : key.trim().length > 0;
+  const canCheck = (hasKey && !editing) || key.trim().length > 0;
   const checkFailed = checkResult?.ok === false;
   const checkPassed = checkResult?.ok === true;
   const checkLabel = checking
@@ -116,22 +161,24 @@ function KeySettings({
     if (editing) keyInput.current?.focus();
   }, [editing]);
 
+  function clearFeedback() {
+    setSaveError(undefined);
+    setCheckResult(undefined);
+  }
+
   function startEditing() {
     setEditing(true);
     setKey("");
-    setSaveError(undefined);
-    setCheckResult(undefined);
+    clearFeedback();
   }
 
   function changeKey(value: string) {
     setKey(value);
-    setSaveError(undefined);
-    setCheckResult(undefined);
+    clearFeedback();
   }
 
   function checkKey() {
-    setSaveError(undefined);
-    setCheckResult(undefined);
+    clearFeedback();
 
     startCheck(async () => {
       const result = await checkSteamGridDbKey(editable ? key : undefined);
@@ -148,8 +195,7 @@ function KeySettings({
   }
 
   function saveKey() {
-    setSaveError(undefined);
-    setCheckResult(undefined);
+    clearFeedback();
 
     startSave(async () => {
       const result = await saveSteamGridDbKey(key);
@@ -159,10 +205,10 @@ function KeySettings({
         return;
       }
 
-      // Stay open: the saved key is now masked and the pencil returns.
+      // Stay open; the refreshed `hasKey` decides whether the field is masked.
       setEditing(false);
       setKey("");
-      setCheckResult(undefined);
+      clearFeedback();
     });
   }
 
@@ -199,54 +245,39 @@ function KeySettings({
           />
 
           {editable ? (
-            <button
-              type="button"
-              aria-label="Save API key"
-              title="Save API key"
+            <KeyActionButton
+              label="Save API key"
               onClick={saveKey}
               disabled={saving || checking}
-              className="flex size-[50px] shrink-0 items-center justify-center bg-accent-strong text-white transition-[filter] hover:brightness-110 disabled:opacity-60 motion-reduce:transition-none"
+              className="bg-accent-strong text-white transition-[filter] hover:brightness-110 disabled:opacity-60 motion-reduce:transition-none"
             >
               {saving ? (
-                <LoaderCircle
-                  size={18}
-                  strokeWidth={2.25}
-                  aria-hidden="true"
-                  className="animate-spin motion-reduce:animate-none"
-                />
+                <Spinner />
               ) : (
                 <Save size={18} strokeWidth={2.25} aria-hidden="true" />
               )}
-            </button>
+            </KeyActionButton>
           ) : (
-            <button
-              type="button"
-              aria-label="Edit API key"
-              title="Edit API key"
+            <KeyActionButton
+              label="Edit API key"
               onClick={startEditing}
-              className="flex size-[50px] shrink-0 items-center justify-center border border-line text-muted transition-colors hover:border-accent hover:text-ink motion-reduce:transition-none"
+              className="border border-line text-muted transition-colors hover:border-accent hover:text-ink motion-reduce:transition-none"
             >
               <Pencil size={18} strokeWidth={2.25} aria-hidden="true" />
-            </button>
+            </KeyActionButton>
           )}
 
-          <button
-            type="button"
-            aria-label={checkLabel}
+          <KeyActionButton
+            label={checkLabel}
             title={checkTitle}
             onClick={checkKey}
             disabled={checking || saving || !canCheck}
-            className={`flex size-[50px] shrink-0 items-center justify-center text-white transition-[background-color,filter] hover:brightness-110 disabled:opacity-60 motion-reduce:transition-none ${
+            className={`text-white transition-[background-color,filter] hover:brightness-110 disabled:opacity-60 motion-reduce:transition-none ${
               checkFailed ? "bg-danger-strong" : "bg-status-completed"
             }`}
           >
             {checking ? (
-              <LoaderCircle
-                size={18}
-                strokeWidth={2.25}
-                aria-hidden="true"
-                className="animate-spin motion-reduce:animate-none"
-              />
+              <Spinner />
             ) : checkFailed ? (
               <X size={18} strokeWidth={2.5} aria-hidden="true" />
             ) : checkPassed ? (
@@ -254,7 +285,7 @@ function KeySettings({
             ) : (
               <RefreshCw size={18} strokeWidth={2.25} aria-hidden="true" />
             )}
-          </button>
+          </KeyActionButton>
         </div>
 
         <span className="sr-only" role="status">

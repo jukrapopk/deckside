@@ -4,16 +4,30 @@ import { refresh } from "next/cache";
 import { and, eq, ne, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { gamePlatforms, games, platforms } from "@/db/schema";
+import {
+  API_KEY_MAX_LENGTH,
+  COVER_URL_MAX_LENGTH,
+  PLATFORM_NAME_MAX_LENGTH,
+  PROGRESS_MAX,
+  PROGRESS_MIN,
+  TITLE_MAX_LENGTH,
+} from "@/lib/limits";
 import { isPlatformIcon, type PlatformIconKey } from "@/lib/platforms";
+import { parseRating } from "@/lib/rating";
 import {
   clearSetting,
   setSetting,
   STEAMGRIDDB_KEY,
   steamGridDbKey,
 } from "@/lib/settings";
-import { searchGames, SteamGridDbError } from "@/lib/steamgriddb";
+import { searchGames } from "@/lib/steamgriddb";
+import {
+  classifySteamGridDbError,
+  STEAMGRIDDB_KEY_REJECTED,
+  STEAMGRIDDB_RATE_LIMITED,
+  STEAMGRIDDB_UNREACHABLE,
+} from "@/lib/steamgriddb-errors";
 import { isStatus, type Status } from "@/lib/statuses";
-import { parseRating } from "@/lib/rating";
 
 export type FormState = { ok?: boolean; error?: string };
 
@@ -46,12 +60,19 @@ function readFields(formData: FormData): Fields {
   ];
 
   if (!title) return { ok: false, error: "Title is required." };
-  if (title.length > 200) {
-    return { ok: false, error: "Title must be 200 characters or fewer." };
+  if (title.length > TITLE_MAX_LENGTH) {
+    return {
+      ok: false,
+      error: `Title must be ${TITLE_MAX_LENGTH} characters or fewer.`,
+    };
   }
   if (!isStatus(status)) return { ok: false, error: "Unknown status." };
   // The picker only writes https links, but the field is still form input.
-  if (coverUrl && (!coverUrl.startsWith("https://") || coverUrl.length > 500)) {
+  if (
+    coverUrl &&
+    (!coverUrl.startsWith("https://") ||
+      coverUrl.length > COVER_URL_MAX_LENGTH)
+  ) {
     return { ok: false, error: "Cover art must be an https link." };
   }
 
@@ -61,11 +82,15 @@ function readFields(formData: FormData): Fields {
   const favourite = formData.get("favourite") === "1";
 
   const progressRaw = formData.get("progress");
-  const progress = progressRaw === null ? 0 : Number(progressRaw);
-  if (!Number.isInteger(progress) || progress < 0 || progress > 100) {
+  const progress = progressRaw === null ? PROGRESS_MIN : Number(progressRaw);
+  if (
+    !Number.isInteger(progress) ||
+    progress < PROGRESS_MIN ||
+    progress > PROGRESS_MAX
+  ) {
     return {
       ok: false,
-      error: "Progress must be a whole number from 0 to 100.",
+      error: `Progress must be a whole number from ${PROGRESS_MIN} to ${PROGRESS_MAX}.`,
     };
   }
 
@@ -169,8 +194,11 @@ function readPlatform(formData: FormData): PlatformFields {
   const icon = String(formData.get("icon") ?? "");
 
   if (!name) return { ok: false, error: "Name is required." };
-  if (name.length > 40) {
-    return { ok: false, error: "Keep the name to 40 characters or fewer." };
+  if (name.length > PLATFORM_NAME_MAX_LENGTH) {
+    return {
+      ok: false,
+      error: `Keep the name to ${PLATFORM_NAME_MAX_LENGTH} characters or fewer.`,
+    };
   }
   if (!isPlatformIcon(icon)) return { ok: false, error: "Choose an icon." };
 
@@ -245,7 +273,9 @@ export async function deletePlatform(id: number): Promise<void> {
 export async function saveSteamGridDbKey(key: string): Promise<FormState> {
   const candidate = key.trim();
 
-  if (candidate.length > 200) return { error: "That key is too long." };
+  if (candidate.length > API_KEY_MAX_LENGTH) {
+    return { error: "That key is too long." };
+  }
 
   if (candidate) {
     setSetting(STEAMGRIDDB_KEY, candidate);
@@ -270,25 +300,25 @@ export async function checkSteamGridDbKey(key?: string): Promise<FormState> {
   return validateSteamGridDbKey(candidate);
 }
 
+/** Any search proves auth; this title simply exists in the catalogue. */
+const KEY_CHECK_TERM = "portal";
+
 async function validateSteamGridDbKey(key: string): Promise<FormState> {
-  if (key.length > 200) return { error: "That key is too long." };
+  if (key.length > API_KEY_MAX_LENGTH) {
+    return { error: "That key is too long." };
+  }
 
   try {
-    // Any search proves auth; the result itself does not matter.
-    await searchGames(key, "portal");
+    await searchGames(key, KEY_CHECK_TERM);
     return { ok: true };
   } catch (error) {
-    if (error instanceof SteamGridDbError) {
-      if (error.status === 401 || error.status === 403) {
-        return { error: "SteamGridDB rejected that key." };
-      }
-      if (error.status === 429) {
-        return { error: "SteamGridDB is rate limiting. Try again in a minute." };
-      }
+    switch (classifySteamGridDbError(error)) {
+      case "auth":
+        return { error: STEAMGRIDDB_KEY_REJECTED };
+      case "rate-limit":
+        return { error: STEAMGRIDDB_RATE_LIMITED };
+      default:
+        return { error: STEAMGRIDDB_UNREACHABLE };
     }
-
-    return {
-      error: "Could not reach SteamGridDB. Check the connection and retry.",
-    };
   }
 }

@@ -6,14 +6,23 @@ import { addGame, deleteGame, updateGame } from "@/app/actions";
 import { CoverPicker } from "@/app/cover-picker";
 import { PlatformPicker } from "@/app/platform-picker";
 import { Button } from "@/components/button";
-import { DeleteButton } from "@/components/delete-button";
-import { Field, FieldGroup, Select, TextField } from "@/components/field";
-import { FormError, FormFooter } from "@/components/form";
+import { DialogForm } from "@/components/dialog-form";
+import {
+  controlAction,
+  Field,
+  FieldGroup,
+  Select,
+  TextField,
+} from "@/components/field";
 import { HeartGlyph } from "@/components/heart";
 import { IconButton } from "@/components/icon-button";
 import { Modal, useModal } from "@/components/modal";
 import { StarPicker } from "@/components/star-picker";
-import { SubmitButton } from "@/components/submit-button";
+import {
+  PROGRESS_MAX,
+  PROGRESS_MIN,
+  TITLE_MAX_LENGTH,
+} from "@/lib/limits";
 import { STATUSES, STATUS_LABELS, type Status } from "@/lib/statuses";
 import { TopBarAction } from "./top-bar-action";
 
@@ -112,7 +121,7 @@ function GameForm(props: GameFormProps) {
   const [progressText, setProgressText] = useState(
     String(existing?.progress ?? 0),
   );
-  const progress = Math.min(100, Number(progressText) || 0);
+  const progress = Math.min(PROGRESS_MAX, Number(progressText) || 0);
   const [platformIds, setPlatformIds] = useState<number[]>(
     existing?.platformIds ?? [],
   );
@@ -134,14 +143,22 @@ function GameForm(props: GameFormProps) {
   }
 
   return (
-    <form action={submit} className="flex flex-col gap-5">
+    <DialogForm
+      action={submit}
+      error={error}
+      onClose={props.onDone}
+      onDelete={
+        props.mode === "edit" ? () => deleteGame(props.game.id) : undefined
+      }
+      submitLabel={props.mode === "edit" ? "Save" : "Add game"}
+    >
       <div className="flex items-end gap-2">
         <div className="min-w-0 flex-1">
           <TextField
             label={props.mode === "add" ? "Title *" : "Title"}
             name="title"
             required
-            maxLength={200}
+            maxLength={TITLE_MAX_LENGTH}
             autoComplete="off"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
@@ -160,7 +177,7 @@ function GameForm(props: GameFormProps) {
           aria-pressed={favourite}
           title={favourite ? "Remove from favourites" : "Add to favourites"}
           onClick={() => setFavourite((value) => !value)}
-          className={`flex size-[50px] shrink-0 items-center justify-center border transition-colors motion-reduce:transition-none ${
+          className={`${controlAction} border transition-colors motion-reduce:transition-none ${
             favourite
               ? "border-accent bg-accent-strong text-white"
               : "border-line bg-surface text-muted hover:border-accent hover:text-ink"
@@ -196,8 +213,8 @@ function GameForm(props: GameFormProps) {
           <input
             type="range"
             name="progress"
-            min={0}
-            max={100}
+            min={PROGRESS_MIN}
+            max={PROGRESS_MAX}
             step={1}
             value={progress}
             aria-label="Progress"
@@ -236,24 +253,6 @@ function GameForm(props: GameFormProps) {
       <FieldGroup legend="Rating">
         <StarPicker name="rating" value={rating} onChange={setRating} />
       </FieldGroup>
-
-      <FormError message={error} />
-
-      <FormFooter
-        left={
-          props.mode === "edit" ? (
-            <DeleteButton
-              onDelete={() => deleteGame(props.game.id)}
-              onDone={props.onDone}
-            />
-          ) : undefined
-        }
-      >
-        <Button variant="secondary" onClick={props.onDone}>
-          Cancel
-        </Button>
-        <SubmitButton label={props.mode === "edit" ? "Save" : "Add game"} />
-      </FormFooter>
-    </form>
+    </DialogForm>
   );
 }

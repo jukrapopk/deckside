@@ -1,12 +1,21 @@
 "use server";
 
+import {
+  STEAMGRIDDB_QUERY_MAX_LENGTH,
+  STEAMGRIDDB_QUERY_MIN_LENGTH,
+} from "@/lib/limits";
 import { steamGridDbKey } from "@/lib/settings";
 import {
   listGrids,
   searchGames,
-  SteamGridDbError,
   type SteamGridDbGrid,
 } from "@/lib/steamgriddb";
+import {
+  classifySteamGridDbError,
+  STEAMGRIDDB_KEY_REJECTED,
+  STEAMGRIDDB_RATE_LIMITED,
+  STEAMGRIDDB_UNREACHABLE,
+} from "@/lib/steamgriddb-errors";
 
 export type CoverOption = {
   id: number;
@@ -26,9 +35,9 @@ export type CoverSearchResult =
  * live-typed, so a slow connection cannot spend the rate limit on keystrokes.
  */
 export async function findCovers(query: string): Promise<CoverSearchResult> {
-  const term = query.trim().slice(0, 100);
+  const term = query.trim().slice(0, STEAMGRIDDB_QUERY_MAX_LENGTH);
 
-  if (term.length < 2) {
+  if (term.length < STEAMGRIDDB_QUERY_MIN_LENGTH) {
     return { ok: false, message: "Type at least two characters." };
   }
 
@@ -61,28 +70,19 @@ export async function findCovers(query: string): Promise<CoverSearchResult> {
       options: grids.slice(0, 12).map(toOption),
     };
   } catch (error) {
-    if (error instanceof SteamGridDbError) {
-      if (error.status === 401 || error.status === 403) {
+    switch (classifySteamGridDbError(error)) {
+      case "auth":
         return {
           ok: false,
-          message: "SteamGridDB rejected that key. Check it in Settings.",
+          message: `${STEAMGRIDDB_KEY_REJECTED} Check it in Settings.`,
         };
-      }
-      if (error.status === 429) {
-        return {
-          ok: false,
-          message: "SteamGridDB is rate limiting. Try again in a minute.",
-        };
-      }
-      if (error.status === 404) {
+      case "rate-limit":
+        return { ok: false, message: STEAMGRIDDB_RATE_LIMITED };
+      case "not-found":
         return { ok: false, message: `No art found for "${term}".` };
-      }
+      default:
+        return { ok: false, message: STEAMGRIDDB_UNREACHABLE };
     }
-
-    return {
-      ok: false,
-      message: "Could not reach SteamGridDB. Check the connection and retry.",
-    };
   }
 }
 
