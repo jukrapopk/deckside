@@ -1,5 +1,6 @@
 "use client";
 
+import { Heart } from "lucide-react";
 import { useMemo } from "react";
 import { EditGameDialog } from "@/app/game-dialog";
 import { usePlatforms } from "@/app/platforms-provider";
@@ -18,7 +19,7 @@ type GameCardProps = {
 };
 
 export function GameCard({ game, eager = false }: GameCardProps) {
-  const { title, status, rating, progress, coverUrl } = game;
+  const { title, status, rating, favourite, progress, coverUrl } = game;
   const platforms = usePlatforms();
 
   const byId = useMemo(() => indexPlatforms(platforms), [platforms]);
@@ -36,6 +37,24 @@ export function GameCard({ game, eager = false }: GameCardProps) {
       className={`group relative overflow-hidden ${GRID_TILE} transition-transform duration-200 ease-out hover:z-10 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100`}
     >
       <CoverArt src={coverUrl} title={title} eager={eager} />
+
+      {/* A favourite is a state, not an action, so the heart sits opposite the
+          edit affordance and borrows its colour and shadow rather than a badge. */}
+      {favourite && (
+        <span
+          role="img"
+          aria-label="Favourite"
+          title="Favourite"
+          className="absolute left-0 top-0 flex size-10 items-center justify-center text-white/85 drop-shadow-[0_1px_3px_rgba(15,22,34,0.9)]"
+        >
+          <Heart
+            size={18}
+            strokeWidth={2.25}
+            fill="currentColor"
+            aria-hidden="true"
+          />
+        </span>
+      )}
 
       {/* Scrim so the labels stay legible over any photo. Tinted to the page
           ground rather than neutral black, so the card edge belongs to it. */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Plus } from "lucide-react";
+import { Heart, Pencil, Plus } from "lucide-react";
 import { useState, type CSSProperties } from "react";
 import { addGame, deleteGame, updateGame } from "@/app/actions";
 import { CoverPicker } from "@/app/cover-picker";
@@ -22,6 +22,7 @@ export type GameValues = {
   platformIds: number[];
   status: Status;
   rating: number | null;
+  favourite: boolean;
   progress: number;
   coverUrl: string | null;
 };
@@ -93,6 +94,7 @@ function GameForm(props: GameFormProps) {
 
   const [rating, setRating] = useState<number | null>(existing?.rating ?? null);
   const [title, setTitle] = useState(existing?.title ?? "");
+  const [favourite, setFavourite] = useState(existing?.favourite ?? false);
   // The field keeps what was typed (so it can be emptied) and the value is
   // clamped when it is read.
   const [progressText, setProgressText] = useState(
@@ -121,15 +123,45 @@ function GameForm(props: GameFormProps) {
 
   return (
     <form action={submit} className="flex flex-col gap-5">
-      <TextField
-        label={props.mode === "add" ? "Title *" : "Title"}
-        name="title"
-        required
-        maxLength={200}
-        autoComplete="off"
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
-      />
+      <div className="flex items-end gap-2">
+        <div className="min-w-0 flex-1">
+          <TextField
+            label={props.mode === "add" ? "Title *" : "Title"}
+            name="title"
+            required
+            maxLength={200}
+            autoComplete="off"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+          />
+        </div>
+
+        {/* The hidden value lets the toggle post with the rest of the form. */}
+        <input
+          type="hidden"
+          name="favourite"
+          value={favourite ? "1" : ""}
+        />
+        <button
+          type="button"
+          aria-label="Favourite"
+          aria-pressed={favourite}
+          title={favourite ? "Remove from favourites" : "Add to favourites"}
+          onClick={() => setFavourite((value) => !value)}
+          className={`flex size-[50px] shrink-0 items-center justify-center border transition-colors motion-reduce:transition-none ${
+            favourite
+              ? "border-accent bg-accent-strong text-white"
+              : "border-line bg-surface text-muted hover:border-accent hover:text-ink"
+          }`}
+        >
+          <Heart
+            size={20}
+            strokeWidth={2.25}
+            fill={favourite ? "currentColor" : "none"}
+            aria-hidden="true"
+          />
+        </button>
+      </div>
 
       <FieldGroup legend="Cover">
         <CoverPicker title={title} value={coverUrl} onChange={setCoverUrl} />

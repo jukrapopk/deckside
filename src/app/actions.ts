@@ -18,6 +18,7 @@ type Fields =
         title: string;
         status: Status;
         rating: number | null;
+        favourite: boolean;
         progress: number;
         coverUrl: string | null;
       };
@@ -51,6 +52,8 @@ function readFields(formData: FormData): Fields {
   const parsed = parseRating(String(formData.get("rating") ?? ""));
   if (parsed.error) return { ok: false, error: parsed.error };
 
+  const favourite = formData.get("favourite") === "1";
+
   const progressRaw = formData.get("progress");
   const progress = progressRaw === null ? 0 : Number(progressRaw);
   if (!Number.isInteger(progress) || progress < 0 || progress > 100) {
@@ -66,6 +69,7 @@ function readFields(formData: FormData): Fields {
       title,
       status,
       rating: parsed.rating,
+      favourite,
       progress,
       coverUrl: coverUrl || null,
     },

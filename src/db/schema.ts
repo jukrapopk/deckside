@@ -17,6 +17,10 @@ export const games = sqliteTable("games", {
     .notNull()
     .default("backlog"),
   rating: integer("rating"),
+  // A single flag rather than a rating: favourites are a shortlist, not a score.
+  favourite: integer("favourite", { mode: "boolean" })
+    .notNull()
+    .default(false),
   // Whole percent, 0–100. Zero means "not tracked" on a tile, not an empty bar.
   progress: integer("progress").notNull().default(0),
   coverUrl: text("cover_url"),
