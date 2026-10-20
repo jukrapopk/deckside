@@ -98,7 +98,7 @@ export function TopBar({ q, counts, hasSteamGridDbKey }: TopBarProps) {
               enterKeyHint="search"
               defaultValue={q}
               onChange={(event) => queueSearch(event.target.value)}
-              placeholder="Search title or platform"
+              placeholder="Search"
               className="h-16 w-full min-w-0 border-0 bg-transparent pl-14 pr-12 text-lg text-ink outline-none placeholder:text-muted"
             />
             {q && (

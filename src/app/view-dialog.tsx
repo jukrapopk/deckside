@@ -4,9 +4,9 @@ import {
   ArrowDown,
   ArrowUp,
   Check,
+  Eye,
   LayoutGrid,
   Minus,
-  SlidersHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/button";
 import { Field, FieldGroup, Select } from "@/components/field";
@@ -108,7 +108,7 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
         variant={changed ? "accent" : "ghost"}
         onClick={modal.openModal}
         icon={
-          <SlidersHorizontal size={22} strokeWidth={2.25} aria-hidden="true" />
+          <Eye size={22} strokeWidth={2.25} aria-hidden="true" />
         }
       />
 
