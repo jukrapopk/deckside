@@ -49,17 +49,30 @@ export function TextField({
 /** For control groups that are not a single labelled input (radios, custom). */
 export function FieldGroup({
   legend,
+  action,
   children,
 }: {
   legend: string;
+  /** Optional action aligned with the legend, such as Remove. */
+  action?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <fieldset className="flex flex-col gap-2">
-      {/* A rendered legend is laid out in the fieldset's border area rather
-          than as a flex item, so the gap never opens between it and the
-          controls. The margin supplies the same 8px the other fields get. */}
-      <legend className="mb-2 text-sm font-medium text-muted">{legend}</legend>
+      {action ? (
+        <>
+          <legend className="sr-only">{legend}</legend>
+          <div className="flex items-center justify-between gap-3 text-sm font-medium text-muted">
+            <span>{legend}</span>
+            {action}
+          </div>
+        </>
+      ) : (
+        /* A rendered legend is laid out in the fieldset's border area rather
+            than as a flex item, so the gap never opens between it and the
+            controls. The margin supplies the same 8px the other fields get. */
+        <legend className="mb-2 text-sm font-medium text-muted">{legend}</legend>
+      )}
       {children}
     </fieldset>
   );

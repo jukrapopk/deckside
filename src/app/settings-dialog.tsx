@@ -6,10 +6,11 @@ import { clearSteamGridDbKey, saveSteamGridDbKey } from "@/app/actions";
 import { AddPlatformDialog, EditPlatformDialog } from "./platform-dialog";
 import { usePlatforms } from "./platforms-provider";
 import { Button } from "@/components/button";
-import { TextField } from "@/components/field";
+import { inputClass } from "@/components/field";
 import { FormError, FormFooter } from "@/components/form";
 import { Modal, useModal } from "@/components/modal";
 import { PlatformIcon } from "@/components/platform-icon";
+import { RemoveButton } from "@/components/remove-button";
 import { SubmitButton } from "@/components/submit-button";
 import { TopBarAction } from "./top-bar-action";
 
@@ -95,8 +96,27 @@ function SettingsForm({
       className="flex flex-col gap-5 border-t border-line pt-6"
     >
       <div className="flex flex-col gap-2">
-        <TextField
-          label="SteamGridDB API key"
+        <div className="flex items-center justify-between gap-3">
+          <label
+            htmlFor="steamgriddb-key"
+            className="text-sm font-medium text-muted"
+          >
+            SteamGridDB API key
+          </label>
+          {hasKey && (
+            <RemoveButton
+              disabled={removing}
+              onClick={() =>
+                startRemove(() => clearSteamGridDbKey().then(onDone))
+              }
+            >
+              {removing ? "Removing" : "Remove key"}
+            </RemoveButton>
+          )}
+        </div>
+
+        <input
+          id="steamgriddb-key"
           name="apiKey"
           type="password"
           autoComplete="off"
@@ -104,22 +124,8 @@ function SettingsForm({
           disabled={hasKey}
           value={hasKey ? "***************" : undefined}
           placeholder="Paste your key"
-          className="disabled:text-muted"
+          className={`${inputClass} disabled:text-muted`}
         />
-
-        {hasKey && (
-          <Button
-            variant="link"
-            size="none"
-            className="self-start"
-            disabled={removing}
-            onClick={() =>
-              startRemove(() => clearSteamGridDbKey().then(onDone))
-            }
-          >
-            {removing ? "Removing" : "Remove key"}
-          </Button>
-        )}
       </div>
 
       <FormError message={error} />

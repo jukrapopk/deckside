@@ -67,7 +67,7 @@ export function CoverPicker({
           />
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex gap-2">
             <label htmlFor="cover-search" className="sr-only">
               Search SteamGridDB
@@ -97,16 +97,6 @@ export function CoverPicker({
               {searching ? "Searching" : "Search"}
             </Button>
           </div>
-
-          <Button
-            variant="link"
-            size="none"
-            className="self-start"
-            onClick={() => onChange("")}
-            disabled={!value}
-          >
-            Remove cover
-          </Button>
         </div>
       </div>
 

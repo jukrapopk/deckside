@@ -12,6 +12,7 @@ import { FormError, FormFooter } from "@/components/form";
 import { HeartGlyph } from "@/components/heart";
 import { IconButton } from "@/components/icon-button";
 import { Modal, useModal } from "@/components/modal";
+import { RemoveButton } from "@/components/remove-button";
 import { StarPicker } from "@/components/star-picker";
 import { SubmitButton } from "@/components/submit-button";
 import { STATUSES, STATUS_LABELS, type Status } from "@/lib/statuses";
@@ -170,7 +171,16 @@ function GameForm(props: GameFormProps) {
         </button>
       </div>
 
-      <FieldGroup legend="Cover">
+      <FieldGroup
+        legend="Cover"
+        action={
+          coverUrl ? (
+            <RemoveButton onClick={() => setCoverUrl("")}>
+              Remove cover
+            </RemoveButton>
+          ) : undefined
+        }
+      >
         <CoverPicker title={title} value={coverUrl} onChange={setCoverUrl} />
       </FieldGroup>
 
