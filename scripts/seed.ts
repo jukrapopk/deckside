@@ -13,12 +13,42 @@ const platformSeed = [
 ] as const;
 
 const seed = [
-  { title: "Hollow Knight", platform: "PC", status: "completed", rating: 5 },
-  { title: "Celeste", platform: "Switch", status: "completed", rating: 5 },
-  { title: "Hades", platform: "PC", status: "playing", rating: 4 },
-  { title: "Disco Elysium", platform: "PC", status: "up-next", rating: null },
-  { title: "Outer Wilds", platform: "PC", status: "backlog", rating: null },
-  { title: "Bloodborne", platform: "PS4", status: "dropped", rating: 3 },
+  {
+    title: "Hollow Knight",
+    platform: "PC",
+    status: "completed",
+    rating: 5,
+    progress: 100,
+  },
+  {
+    title: "Celeste",
+    platform: "Switch",
+    status: "completed",
+    rating: 5,
+    progress: 100,
+  },
+  { title: "Hades", platform: "PC", status: "playing", rating: 4, progress: 40 },
+  {
+    title: "Disco Elysium",
+    platform: "PC",
+    status: "up-next",
+    rating: null,
+    progress: 0,
+  },
+  {
+    title: "Outer Wilds",
+    platform: "PC",
+    status: "backlog",
+    rating: null,
+    progress: 0,
+  },
+  {
+    title: "Bloodborne",
+    platform: "PS4",
+    status: "dropped",
+    rating: 3,
+    progress: 60,
+  },
 ] as const;
 
 const db = getDb();

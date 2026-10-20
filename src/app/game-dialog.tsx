@@ -18,6 +18,7 @@ export type GameValues = {
   platformIds: number[];
   status: Status;
   rating: number | null;
+  progress: number;
   coverUrl: string | null;
 };
 
@@ -91,6 +92,7 @@ function GameForm(props: GameFormProps) {
 
   const [rating, setRating] = useState<number | null>(existing?.rating ?? null);
   const [title, setTitle] = useState(existing?.title ?? "");
+  const [progress, setProgress] = useState(existing?.progress ?? 0);
   const [platformIds, setPlatformIds] = useState<number[]>(
     existing?.platformIds ?? [],
   );
@@ -151,6 +153,25 @@ function GameForm(props: GameFormProps) {
           ))}
         </select>
       </Field>
+
+      <FieldGroup legend="Progress">
+        <div className="flex items-center gap-4">
+          <input
+            type="range"
+            name="progress"
+            min={0}
+            max={100}
+            step={1}
+            value={progress}
+            aria-label="Progress"
+            onChange={(event) => setProgress(Number(event.target.value))}
+            className="w-full accent-accent"
+          />
+          <span className="w-12 shrink-0 text-right text-base tabular-nums text-muted">
+            {progress}%
+          </span>
+        </div>
+      </FieldGroup>
 
       <FieldGroup legend="Rating">
         <StarPicker name="rating" value={rating} onChange={setRating} />

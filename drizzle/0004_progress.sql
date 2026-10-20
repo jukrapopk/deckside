@@ -1,0 +1,1 @@
+ALTER TABLE `games` ADD `progress` integer DEFAULT 0 NOT NULL;

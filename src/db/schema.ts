@@ -17,6 +17,8 @@ export const games = sqliteTable("games", {
     .notNull()
     .default("backlog"),
   rating: integer("rating"),
+  // Whole percent, 0–100. Zero means "not tracked" on a tile, not an empty bar.
+  progress: integer("progress").notNull().default(0),
   coverUrl: text("cover_url"),
   notes: text("notes"),
   createdAt: integer("created_at", { mode: "timestamp" })

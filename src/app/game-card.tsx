@@ -18,7 +18,7 @@ type GameCardProps = {
 };
 
 export function GameCard({ game, eager = false }: GameCardProps) {
-  const { title, status, rating, coverUrl, platformIds } = game;
+  const { title, status, rating, progress, coverUrl, platformIds } = game;
   const platforms = usePlatforms();
 
   const byId = useMemo(
@@ -49,6 +49,23 @@ export function GameCard({ game, eager = false }: GameCardProps) {
         aria-hidden="true"
         className="absolute inset-x-0 bottom-0 h-3/5 bg-linear-to-t from-bg/95 via-bg/70 to-transparent"
       />
+
+      {/* A bar on the bottom edge, above the scrim so its fill keeps its
+          colour, under the labels so it cannot move the title block. Zero
+          means untracked, so the tile stays clean until there is something
+          to show. */}
+      {progress > 0 && (
+        <div
+          role="progressbar"
+          aria-label={`${title} progress`}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progress}
+          className="absolute inset-x-0 bottom-0 h-1.5 bg-white/15"
+        >
+          <div className="h-full bg-accent" style={{ width: `${progress}%` }} />
+        </div>
+      )}
 
       <EditGameDialog
         game={game}

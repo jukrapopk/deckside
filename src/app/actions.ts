@@ -18,6 +18,7 @@ type Fields =
         title: string;
         status: Status;
         rating: number | null;
+        progress: number;
         coverUrl: string | null;
       };
       platformIds: number[];
@@ -50,12 +51,22 @@ function readFields(formData: FormData): Fields {
   const parsed = parseRating(String(formData.get("rating") ?? ""));
   if (parsed.error) return { ok: false, error: parsed.error };
 
+  const progressRaw = formData.get("progress");
+  const progress = progressRaw === null ? 0 : Number(progressRaw);
+  if (!Number.isInteger(progress) || progress < 0 || progress > 100) {
+    return {
+      ok: false,
+      error: "Progress must be a whole number from 0 to 100.",
+    };
+  }
+
   return {
     ok: true,
     values: {
       title,
       status,
       rating: parsed.rating,
+      progress,
       coverUrl: coverUrl || null,
     },
     platformIds,
