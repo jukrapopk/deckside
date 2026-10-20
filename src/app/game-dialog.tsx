@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useState, useTransition, type CSSProperties } from "react";
 import { addGame, deleteGame, updateGame } from "@/app/actions";
 import { CoverPicker } from "@/app/cover-picker";
 import { PlatformPicker } from "@/app/platform-picker";
@@ -92,7 +92,12 @@ function GameForm(props: GameFormProps) {
 
   const [rating, setRating] = useState<number | null>(existing?.rating ?? null);
   const [title, setTitle] = useState(existing?.title ?? "");
-  const [progress, setProgress] = useState(existing?.progress ?? 0);
+  // The field keeps what was typed (so it can be emptied) and the value is
+  // clamped when it is read.
+  const [progressText, setProgressText] = useState(
+    String(existing?.progress ?? 0),
+  );
+  const progress = Math.min(100, Number(progressText) || 0);
   const [platformIds, setPlatformIds] = useState<number[]>(
     existing?.platformIds ?? [],
   );
@@ -151,7 +156,7 @@ function GameForm(props: GameFormProps) {
       </Field>
 
       <FieldGroup legend="Progress">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <input
             type="range"
             name="progress"
@@ -160,12 +165,35 @@ function GameForm(props: GameFormProps) {
             step={1}
             value={progress}
             aria-label="Progress"
-            onChange={(event) => setProgress(Number(event.target.value))}
-            className="w-full accent-accent"
+            onChange={(event) => setProgressText(event.target.value)}
+            style={{ "--progress": `${progress}%` } as CSSProperties}
+            className="progress-range min-w-0 flex-1"
           />
-          <span className="w-12 shrink-0 text-right text-base tabular-nums text-muted">
-            {progress}%
-          </span>
+
+          <div className="relative w-20 shrink-0">
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={3}
+              value={progressText}
+              aria-label="Progress percent"
+              onChange={(event) =>
+                setProgressText(
+                  event.target.value.replace(/\D/g, "").slice(0, 3),
+                )
+              }
+              onFocus={(event) => event.target.select()}
+              onBlur={() => setProgressText(String(progress))}
+              className="h-11 w-full border border-line bg-surface pl-3 pr-7 text-right text-base tabular-nums text-ink focus:border-accent"
+            />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-base text-muted"
+            >
+              %
+            </span>
+          </div>
         </div>
       </FieldGroup>
 
