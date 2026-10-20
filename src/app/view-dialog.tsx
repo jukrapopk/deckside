@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Filter } from "lucide-react";
+import { Check, SlidersHorizontal } from "lucide-react";
 import { Field, FieldGroup, inputClass } from "@/components/field";
 import { IconButton } from "@/components/icon-button";
 import { Modal, useModal } from "@/components/modal";
@@ -25,7 +25,7 @@ import { useView } from "./view-provider";
  * apply as they are made, so the dialog dismisses rather than commits; they
  * are remembered by the provider, not carried in the URL.
  */
-export function FilterDialog({ counts }: { counts: StatusCounts }) {
+export function ViewDialog({ counts }: { counts: StatusCounts }) {
   const modal = useModal();
   const { status, sort, group, setStatus, setSort, setGroup, resetView } =
     useView();
@@ -46,19 +46,21 @@ export function FilterDialog({ counts }: { counts: StatusCounts }) {
     <>
       <div className="border-l border-line">
         <IconButton
-          label="Filter and sort"
+          label="View options"
           size="lg"
           variant={changed ? "accent" : "ghost"}
           onClick={modal.openModal}
-          icon={<Filter size={22} strokeWidth={2.25} aria-hidden="true" />}
+          icon={
+            <SlidersHorizontal
+              size={22}
+              strokeWidth={2.25}
+              aria-hidden="true"
+            />
+          }
         />
       </div>
 
-      <Modal
-        open={modal.open}
-        onClose={modal.closeModal}
-        title="Filter and sort"
-      >
+      <Modal open={modal.open} onClose={modal.closeModal} title="View options">
         <div className="flex flex-col gap-6">
           <FieldGroup legend="Status">
             <div className="flex flex-col divide-y divide-line border border-line">

@@ -4,7 +4,7 @@ import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useTransition } from "react";
 import { AddGameDialog } from "./game-dialog";
-import { FilterDialog } from "./filter-dialog";
+import { ViewDialog } from "./view-dialog";
 import { SettingsDialog } from "./settings-dialog";
 import type { StatusCounts } from "@/lib/statuses";
 
@@ -72,7 +72,7 @@ export function TopBar({ q, counts, hasSteamGridDbKey }: TopBarProps) {
           )}
         </form>
 
-        <FilterDialog counts={counts} />
+        <ViewDialog counts={counts} />
 
         <SettingsDialog hasKey={hasSteamGridDbKey} />
 
