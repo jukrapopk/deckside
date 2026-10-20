@@ -75,9 +75,11 @@ export function GameCard({ game, eager = false }: GameCardProps) {
         </div>
       )}
 
+      {/* `focus-visible`, not `focus-within`: closing a dialog returns focus
+          to the pencil, which would otherwise keep it pinned visible. */}
       <EditGameDialog
         game={game}
-        triggerClassName="opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none"
+        triggerClassName="opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100 motion-reduce:transition-none"
       />
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-4">
