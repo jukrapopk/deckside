@@ -38,7 +38,7 @@ RUN addgroup --system --gid 1001 nodejs \
 # including the native better-sqlite3 binding.
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+# There is no public/ directory; the app icon is a route in src/app.
 # Migrations are read at runtime by instrumentation.ts, so they must be present.
 COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
 

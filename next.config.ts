@@ -1,10 +1,13 @@
 import type { NextConfig } from "next";
 
+// Dev-only: extra hosts for LAN or Tailscale access. Next already allows
+// localhost and whatever host it started with, so this stays empty by default.
+const allowedDevOrigins = process.env.ALLOWED_DEV_ORIGINS?.split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 const nextConfig: NextConfig = {
-  /* config options here */
-  // Dev-only: allow the Tailscale address used to open this machine from other
-  // devices. Next already allows localhost and whatever host it started with.
-  allowedDevOrigins: ["100.100.1.1"],
+  allowedDevOrigins,
   cacheComponents: true,
   partialPrefetching: true,
   // Keep the native SQLite binding out of the bundle; it is required at runtime.

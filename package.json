@@ -1,7 +1,12 @@
 {
   "name": "deckside",
   "version": "0.1.0",
+  "description": "A personal game library for tracking what you own, what is up next, what you are playing, and what you have finished.",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jukrapopk/deckside.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

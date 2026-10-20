@@ -126,6 +126,22 @@ server action.
 | `DATABASE_PATH` | `./data/game-library.db` | SQLite file location |
 | `MIGRATIONS_PATH` | `./drizzle` | Directory migrations are read from |
 | `STEAMGRIDDB_API_KEY` | unset | Overrides the key saved in Settings |
+| `ALLOWED_DEV_ORIGINS` | unset | Extra dev hosts, comma-separated (LAN/Tailscale) |
+
+Copy `.env.example` to `.env.local` for a starting point.
+
+## Security and privacy
+
+Deckside is a single-user local app and has **no authentication**. Keep it on
+localhost, a trusted LAN, or a private Tailscale network; do not expose it to the
+public internet.
+
+By default the SQLite database lives under `data/` and is gitignored. It contains
+your library and, unless you use `STEAMGRIDDB_API_KEY`, the SteamGridDB key in
+plain text. Protect and back up the file like any other local secret.
+
+The app has no analytics. Cover searches go to SteamGridDB from the server; the
+browser only receives the resulting image URLs.
 
 ## Docker
 
