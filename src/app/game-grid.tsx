@@ -75,49 +75,56 @@ export function GameGrid({ games, total, q }: GameGridProps) {
 
   return (
     <div className="flex flex-col">
-      {sections.map((section) => (
-        <section key={section.key}>
-          {(group !== "none" || section.favourite) && (
-            <h2 className="flex items-center justify-between border-b border-line px-5 py-3 text-base font-semibold">
-              <span className="flex items-center gap-3">
-                {section.favourite ? (
-                  <span
-                    aria-hidden="true"
-                    className="flex size-7 items-center justify-center"
-                  >
-                    <HeartGlyph filled />
-                  </span>
-                ) : section.status ? (
-                  <StatusBadge status={section.status} decorative />
-                ) : section.platform ? (
-                  <span
-                    aria-hidden="true"
-                    className="flex size-7 items-center justify-center"
-                  >
-                    <PlatformIcon icon={section.platform.icon} />
-                  </span>
-                ) : (
-                  // "No platform" still indents like the sections above it.
-                  <span aria-hidden="true" className="size-7" />
-                )}
-                {section.label}
-              </span>
-              <span className="text-sm font-normal text-muted">
-                {section.games.length}
-              </span>
-            </h2>
-          )}
-          <ul className={GRID_COLS}>
-            {section.games.map((game) => (
-              <GameCard
-                key={game.id}
-                game={game}
-                eager={eager.has(game.id)}
-              />
-            ))}
-          </ul>
-        </section>
-      ))}
+      {sections.map((section) => {
+        const headed = group !== "none" || section.favourite;
+
+        return (
+          <section
+            key={section.key}
+            className={headed ? "border-b border-line" : undefined}
+          >
+            {headed && (
+              <h2 className="flex items-center justify-between px-5 pb-0 pt-3 text-base font-semibold">
+                <span className="flex items-center gap-3">
+                  {section.favourite ? (
+                    <span
+                      aria-hidden="true"
+                      className="flex size-7 items-center justify-center"
+                    >
+                      <HeartGlyph filled />
+                    </span>
+                  ) : section.status ? (
+                    <StatusBadge status={section.status} decorative />
+                  ) : section.platform ? (
+                    <span
+                      aria-hidden="true"
+                      className="flex size-7 items-center justify-center"
+                    >
+                      <PlatformIcon icon={section.platform.icon} />
+                    </span>
+                  ) : (
+                    // "No platform" still indents like the sections above it.
+                    <span aria-hidden="true" className="size-7" />
+                  )}
+                  {section.label}
+                </span>
+                <span className="text-sm font-normal text-muted">
+                  {section.games.length}
+                </span>
+              </h2>
+            )}
+            <ul className={GRID_COLS}>
+              {section.games.map((game) => (
+                <GameCard
+                  key={game.id}
+                  game={game}
+                  eager={eager.has(game.id)}
+                />
+              ))}
+            </ul>
+          </section>
+        );
+      })}
     </div>
   );
 }
