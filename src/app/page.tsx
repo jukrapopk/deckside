@@ -5,6 +5,7 @@ import { hasSteamGridDbKey } from "@/lib/settings";
 import { GameGrid } from "./game-grid";
 import { GameGridSkeleton, TopBarSkeleton } from "./skeletons";
 import { TopBar } from "./top-bar";
+import { ViewProvider } from "./view-provider";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -18,7 +19,6 @@ async function readFilters(searchParams: SearchParams) {
   const params = await searchParams;
   return parseFilters({
     q: firstValue(params.q),
-    status: firstValue(params.status),
   });
 }
 
@@ -28,7 +28,6 @@ async function LibraryBar({ searchParams }: { searchParams: SearchParams }) {
   return (
     <TopBar
       q={filters.q ?? ""}
-      status={filters.status}
       counts={countByStatus()}
       hasSteamGridDbKey={hasSteamGridDbKey()}
     />
@@ -42,23 +41,25 @@ async function LibraryGrid({ searchParams }: { searchParams: SearchParams }) {
     <GameGrid
       games={listGames(filters)}
       total={countByStatus().all}
-      filters={filters}
+      q={filters.q ?? ""}
     />
   );
 }
 
 export default function Home({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <div className="flex min-h-[100dvh] flex-col">
-      <Suspense fallback={<TopBarSkeleton />}>
-        <LibraryBar searchParams={searchParams} />
-      </Suspense>
-
-      <main className="flex-1">
-        <Suspense fallback={<GameGridSkeleton />}>
-          <LibraryGrid searchParams={searchParams} />
+    <ViewProvider>
+      <div className="flex min-h-[100dvh] flex-col">
+        <Suspense fallback={<TopBarSkeleton />}>
+          <LibraryBar searchParams={searchParams} />
         </Suspense>
-      </main>
-    </div>
+
+        <main className="flex-1">
+          <Suspense fallback={<GameGridSkeleton />}>
+            <LibraryGrid searchParams={searchParams} />
+          </Suspense>
+        </main>
+      </div>
+    </ViewProvider>
   );
 }

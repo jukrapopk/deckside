@@ -1,32 +1,90 @@
+"use client";
+
 import { Gamepad2, Search } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { GameCard } from "./game-card";
-import type { GameFilters } from "@/db/queries";
+import { useView } from "./view-provider";
 import type { Game } from "@/db/schema";
 import { GRID_COLS } from "@/lib/grid";
+import { groupGames, sortGames } from "@/lib/view";
 
 type GameGridProps = {
   games: Game[];
+  /** Library-wide count, before the search narrowed `games`. */
   total: number;
-  filters: GameFilters;
+  q: string;
 };
 
-export function GameGrid({ games, total, filters }: GameGridProps) {
-  if (total === 0) {
-    return <EmptyLibrary />;
+const ACTION =
+  "mt-2 border border-line px-5 py-3 text-base font-medium hover:border-accent";
+
+export function GameGrid({ games, total, q }: GameGridProps) {
+  const { status, sort, group, setStatus } = useView();
+
+  if (total === 0) return <EmptyLibrary />;
+  if (games.length === 0) {
+    return (
+      <NoMatches
+        description={`Nothing matches "${q}".`}
+        action={
+          <Link href="/" className={ACTION}>
+            Clear search
+          </Link>
+        }
+      />
+    );
   }
 
-  if (games.length === 0) {
-    return <NoMatches filters={filters} />;
+  const visible = status
+    ? games.filter((game) => game.status === status)
+    : games;
+
+  if (visible.length === 0) {
+    return (
+      <NoMatches
+        description="Nothing matches this status."
+        action={
+          <button
+            type="button"
+            onClick={() => setStatus(undefined)}
+            className={ACTION}
+          >
+            Clear filter
+          </button>
+        }
+      />
+    );
   }
+
+  const sorted = sortGames(visible, sort);
+  // The first screenful is worth loading eagerly, whichever group it lands in.
+  const eager = new Set(sorted.slice(0, 6).map((game) => game.id));
 
   return (
-    <ul className={GRID_COLS}>
-      {games.map((game, index) => (
-        <GameCard key={game.id} game={game} eager={index < 6} />
+    <div className="flex flex-col">
+      {groupGames(sorted, group).map((section) => (
+        <section key={section.key}>
+          {group !== "none" && (
+            <h2 className="flex items-baseline justify-between border-b border-line px-5 py-3 text-base font-semibold">
+              {section.label}
+              <span className="text-sm font-normal text-muted">
+                {section.games.length}
+              </span>
+            </h2>
+          )}
+          <ul className={GRID_COLS}>
+            {section.games.map((game) => (
+              <GameCard
+                key={game.id}
+                game={game}
+                eager={eager.has(game.id)}
+              />
+            ))}
+          </ul>
+        </section>
       ))}
-    </ul>
+    </div>
   );
 }
 
@@ -69,15 +127,17 @@ function EmptyLibrary() {
   );
 }
 
-function NoMatches({ filters }: { filters: GameFilters }) {
+function NoMatches({
+  description,
+  action,
+}: {
+  description: string;
+  action: ReactNode;
+}) {
   return (
     <MessageState
       title="No games found"
-      description={
-        filters.q
-          ? `Nothing matches "${filters.q}".`
-          : "Nothing matches this filter."
-      }
+      description={description}
       icon={
         <Search
           size={40}
@@ -86,14 +146,7 @@ function NoMatches({ filters }: { filters: GameFilters }) {
           className="text-muted"
         />
       }
-      action={
-        <Link
-          href="/"
-          className="mt-2 border border-line px-5 py-3 text-base font-medium hover:border-accent"
-        >
-          Clear filters
-        </Link>
-      }
+      action={action}
     />
   );
 }

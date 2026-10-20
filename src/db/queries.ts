@@ -1,32 +1,22 @@
-import { and, desc, eq, like, or, type SQL } from "drizzle-orm";
+import { and, desc, like, or, type SQL } from "drizzle-orm";
 import { getDb } from "./index";
 import { games } from "./schema";
-import { isStatus, STATUSES, type Status, type StatusCounts } from "@/lib/statuses";
+import { STATUSES, type StatusCounts } from "@/lib/statuses";
 
 export type GameFilters = {
   q?: string;
-  status?: Status;
 };
 
-export function parseFilters(params: {
-  q?: string;
-  status?: string;
-}): GameFilters {
+export function parseFilters(params: { q?: string }): GameFilters {
   const q = params.q?.trim();
-  const status = params.status?.trim();
 
   return {
     q: q || undefined,
-    status: status && isStatus(status) ? status : undefined,
   };
 }
 
-export function listGames({ q, status }: GameFilters = {}) {
+export function listGames({ q }: GameFilters = {}) {
   const filters: SQL[] = [];
-
-  if (status) {
-    filters.push(eq(games.status, status));
-  }
 
   if (q) {
     // `%` and `_` keep their LIKE wildcard meaning here. Fine for a personal
@@ -40,7 +30,9 @@ export function listGames({ q, status }: GameFilters = {}) {
     .select()
     .from(games)
     .where(filters.length ? and(...filters) : undefined)
-    // `created_at` has second granularity, so break ties by insertion order.
+    // The client sorts for display; this only keeps the server's first paint
+    // deterministic. `created_at` has second granularity, so break ties by
+    // insertion order.
     .orderBy(desc(games.createdAt), desc(games.id))
     .all();
 }
