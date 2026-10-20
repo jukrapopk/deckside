@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { isStatus, type Status } from "@/lib/statuses";
+import { isStatus, STATUSES, type Status } from "@/lib/statuses";
 import {
   DEFAULT_DIRECTION,
   DEFAULT_FAVOURITES_FIRST,
@@ -26,7 +26,8 @@ import {
 const STORAGE_KEY = "game-library:view";
 
 type View = {
-  status?: Status;
+  /** Selected statuses; all of them is the unfiltered view. */
+  statuses: Status[];
   sort: Sort;
   direction: Direction;
   group: Group;
@@ -34,7 +35,9 @@ type View = {
 };
 
 type ViewControls = View & {
-  setStatus: (status?: Status) => void;
+  setAllStatuses: () => void;
+  clearStatuses: () => void;
+  toggleStatus: (status: Status) => void;
   setSort: (sort: Sort) => void;
   invertDirection: () => void;
   setGroup: (group: Group) => void;
@@ -46,11 +49,36 @@ const ViewContext = createContext<ViewControls | null>(null);
 
 function defaults(): View {
   return {
+    statuses: [...STATUSES],
     sort: DEFAULT_SORT,
     direction: DEFAULT_DIRECTION,
     group: DEFAULT_GROUP,
     favouritesFirst: DEFAULT_FAVOURITES_FIRST,
   };
+}
+
+/**
+ * The filter used to hold one status. Read both shapes so a stored view keeps
+ * working after the upgrade; a missing or unusable list means every status.
+ */
+function readStatuses(value: unknown, legacy: unknown): Status[] {
+  if (Array.isArray(value)) {
+    const selected = new Set(
+      value.filter(
+        (item): item is Status => typeof item === "string" && isStatus(item),
+      ),
+    );
+
+    // An empty list is a real state (everything unchecked). An array with no
+    // valid values is corrupt and falls back to every status.
+    if (selected.size === 0 && value.length > 0) return [...STATUSES];
+
+    return STATUSES.filter((status) => selected.has(status));
+  }
+
+  if (typeof legacy === "string" && isStatus(legacy)) return [legacy];
+
+  return [...STATUSES];
 }
 
 /** Anything can be in localStorage; keep only values this version knows. */
@@ -59,25 +87,26 @@ function readStored(): View {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaults();
 
-    const parsed = JSON.parse(raw) as Partial<View> | null;
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== "object" || parsed === null) return defaults();
+
+    const stored = parsed as Record<string, unknown>;
+
     return {
-      status:
-        typeof parsed?.status === "string" && isStatus(parsed.status)
-          ? parsed.status
-          : undefined,
+      statuses: readStatuses(stored.statuses, stored.status),
       sort:
-        typeof parsed?.sort === "string" && isSort(parsed.sort)
-          ? parsed.sort
+        typeof stored.sort === "string" && isSort(stored.sort)
+          ? stored.sort
           : DEFAULT_SORT,
       direction:
-        typeof parsed?.direction === "string" && isDirection(parsed.direction)
-          ? parsed.direction
+        typeof stored.direction === "string" && isDirection(stored.direction)
+          ? stored.direction
           : DEFAULT_DIRECTION,
       group:
-        typeof parsed?.group === "string" && isGroup(parsed.group)
-          ? parsed.group
+        typeof stored.group === "string" && isGroup(stored.group)
+          ? stored.group
           : DEFAULT_GROUP,
-      favouritesFirst: parsed?.favouritesFirst === true,
+      favouritesFirst: stored.favouritesFirst === true,
     };
   } catch {
     return defaults();
@@ -116,7 +145,24 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   const value = useMemo<ViewControls>(
     () => ({
       ...view,
-      setStatus: (status) => setView((current) => ({ ...current, status })),
+      setAllStatuses: () =>
+        setView((current) => ({ ...current, statuses: [...STATUSES] })),
+      clearStatuses: () =>
+        setView((current) => ({ ...current, statuses: [] })),
+      toggleStatus: (status) =>
+        setView((current) => {
+          const selected = new Set(current.statuses);
+          if (selected.has(status)) {
+            selected.delete(status);
+          } else {
+            selected.add(status);
+          }
+
+          return {
+            ...current,
+            statuses: STATUSES.filter((option) => selected.has(option)),
+          };
+        }),
       // Each field starts in the direction it reads best in; the button then
       // flips it.
       setSort: (sort) =>

@@ -24,7 +24,7 @@ const ACTION =
   "mt-2 border border-line px-5 py-3 text-base font-medium hover:border-accent";
 
 export function GameGrid({ games, total, q }: GameGridProps) {
-  const { status, sort, direction, group, favouritesFirst, setStatus } =
+  const { statuses, sort, direction, group, favouritesFirst, setAllStatuses } =
     useView();
   const platforms = usePlatforms();
   // Collapsing is a browsing aid, not a saved view preference: groups reopen
@@ -59,18 +59,20 @@ export function GameGrid({ games, total, q }: GameGridProps) {
     );
   }
 
-  const visible = status
-    ? games.filter((game) => game.status === status)
-    : games;
+  const visible = games.filter((game) => statuses.includes(game.status));
 
   if (visible.length === 0) {
     return (
       <NoMatches
-        description="Nothing matches this status."
+        description={
+          statuses.length === 0
+            ? "No statuses are selected."
+            : "Nothing matches the selected statuses."
+        }
         action={
           <button
             type="button"
-            onClick={() => setStatus(undefined)}
+            onClick={() => setAllStatuses()}
             className={ACTION}
           >
             Clear filter

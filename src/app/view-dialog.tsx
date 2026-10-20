@@ -3,7 +3,9 @@
 import {
   ArrowDown,
   ArrowUp,
+  Check,
   LayoutGrid,
+  Minus,
   SlidersHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/button";
@@ -31,6 +33,8 @@ import {
 import { TopBarAction } from "./top-bar-action";
 import { useView } from "./view-provider";
 
+type CheckState = boolean | "mixed";
+
 /**
  * One place for the choices that decide what the grid shows. Changes apply as
  * they are made, so the dialog dismisses rather than commits; they are
@@ -39,12 +43,14 @@ import { useView } from "./view-provider";
 export function ViewDialog({ counts }: { counts: StatusCounts }) {
   const modal = useModal();
   const {
-    status,
+    statuses,
     sort,
     direction,
     group,
     favouritesFirst,
-    setStatus,
+    setAllStatuses,
+    clearStatuses,
+    toggleStatus,
     setSort,
     invertDirection,
     setGroup,
@@ -52,21 +58,48 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
     resetView,
   } = useView();
 
+  const allSelected = STATUSES.every((status) => statuses.includes(status));
   const changed =
-    status !== undefined ||
+    !allSelected ||
     sort !== DEFAULT_SORT ||
     direction !== DEFAULT_DIRECTION ||
     group !== DEFAULT_GROUP ||
     favouritesFirst !== DEFAULT_FAVOURITES_FIRST;
 
-  const options: { value?: Status; label: string; count: number }[] = [
-    { value: undefined, label: "All", count: counts.all },
+  const options: {
+    value?: Status;
+    label: string;
+    count: number;
+    checked: CheckState;
+  }[] = [
+    // All selects every status, or clears them when they are all selected.
+    // Partial selections show a dash, so the next click fills the rest.
+    {
+      value: undefined,
+      label: "All",
+      count: counts.all,
+      checked: allSelected ? true : statuses.length > 0 ? "mixed" : false,
+    },
     ...STATUSES.map((value) => ({
       value,
       label: STATUS_LABELS[value],
       count: counts[value],
+      checked: statuses.includes(value),
     })),
   ];
+
+  function toggleOption(value: Status | undefined) {
+    if (value === undefined) {
+      if (allSelected) {
+        clearStatuses();
+      } else {
+        setAllStatuses();
+      }
+      return;
+    }
+
+    toggleStatus(value);
+  }
 
   return (
     <>
@@ -84,23 +117,28 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
           <FieldGroup legend="Status">
             <div className="flex flex-col divide-y divide-line border border-line">
               {options.map((option) => {
-                const active = option.value === status;
+                const selected = option.checked !== false;
 
                 return (
                   <button
                     key={option.label}
                     type="button"
-                    aria-pressed={active}
-                    onClick={() => setStatus(option.value)}
-                    className={`flex items-center justify-between px-4 py-3 text-left text-base transition-colors motion-reduce:transition-none ${
-                      active
-                        ? "bg-accent-strong text-white"
-                        : "text-ink hover:bg-surface-2"
+                    role="checkbox"
+                    aria-checked={option.checked}
+                    onClick={() => toggleOption(option.value)}
+                    className={`flex items-center justify-between px-4 py-3 text-left text-base transition-colors hover:bg-surface-2 motion-reduce:transition-none ${
+                      selected ? "text-ink" : "text-muted"
                     }`}
                   >
                     <span className="flex items-center gap-3">
                       {option.value ? (
-                        <StatusBadge status={option.value} decorative />
+                        <StatusBadge
+                          status={option.value}
+                          decorative
+                          className={
+                            option.checked === true ? undefined : "opacity-50"
+                          }
+                        />
                       ) : (
                         <span
                           aria-hidden="true"
@@ -115,10 +153,9 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
                       )}
                       {option.label}
                     </span>
-                    {/* Full white on the accent fill: 80% white measures
-                        3.83:1 there, under AA for this size. */}
-                    <span className={active ? "text-white" : "text-muted"}>
+                    <span className="flex items-center gap-3 text-muted tabular-nums">
                       {option.count}
+                      <SelectionMark checked={option.checked} />
                     </span>
                   </button>
                 );
@@ -212,5 +249,25 @@ export function ViewDialog({ counts }: { counts: StatusCounts }) {
         </div>
       </Modal>
     </>
+  );
+}
+
+/** Square check mark for the multi-select status list. */
+function SelectionMark({ checked }: { checked: CheckState }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`flex size-5 shrink-0 items-center justify-center border ${
+        checked
+          ? "border-accent-strong bg-accent-strong text-white"
+          : "border-line"
+      }`}
+    >
+      {checked === "mixed" ? (
+        <Minus size={12} strokeWidth={3} aria-hidden="true" />
+      ) : checked ? (
+        <Check size={12} strokeWidth={3} aria-hidden="true" />
+      ) : null}
+    </span>
   );
 }
