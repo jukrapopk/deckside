@@ -35,6 +35,8 @@ type View = {
 };
 
 type ViewControls = View & {
+  /** False until the saved view has been read from localStorage. */
+  ready: boolean;
   setAllStatuses: () => void;
   clearStatuses: () => void;
   toggleStatus: (status: Status) => void;
@@ -116,8 +118,9 @@ function readStored(): View {
 /**
  * Filter, sort, grouping, and the favourites strip live here rather than in
  * the URL: they are how this browser likes to look at the library, not part of
- * a shared address. Storage is read after mount so the server-rendered order
- * stays the default and hydration has nothing to disagree about.
+ * a shared address. Storage is read after mount so the first client render
+ * matches the server; the grid waits on `ready` so the default view never
+ * flashes before the saved one.
  */
 export function ViewProvider({ children }: { children: ReactNode }) {
   const [view, setView] = useState<View>(defaults);
@@ -145,6 +148,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   const value = useMemo<ViewControls>(
     () => ({
       ...view,
+      ready: hydrated,
       setAllStatuses: () =>
         setView((current) => ({ ...current, statuses: [...STATUSES] })),
       clearStatuses: () =>
@@ -181,7 +185,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
         setView((current) => ({ ...current, favouritesFirst })),
       resetView: () => setView(defaults()),
     }),
-    [view],
+    [view, hydrated],
   );
 
   return <ViewContext.Provider value={value}>{children}</ViewContext.Provider>;

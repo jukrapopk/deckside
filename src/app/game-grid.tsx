@@ -12,6 +12,7 @@ import { useState, type ReactNode } from "react";
 import { GameCard } from "./game-card";
 import { AddGameDialog } from "./game-dialog";
 import { usePlatforms } from "./platforms-provider";
+import { GameGridSkeleton } from "./skeletons";
 import { useView } from "./view-provider";
 import { HeartGlyph } from "@/components/heart";
 import { PlatformIcon } from "@/components/platform-icon";
@@ -31,8 +32,15 @@ const ACTION =
   "mt-2 border border-line px-5 py-3 text-base font-medium hover:border-accent";
 
 export function GameGrid({ games, total, q }: GameGridProps) {
-  const { statuses, sort, direction, group, favouritesFirst, setAllStatuses } =
-    useView();
+  const {
+    ready,
+    statuses,
+    sort,
+    direction,
+    group,
+    favouritesFirst,
+    setAllStatuses,
+  } = useView();
   const platforms = usePlatforms();
   // Collapsing is a browsing aid, not a saved view preference: groups reopen
   // when the page is reloaded.
@@ -65,6 +73,11 @@ export function GameGrid({ games, total, q }: GameGridProps) {
       />
     );
   }
+
+  // Sorting, grouping, and the status filter all come from localStorage. Wait
+  // for the saved view before drawing a grid that would otherwise flash the
+  // defaults for a frame.
+  if (!ready) return <GameGridSkeleton />;
 
   const visible = games.filter((game) => statuses.includes(game.status));
 
