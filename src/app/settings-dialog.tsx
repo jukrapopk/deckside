@@ -290,14 +290,6 @@ function KeySettings({
           </KeyActionButton>
         </div>
 
-        {checkResult && (
-          <p
-            role="status"
-            className={`break-words text-sm ${checkFailed ? "text-danger" : "text-muted"}`}
-          >
-            {checkResult.message}
-          </p>
-        )}
       </div>
 
       <FormError message={saveError} />
