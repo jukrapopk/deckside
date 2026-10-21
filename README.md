@@ -32,8 +32,10 @@ The [live demo](https://deckside-demo.glasspile.com/) runs from the
 [`demo` branch](https://github.com/jukrapopk/deckside/tree/demo). It uses the
 same interface without SQLite: sample games and changes live in `localStorage`,
 so each browser gets its own copy. Some sample games use eight original abstract
-posters. The Vercel project sets `DEMO_MODE=1` so `/` serves the demo. It needs no
-database or SteamGridDB key, and live cover search is disabled.
+posters. A cover you upload is resized in the browser and stored with the game,
+so it counts against the browser's storage. The Vercel project sets `DEMO_MODE=1`
+so `/` serves the demo. It needs no database or SteamGridDB key, and live cover
+search is disabled.
 
 `main` remains the full local app backed by SQLite.
 
