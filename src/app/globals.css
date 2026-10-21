@@ -168,6 +168,13 @@ body::after {
   outline-offset: -2px;
 }
 
+/* The radio itself is visually hidden; draw its focus ring on the star without
+   changing the star's border width or box size. */
+.rating-option input:focus-visible + span {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
 /*
   A native select draws its arrow against the border, which reads as flush at
   this size. Drawing the chevron as a background gives it a predictable inset
