@@ -231,7 +231,6 @@ function EmptyLibrary() {
   return (
     <MessageState
       title="Your library is empty"
-      description="Add a game to start tracking what you own, what is next, and what you are playing."
       icon={
         <Gamepad2
           size={40}
