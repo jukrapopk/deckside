@@ -73,9 +73,11 @@ docker compose up --build
 ```
 
 The image runs as a non-root user and stores `/data/deckside.db` on the
-`deckside_data` volume. Compose publishes on `127.0.0.1` by default; set
-`BIND_ADDRESS` to reach it over a private network. Set `BUILD_STANDALONE=1` for
-the standalone build the Dockerfile expects.
+`deckside_data` volume. Compose publishes on `127.0.0.1:3210` by default; open
+[http://localhost:3210](http://localhost:3210). Set `HOST_PORT` to use another
+port, and `BIND_ADDRESS` to reach it over a private network. For example,
+`BIND_ADDRESS=0.0.0.0` listens on every interface (including Tailscale/LAN). Set
+`BUILD_STANDALONE=1` for the standalone build the Dockerfile expects.
 
 ## License
 
