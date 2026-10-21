@@ -28,6 +28,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - A `"use server"` module may only export async functions at runtime (type-only exports are erased). Put shared constants in `src/lib` (statuses, view vocabulary, platform icons, rating).
 - Only `q` lives in the URL. Status, sort, direction, and grouping are client preferences stored in `localStorage["game-library:view"]`; don't move them into the URL.
 - SteamGridDB searches run server-side in `src/app/artwork-actions.ts`. The key is write-only from the browser; `STEAMGRIDDB_API_KEY` overrides the value saved in Settings.
+- Shared UI reads and mutates through `LibraryProvider` (`src/app/library-context.tsx`). Keep database imports in `src/app/server-library-provider.tsx`; the `/demo` route wires the same interface to `src/demo`. Don't call server actions directly from shared components.
+- Form validation is shared by both backends in `src/lib/game-fields.ts` and `src/lib/platform-fields.ts`. Change the parser, not just one action.
+- The demo is client-only: seed and localStorage live in `src/demo`. `DEMO_MODE=1` rewrites `/` to `/demo` at build time and skips startup migrations; it is not a separate start command.
 
 ## UI
 

@@ -18,6 +18,18 @@ Open [http://localhost:3000](http://localhost:3000).
 The database file lives at `data/game-library.db` and is created on first run. Schema
 migrations are applied automatically when the server starts.
 
+## Demo
+
+`/demo` is a client-only version of the library. It seeds a sample collection on
+first visit and keeps games, platforms, and preferences in `localStorage`; the
+route itself never opens SQLite. Use it locally at
+[http://localhost:3000/demo](http://localhost:3000/demo).
+
+For a Vercel demo deployment, set `DEMO_MODE=1` in the project environment. The
+root URL then rewrites to `/demo`, and startup migrations are skipped. The demo
+needs no database and uses the same build command; there is no separate start
+command.
+
 ## Scripts
 
 | Script | What it does |
@@ -49,10 +61,16 @@ checkout needs no extra setup step.
 src/app/          pages, server actions, and page-level components
 src/components/   reusable UI primitives
 src/db/           schema, connection, queries, migrations
-src/lib/          shared constants used by both client and server
+src/demo/         client-only localStorage demo and its seed
+src/lib/          shared types, validation, and constants
 drizzle/          generated SQL migrations
 scripts/seed.ts   sample data
 ```
+
+The library UI reads through `LibraryProvider` in `src/app/library-context.tsx`.
+The SQLite app supplies server actions from `server-library-provider.tsx`; the
+`/demo` route supplies the same interface from `src/demo/`. Both use the shared
+form parsers in `src/lib`, so validation does not drift between them.
 
 `src/components/` holds the primitives that dialogs and forms are built from, so an
 affordance is defined once and reused: `Modal` and its `useModal` hook, `IconButton`,
@@ -127,6 +145,7 @@ server action.
 | `MIGRATIONS_PATH` | `./drizzle` | Directory migrations are read from |
 | `STEAMGRIDDB_API_KEY` | unset | Overrides the key saved in Settings |
 | `ALLOWED_DEV_ORIGINS` | unset | Extra dev hosts, comma-separated (LAN/Tailscale) |
+| `DEMO_MODE` | unset | Demo deploy: serve `/demo` at `/` and skip migrations |
 
 Copy `.env.example` to `.env.local` for local Next development. Docker Compose
 reads its variables from the shell or a `.env` file in the project root.

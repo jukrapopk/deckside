@@ -2,14 +2,14 @@
 
 import { useMemo } from "react";
 import { EditGameDialog } from "@/app/game-dialog";
-import { usePlatforms } from "@/app/platforms-provider";
+import { usePlatforms } from "@/app/library-context";
 import { CoverArt } from "@/components/cover-art";
 import { HeartGlyph } from "@/components/heart";
 import { PlatformIcon } from "@/components/platform-icon";
 import { StarRating } from "@/components/star-rating";
 import { StatusBadge } from "@/components/status-badge";
-import type { GameWithPlatforms } from "@/db/queries";
 import { GRID_TILE } from "@/lib/grid";
+import type { GameWithPlatforms } from "@/lib/library";
 import { PROGRESS_MAX, PROGRESS_MIN } from "@/lib/limits";
 import { indexPlatforms, platformsOf } from "@/lib/platforms";
 

@@ -2,8 +2,8 @@
 
 import { Pencil, Plus } from "lucide-react";
 import { useState, type CSSProperties } from "react";
-import { addGame, deleteGame, updateGame } from "@/app/actions";
 import { CoverPicker } from "@/app/cover-picker";
+import { useLibrary } from "@/app/library-context";
 import { PlatformPicker } from "@/app/platform-picker";
 import { Button } from "@/components/button";
 import { DialogForm } from "@/components/dialog-form";
@@ -19,24 +19,26 @@ import { HeartGlyph } from "@/components/heart";
 import { IconButton } from "@/components/icon-button";
 import { Modal, useModal } from "@/components/modal";
 import { StarPicker } from "@/components/star-picker";
+import type { GameWithPlatforms } from "@/lib/library";
 import {
   PROGRESS_MAX,
   PROGRESS_MIN,
   TITLE_MAX_LENGTH,
 } from "@/lib/limits";
-import { STATUSES, STATUS_LABELS, type Status } from "@/lib/statuses";
+import { STATUSES, STATUS_LABELS } from "@/lib/statuses";
 import { TopBarAction } from "./top-bar-action";
 
-export type GameValues = {
-  id: number;
-  title: string;
-  platformIds: number[];
-  status: Status;
-  rating: number | null;
-  favourite: boolean;
-  progress: number;
-  coverUrl: string | null;
-};
+export type GameValues = Pick<
+  GameWithPlatforms,
+  | "id"
+  | "title"
+  | "platformIds"
+  | "status"
+  | "rating"
+  | "favourite"
+  | "progress"
+  | "coverUrl"
+>;
 
 export function AddGameDialog({
   trigger = "top-bar",
@@ -112,6 +114,7 @@ type GameFormProps =
  * rather than the previous attempt's fields and error.
  */
 function GameForm(props: GameFormProps) {
+  const { actions, coverSearch } = useLibrary();
   const existing = props.mode === "edit" ? props.game : null;
 
   const [rating, setRating] = useState<number | null>(existing?.rating ?? null);
@@ -132,8 +135,8 @@ function GameForm(props: GameFormProps) {
   async function submit(formData: FormData) {
     const result =
       props.mode === "edit"
-        ? await updateGame(props.game.id, formData)
-        : await addGame(formData);
+        ? await actions.updateGame(props.game.id, formData)
+        : await actions.addGame(formData);
 
     if (result.ok) {
       props.onDone();
@@ -149,7 +152,9 @@ function GameForm(props: GameFormProps) {
       error={error}
       onClose={props.onDone}
       onDelete={
-        props.mode === "edit" ? () => deleteGame(props.game.id) : undefined
+        props.mode === "edit"
+          ? () => actions.deleteGame(props.game.id)
+          : undefined
       }
       submitLabel={props.mode === "edit" ? "Save" : "Add game"}
     >
@@ -189,7 +194,12 @@ function GameForm(props: GameFormProps) {
       </div>
 
       <FieldGroup legend="Cover">
-        <CoverPicker title={title} value={coverUrl} onChange={setCoverUrl} />
+        <CoverPicker
+          title={title}
+          value={coverUrl}
+          onChange={setCoverUrl}
+          onSearch={coverSearch}
+        />
       </FieldGroup>
 
       <FieldGroup legend="Platforms">

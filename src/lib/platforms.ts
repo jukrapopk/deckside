@@ -9,7 +9,13 @@ import {
   Tv,
   type LucideIcon,
 } from "lucide-react";
-import type { Platform } from "@/db/schema";
+
+/** The shared shape of a platform, independent of where it is stored. */
+export type Platform = {
+  id: number;
+  name: string;
+  icon: string;
+};
 
 /*
   Platform icons are stored as a key, not as a component, so the database stays

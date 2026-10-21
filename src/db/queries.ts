@@ -5,17 +5,16 @@ import {
   gamePlatforms,
   games,
   platforms,
-  type Game,
   type Platform,
 } from "./schema";
-import { STATUSES, type StatusCounts } from "@/lib/statuses";
+import { countStatuses, type StatusCounts } from "@/lib/statuses";
+import type { GameWithPlatforms } from "@/lib/library";
+
+export type { GameWithPlatforms } from "@/lib/library";
 
 export type GameFilters = {
   q?: string;
 };
-
-/** A game plus the platforms it was filed under, as ids the client can resolve. */
-export type GameWithPlatforms = Game & { platformIds: number[] };
 
 export function parseFilters(params: { q?: string }): GameFilters {
   const q = params.q?.trim();
@@ -99,9 +98,5 @@ export const countByStatus = cache((): StatusCounts => {
     .from(games)
     .all();
 
-  const counts = { all: rows.length } as StatusCounts;
-  for (const status of STATUSES) counts[status] = 0;
-  for (const row of rows) counts[row.status] += 1;
-
-  return counts;
+  return countStatuses(rows);
 });

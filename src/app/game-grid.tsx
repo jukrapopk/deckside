@@ -7,31 +7,29 @@ import {
   SearchX,
   type LucideIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { GameCard } from "./game-card";
 import { AddGameDialog } from "./game-dialog";
-import { usePlatforms } from "./platforms-provider";
+import { useLibrary, usePlatforms } from "./library-context";
 import { GameGridSkeleton } from "./skeletons";
 import { useView } from "./view-provider";
 import { HeartGlyph } from "@/components/heart";
 import { PlatformIcon } from "@/components/platform-icon";
 import { StatusBadge } from "@/components/status-badge";
-import type { GameWithPlatforms } from "@/db/queries";
 import { GRID_COLS } from "@/lib/grid";
 import { groupGames, sortGames } from "@/lib/view";
-
-type GameGridProps = {
-  games: GameWithPlatforms[];
-  /** Library-wide count, before the search narrowed `games`. */
-  total: number;
-  q: string;
-};
 
 const ACTION =
   "mt-2 border border-line px-5 py-3 text-base font-medium hover:border-accent";
 
-export function GameGrid({ games, total, q }: GameGridProps) {
+export function GameGrid() {
+  const {
+    games,
+    counts,
+    query,
+    setQuery,
+    ready: libraryReady,
+  } = useLibrary();
   const {
     ready,
     statuses,
@@ -60,24 +58,27 @@ export function GameGrid({ games, total, q }: GameGridProps) {
     });
   }
 
-  if (total === 0) return <EmptyLibrary />;
+  // Wait for both the data source and the saved view before drawing a grid
+  // that would otherwise flash defaults for a frame.
+  if (!libraryReady || !ready) return <GameGridSkeleton />;
+
+  if (counts.all === 0) return <EmptyLibrary />;
   if (games.length === 0) {
     return (
       <NoMatches
-        description={`Nothing matches "${q}".`}
+        description={`Nothing matches "${query}".`}
         action={
-          <Link href="/" className={ACTION}>
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            className={ACTION}
+          >
             Clear search
-          </Link>
+          </button>
         }
       />
     );
   }
-
-  // Sorting, grouping, and the status filter all come from localStorage. Wait
-  // for the saved view before drawing a grid that would otherwise flash the
-  // defaults for a frame.
-  if (!ready) return <GameGridSkeleton />;
 
   const visible = games.filter((game) => statuses.includes(game.status));
 

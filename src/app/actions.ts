@@ -4,16 +4,10 @@ import { refresh } from "next/cache";
 import { and, eq, ne, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { gamePlatforms, games, platforms } from "@/db/schema";
-import {
-  API_KEY_MAX_LENGTH,
-  COVER_URL_MAX_LENGTH,
-  PLATFORM_NAME_MAX_LENGTH,
-  PROGRESS_MAX,
-  PROGRESS_MIN,
-  TITLE_MAX_LENGTH,
-} from "@/lib/limits";
-import { isPlatformIcon, type PlatformIconKey } from "@/lib/platforms";
-import { parseRating } from "@/lib/rating";
+import { readGameFields } from "@/lib/game-fields";
+import type { FormState } from "@/lib/form-state";
+import { API_KEY_MAX_LENGTH } from "@/lib/limits";
+import { readPlatformFields } from "@/lib/platform-fields";
 import {
   clearSetting,
   setSetting,
@@ -27,86 +21,6 @@ import {
   STEAMGRIDDB_RATE_LIMITED,
   STEAMGRIDDB_UNREACHABLE,
 } from "@/lib/steamgriddb-errors";
-import { isStatus, type Status } from "@/lib/statuses";
-
-export type FormState = { ok?: boolean; error?: string };
-
-type Fields =
-  | {
-      ok: true;
-      values: {
-        title: string;
-        status: Status;
-        rating: number | null;
-        favourite: boolean;
-        progress: number;
-        coverUrl: string | null;
-      };
-      platformIds: number[];
-    }
-  | { ok: false; error: string };
-
-function readFields(formData: FormData): Fields {
-  const title = String(formData.get("title") ?? "").trim();
-  const status = String(formData.get("status") ?? "backlog");
-  const coverUrl = String(formData.get("coverUrl") ?? "").trim();
-  const platformIds = [
-    ...new Set(
-      formData
-        .getAll("platformIds")
-        .map((value) => Number(value))
-        .filter((id) => Number.isInteger(id) && id > 0),
-    ),
-  ];
-
-  if (!title) return { ok: false, error: "Title is required." };
-  if (title.length > TITLE_MAX_LENGTH) {
-    return {
-      ok: false,
-      error: `Title must be ${TITLE_MAX_LENGTH} characters or fewer.`,
-    };
-  }
-  if (!isStatus(status)) return { ok: false, error: "Unknown status." };
-  // The picker only writes https links, but the field is still form input.
-  if (
-    coverUrl &&
-    (!coverUrl.startsWith("https://") ||
-      coverUrl.length > COVER_URL_MAX_LENGTH)
-  ) {
-    return { ok: false, error: "Cover art must be an https link." };
-  }
-
-  const parsed = parseRating(String(formData.get("rating") ?? ""));
-  if (parsed.error) return { ok: false, error: parsed.error };
-
-  const favourite = formData.get("favourite") === "1";
-
-  const progressRaw = formData.get("progress");
-  const progress = progressRaw === null ? PROGRESS_MIN : Number(progressRaw);
-  if (
-    !Number.isInteger(progress) ||
-    progress < PROGRESS_MIN ||
-    progress > PROGRESS_MAX
-  ) {
-    return {
-      ok: false,
-      error: `Progress must be a whole number from ${PROGRESS_MIN} to ${PROGRESS_MAX}.`,
-    };
-  }
-
-  return {
-    ok: true,
-    values: {
-      title,
-      status,
-      rating: parsed.rating,
-      favourite,
-      progress,
-      coverUrl: coverUrl || null,
-    },
-    platformIds,
-  };
-}
 
 /** Only ids that exist can be linked; the form is not the authority. */
 function validPlatformIds(ids: number[]): number[] {
@@ -128,7 +42,7 @@ function linksFor(gameId: number, platformIds: number[]) {
 }
 
 export async function addGame(formData: FormData): Promise<FormState> {
-  const fields = readFields(formData);
+  const fields = readGameFields(formData);
   if (!fields.ok) return { error: fields.error };
 
   const platformIds = validPlatformIds(fields.platformIds);
@@ -153,7 +67,7 @@ export async function updateGame(
 ): Promise<FormState> {
   if (!Number.isInteger(id)) return { error: "Unknown game." };
 
-  const fields = readFields(formData);
+  const fields = readGameFields(formData);
   if (!fields.ok) return { error: fields.error };
 
   const platformIds = validPlatformIds(fields.platformIds);
@@ -185,26 +99,6 @@ export async function deleteGame(id: number): Promise<void> {
 }
 
 /** The platform list is managed from Settings and picked from a game's form. */
-type PlatformFields =
-  | { ok: true; name: string; icon: PlatformIconKey }
-  | { ok: false; error: string };
-
-function readPlatform(formData: FormData): PlatformFields {
-  const name = String(formData.get("name") ?? "").trim();
-  const icon = String(formData.get("icon") ?? "");
-
-  if (!name) return { ok: false, error: "Name is required." };
-  if (name.length > PLATFORM_NAME_MAX_LENGTH) {
-    return {
-      ok: false,
-      error: `Keep the name to ${PLATFORM_NAME_MAX_LENGTH} characters or fewer.`,
-    };
-  }
-  if (!isPlatformIcon(icon)) return { ok: false, error: "Choose an icon." };
-
-  return { ok: true, name, icon };
-}
-
 function platformNameTaken(name: string, exceptId?: number) {
   const where = sql`lower(${platforms.name}) = lower(${name})`;
 
@@ -220,7 +114,7 @@ function platformNameTaken(name: string, exceptId?: number) {
 }
 
 export async function addPlatform(formData: FormData): Promise<FormState> {
-  const fields = readPlatform(formData);
+  const fields = readPlatformFields(formData);
   if (!fields.ok) return { error: fields.error };
   if (platformNameTaken(fields.name)) {
     return { error: "That platform is already in the list." };
@@ -240,7 +134,7 @@ export async function updatePlatform(
 ): Promise<FormState> {
   if (!Number.isInteger(id)) return { error: "Unknown platform." };
 
-  const fields = readPlatform(formData);
+  const fields = readPlatformFields(formData);
   if (!fields.ok) return { error: fields.error };
   if (platformNameTaken(fields.name, id)) {
     return { error: "That platform is already in the list." };

@@ -3,10 +3,10 @@
 import { Check, X } from "lucide-react";
 import Image from "next/image";
 import { useState, useTransition } from "react";
-import { findCovers, type CoverOption } from "./artwork-actions";
 import { Button } from "@/components/button";
 import { CoverArt } from "@/components/cover-art";
 import { inputClass } from "@/components/field";
+import type { CoverOption, CoverSearch } from "@/lib/cover-search";
 import { STEAMGRIDDB_QUERY_MIN_LENGTH } from "@/lib/limits";
 
 type Result =
@@ -33,10 +33,13 @@ export function CoverPicker({
   title,
   value,
   onChange,
+  onSearch,
 }: {
   title: string;
   value: string;
   onChange: (url: string) => void;
+  /** Omitted in the demo, where there is no server-side SteamGridDB key. */
+  onSearch?: CoverSearch;
 }) {
   // Until the search box is touched it follows the title, so adding a game
   // does not ask for the same words twice.
@@ -48,10 +51,10 @@ export function CoverPicker({
   const [searching, startSearch] = useTransition();
 
   function search() {
-    if (!canSearch) return;
+    if (!canSearch || !onSearch) return;
 
     startSearch(async () => {
-      const response = await findCovers(searchTerm);
+      const response = await onSearch(searchTerm);
       setResult(
         response.ok
           ? { status: "found", game: response.game, options: response.options }
@@ -103,35 +106,42 @@ export function CoverPicker({
         )}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <label htmlFor="cover-search" className="sr-only">
-              Search SteamGridDB
-            </label>
-            <input
-              id="cover-search"
-              value={query}
-              onChange={(event) => setTyped(event.target.value)}
-              onKeyDown={(event) => {
-                // Enter searches. It must not submit the game form.
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  search();
-                }
-              }}
-              placeholder="Search SteamGridDB"
-              autoComplete="off"
-              className={`${inputClass} min-w-0`}
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full shrink-0 sm:w-auto"
-              onClick={search}
-              disabled={searching || !canSearch}
-            >
-              {searching ? "Searching" : "Search"}
-            </Button>
-          </div>
+          {onSearch ? (
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <label htmlFor="cover-search" className="sr-only">
+                Search SteamGridDB
+              </label>
+              <input
+                id="cover-search"
+                value={query}
+                onChange={(event) => setTyped(event.target.value)}
+                onKeyDown={(event) => {
+                  // Enter searches. It must not submit the game form.
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    search();
+                  }
+                }}
+                placeholder="Search SteamGridDB"
+                autoComplete="off"
+                className={`${inputClass} min-w-0`}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full shrink-0 sm:w-auto"
+                onClick={search}
+                disabled={searching || !canSearch}
+              >
+                {searching ? "Searching" : "Search"}
+              </Button>
+            </div>
+          ) : (
+            <p className="text-sm text-muted">
+              Cover search is unavailable in the demo. New games use their
+              initial.
+            </p>
+          )}
         </div>
       </div>
 

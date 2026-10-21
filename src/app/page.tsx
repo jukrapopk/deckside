@@ -9,7 +9,7 @@ import {
 import { hasSteamGridDbKey } from "@/lib/settings";
 import { SITE_NAME } from "@/lib/site";
 import { GameGrid } from "./game-grid";
-import { PlatformsProvider } from "./platforms-provider";
+import { ServerLibraryProvider } from "./server-library-provider";
 import { GameGridSkeleton, TopBarSkeleton } from "./skeletons";
 import { TopBar } from "./top-bar";
 import { ViewProvider } from "./view-provider";
@@ -29,31 +29,22 @@ async function readFilters(searchParams: SearchParams) {
   });
 }
 
-async function LibraryBar({ searchParams }: { searchParams: SearchParams }) {
+async function Library({ searchParams }: { searchParams: SearchParams }) {
   const filters = await readFilters(searchParams);
 
   return (
-    <PlatformsProvider platforms={listPlatforms()}>
-      <TopBar
-        q={filters.q ?? ""}
-        counts={countByStatus()}
-        hasSteamGridDbKey={hasSteamGridDbKey()}
-      />
-    </PlatformsProvider>
-  );
-}
-
-async function LibraryGrid({ searchParams }: { searchParams: SearchParams }) {
-  const filters = await readFilters(searchParams);
-
-  return (
-    <PlatformsProvider platforms={listPlatforms()}>
-      <GameGrid
-        games={listGames(filters)}
-        total={countByStatus().all}
-        q={filters.q ?? ""}
-      />
-    </PlatformsProvider>
+    <ServerLibraryProvider
+      games={listGames(filters)}
+      platforms={listPlatforms()}
+      counts={countByStatus()}
+      q={filters.q ?? ""}
+      hasKey={hasSteamGridDbKey()}
+    >
+      <TopBar />
+      <main className="flex-1">
+        <GameGrid />
+      </main>
+    </ServerLibraryProvider>
   );
 }
 
@@ -63,15 +54,18 @@ export default function Home({ searchParams }: { searchParams: SearchParams }) {
       <div className="flex min-h-[100dvh] flex-col">
         <h1 className="sr-only">{SITE_NAME}</h1>
 
-        <Suspense fallback={<TopBarSkeleton />}>
-          <LibraryBar searchParams={searchParams} />
+        <Suspense
+          fallback={
+            <>
+              <TopBarSkeleton />
+              <main className="flex-1">
+                <GameGridSkeleton />
+              </main>
+            </>
+          }
+        >
+          <Library searchParams={searchParams} />
         </Suspense>
-
-        <main className="flex-1">
-          <Suspense fallback={<GameGridSkeleton />}>
-            <LibraryGrid searchParams={searchParams} />
-          </Suspense>
-        </main>
       </div>
     </ViewProvider>
   );

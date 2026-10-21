@@ -1,6 +1,5 @@
-import type { GameWithPlatforms } from "@/db/queries";
-import type { Platform } from "@/db/schema";
-import { indexPlatforms, platformsOf } from "@/lib/platforms";
+import type { GameWithPlatforms } from "@/lib/library";
+import { indexPlatforms, platformsOf, type Platform } from "@/lib/platforms";
 import { STATUSES, STATUS_LABELS, type Status } from "@/lib/statuses";
 
 /*

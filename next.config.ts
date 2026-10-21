@@ -8,6 +8,13 @@ const allowedDevOrigins = process.env.ALLOWED_DEV_ORIGINS?.split(",")
 
 const nextConfig: NextConfig = {
   allowedDevOrigins,
+  async rewrites() {
+    // The demo is always available at /demo. A Vercel demo deployment sets
+    // this at build time so the root URL is the demo instead of the SQLite app.
+    return process.env.DEMO_MODE === "1"
+      ? [{ source: "/", destination: "/demo" }]
+      : [];
+  },
   cacheComponents: true,
   partialPrefetching: true,
   // Keep the native SQLite binding out of the bundle; it is required at runtime.

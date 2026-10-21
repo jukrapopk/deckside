@@ -2,7 +2,7 @@
 
 import { Pencil, Plus } from "lucide-react";
 import { useState } from "react";
-import { addPlatform, deletePlatform, updatePlatform } from "@/app/actions";
+import { useLibrary } from "@/app/library-context";
 import { DialogForm } from "@/components/dialog-form";
 import {
   FieldGroup,
@@ -11,12 +11,12 @@ import {
 } from "@/components/field";
 import { IconButton } from "@/components/icon-button";
 import { Modal, useModal } from "@/components/modal";
-import type { Platform } from "@/db/schema";
 import { PLATFORM_NAME_MAX_LENGTH } from "@/lib/limits";
 import {
   DEFAULT_PLATFORM_ICON,
   isPlatformIcon,
   PLATFORM_ICONS,
+  type Platform,
   type PlatformIconKey,
 } from "@/lib/platforms";
 
@@ -82,6 +82,7 @@ type PlatformFormProps =
   | { mode: "edit"; platform: Platform; onDone: () => void };
 
 function PlatformForm(props: PlatformFormProps) {
+  const { actions } = useLibrary();
   const existing = props.mode === "edit" ? props.platform : null;
 
   const [name, setName] = useState(existing?.name ?? "");
@@ -95,8 +96,8 @@ function PlatformForm(props: PlatformFormProps) {
   async function submit(formData: FormData) {
     const result =
       props.mode === "edit"
-        ? await updatePlatform(props.platform.id, formData)
-        : await addPlatform(formData);
+        ? await actions.updatePlatform(props.platform.id, formData)
+        : await actions.addPlatform(formData);
 
     if (result.ok) {
       props.onDone();
@@ -113,7 +114,7 @@ function PlatformForm(props: PlatformFormProps) {
       onClose={props.onDone}
       onDelete={
         props.mode === "edit"
-          ? () => deletePlatform(props.platform.id)
+          ? () => actions.deletePlatform(props.platform.id)
           : undefined
       }
       submitLabel={props.mode === "edit" ? "Save" : "Add platform"}

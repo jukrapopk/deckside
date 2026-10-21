@@ -16,14 +16,13 @@ import {
   useTransition,
   type ReactNode,
 } from "react";
-import { checkSteamGridDbKey, saveSteamGridDbKey } from "@/app/actions";
 import { Button } from "@/components/button";
 import { controlAction, inputClass } from "@/components/field";
 import { FormError, FormFooter } from "@/components/form";
 import { Modal, useModal } from "@/components/modal";
 import { PlatformIcon } from "@/components/platform-icon";
+import { useLibrary, type KeyActions } from "./library-context";
 import { AddPlatformDialog, EditPlatformDialog } from "./platform-dialog";
-import { usePlatforms } from "./platforms-provider";
 import { TopBarAction } from "./top-bar-action";
 
 /**
@@ -31,8 +30,14 @@ import { TopBarAction } from "./top-bar-action";
  * game. The saved key never leaves the server: the form only ever learns
  * whether one exists.
  */
-export function SettingsDialog({ hasKey }: { hasKey: boolean }) {
+export function SettingsDialog() {
   const modal = useModal();
+  const {
+    keyActions,
+    hasSteamGridDbKey,
+    isDemo,
+    resetDemo,
+  } = useLibrary();
 
   return (
     <>
@@ -45,11 +50,15 @@ export function SettingsDialog({ hasKey }: { hasKey: boolean }) {
       <Modal open={modal.open} onClose={modal.closeModal} title="Settings">
         <div className="flex flex-col gap-6">
           <PlatformSettings />
-          <KeySettings
-            key={modal.open ? "open" : "closed"}
-            hasKey={hasKey}
-            onDone={modal.closeModal}
-          />
+          {keyActions && (
+            <KeySettings
+              key={modal.open ? "open" : "closed"}
+              hasKey={hasSteamGridDbKey}
+              onDone={modal.closeModal}
+              actions={keyActions}
+            />
+          )}
+          {isDemo && <DemoSettings resetDemo={resetDemo} />}
         </div>
       </Modal>
     </>
@@ -58,7 +67,7 @@ export function SettingsDialog({ hasKey }: { hasKey: boolean }) {
 
 /** The list games choose from; adding and editing happen in their own dialog. */
 function PlatformSettings() {
-  const platforms = usePlatforms();
+  const { platforms } = useLibrary();
 
   return (
     <section className="flex flex-col gap-3">
@@ -81,6 +90,23 @@ function PlatformSettings() {
           <AddPlatformDialog />
         </li>
       </ul>
+    </section>
+  );
+}
+
+function DemoSettings({ resetDemo }: { resetDemo?: () => void }) {
+  return (
+    <section className="flex flex-col gap-3 border-t border-line pt-6">
+      <h3 className="text-base font-semibold">Demo data</h3>
+      <p className="text-sm text-muted">
+        This demo keeps its games, platforms, and preferences in this browser.
+        Clearing site data resets it.
+      </p>
+      {resetDemo && (
+        <Button variant="secondary" size="sm" onClick={resetDemo}>
+          Reset demo data
+        </Button>
+      )}
     </section>
   );
 }
@@ -132,9 +158,11 @@ function KeyActionButton({
 function KeySettings({
   hasKey,
   onDone,
+  actions,
 }: {
   hasKey: boolean;
   onDone: () => void;
+  actions: KeyActions;
 }) {
   const [editing, setEditing] = useState(false);
   const [key, setKey] = useState("");
@@ -179,7 +207,7 @@ function KeySettings({
     clearFeedback();
 
     startCheck(async () => {
-      const result = await checkSteamGridDbKey(editable ? key : undefined);
+      const result = await actions.checkKey(editable ? key : undefined);
 
       setCheckResult(
         result.ok
@@ -196,7 +224,7 @@ function KeySettings({
     clearFeedback();
 
     startSave(async () => {
-      const result = await saveSteamGridDbKey(key);
+      const result = await actions.saveKey(key);
 
       if (!result.ok) {
         setSaveError(result.error);

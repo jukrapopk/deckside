@@ -2,7 +2,7 @@
 
 import { selectedControl } from "@/components/field";
 import { PlatformIcon } from "@/components/platform-icon";
-import { usePlatforms } from "./platforms-provider";
+import { usePlatforms } from "./library-context";
 
 /**
  * Multi-select from the list maintained in Settings. Plain toggle buttons,

@@ -1,37 +1,29 @@
 "use client";
 
 import { Search, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useTransition } from "react";
+import { useEffect, useRef } from "react";
 import { AddGameDialog } from "./game-dialog";
+import { useLibrary } from "./library-context";
 import { ViewDialog } from "./view-dialog";
 import { SettingsDialog } from "./settings-dialog";
-import type { StatusCounts } from "@/lib/statuses";
 
 /** Long enough to finish a word, short enough that the grid feels live. */
 const SEARCH_DEBOUNCE_MS = 200;
 
-type TopBarProps = {
-  q: string;
-  counts: StatusCounts;
-  hasSteamGridDbKey: boolean;
-};
-
-export function TopBar({ q, counts, hasSteamGridDbKey }: TopBarProps) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+export function TopBar() {
+  const { query, setQuery, pending, counts } = useLibrary();
   const searchRef = useRef<HTMLInputElement>(null);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // What the URL should hold, so a debounced echo of an in-flight search is
-  // skipped even before the next render arrives.
-  const committedQ = useRef(q);
+  // What the URL (or demo filter) should hold, so a debounced echo of an
+  // in-flight search is skipped even before the next render arrives.
+  const committedQ = useRef(query);
   // The query the field was last synced to, so we can tell uncommitted typing
-  // from a navigation that changed the URL.
-  const syncedQ = useRef(q);
+  // from a navigation that changed the query.
+  const syncedQ = useRef(query);
 
   useEffect(() => {
-    committedQ.current = q;
-  }, [q]);
+    committedQ.current = query;
+  }, [query]);
 
   // The field is uncontrolled so typing never fights the router. When the
   // query changes from somewhere else — the empty state's clear link, or
@@ -45,9 +37,9 @@ export function TopBar({ q, counts, hasSteamGridDbKey }: TopBarProps) {
       document.activeElement === input &&
       input.value.trim() !== syncedQ.current;
 
-    if (!typing && input.value !== q) input.value = q;
-    syncedQ.current = q;
-  }, [q]);
+    if (!typing && input.value !== query) input.value = query;
+    syncedQ.current = query;
+  }, [query]);
 
   useEffect(() => {
     return () => {
@@ -59,11 +51,7 @@ export function TopBar({ q, counts, hasSteamGridDbKey }: TopBarProps) {
     const trimmed = nextQ.trim();
     if (trimmed === committedQ.current) return;
     committedQ.current = trimmed;
-
-    const params = new URLSearchParams();
-    if (trimmed) params.set("q", trimmed);
-    const query = params.toString();
-    startTransition(() => router.push(query ? `/?${query}` : "/"));
+    setQuery(trimmed);
   }
 
   function cancelSearch() {
@@ -87,7 +75,7 @@ export function TopBar({ q, counts, hasSteamGridDbKey }: TopBarProps) {
   return (
     <header
       className={`sticky top-0 z-20 border-b border-line bg-bg/95 backdrop-blur transition-opacity motion-reduce:transition-none ${
-        isPending ? "opacity-70" : ""
+        pending ? "opacity-70" : ""
       }`}
     >
       <div className="flex items-stretch">
@@ -96,7 +84,7 @@ export function TopBar({ q, counts, hasSteamGridDbKey }: TopBarProps) {
           className="flex min-w-0 flex-1 items-center"
           onSubmit={(event) => {
             event.preventDefault();
-            flushSearch(searchRef.current?.value ?? q);
+            flushSearch(searchRef.current?.value ?? query);
           }}
         >
           <label htmlFor="library-search" className="sr-only">
@@ -116,14 +104,14 @@ export function TopBar({ q, counts, hasSteamGridDbKey }: TopBarProps) {
               type="text"
               inputMode="search"
               enterKeyHint="search"
-              defaultValue={q}
+              defaultValue={query}
               onChange={(event) => queueSearch(event.target.value)}
               placeholder="Search"
               className={`h-16 w-full min-w-0 border-0 bg-transparent pl-14 text-lg text-ink outline-none placeholder:text-muted max-sm:pl-12 ${
-                q ? "pr-12" : "pr-4"
+                query ? "pr-12" : "pr-4"
               }`}
             />
-            {q && (
+            {query && (
               <button
                 type="button"
                 onClick={() => {
@@ -145,7 +133,7 @@ export function TopBar({ q, counts, hasSteamGridDbKey }: TopBarProps) {
 
         <ViewDialog counts={counts} />
 
-        <SettingsDialog hasKey={hasSteamGridDbKey} />
+        <SettingsDialog />
 
         <AddGameDialog />
       </div>

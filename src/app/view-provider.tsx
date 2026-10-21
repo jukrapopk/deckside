@@ -23,7 +23,7 @@ import {
   type Sort,
 } from "@/lib/view";
 
-const STORAGE_KEY = "game-library:view";
+const DEFAULT_STORAGE_KEY = "game-library:view";
 
 type View = {
   /** Selected statuses; all of them is the unfiltered view. */
@@ -84,9 +84,9 @@ function readStatuses(value: unknown, legacy: unknown): Status[] {
 }
 
 /** Anything can be in localStorage; keep only values this version knows. */
-function readStored(): View {
+function readStored(storageKey: string): View {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey);
     if (!raw) return defaults();
 
     const parsed: unknown = JSON.parse(raw);
@@ -122,7 +122,14 @@ function readStored(): View {
  * matches the server; the grid waits on `ready` so the default view never
  * flashes before the saved one.
  */
-export function ViewProvider({ children }: { children: ReactNode }) {
+export function ViewProvider({
+  children,
+  storageKey = DEFAULT_STORAGE_KEY,
+}: {
+  children: ReactNode;
+  /** Allows the demo to keep its own view preferences. */
+  storageKey?: string;
+}) {
   const [view, setView] = useState<View>(defaults);
   const [hydrated, setHydrated] = useState(false);
 
@@ -130,20 +137,20 @@ export function ViewProvider({ children }: { children: ReactNode }) {
     // The server has no storage, so the saved view can only be read after
     // mount; the first render must match the server's output until then.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setView(readStored());
+    setView(readStored(storageKey));
     setHydrated(true);
-  }, []);
+  }, [storageKey]);
 
   useEffect(() => {
     // The first write would otherwise store the pre-hydration defaults.
     if (!hydrated) return;
 
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(view));
+      localStorage.setItem(storageKey, JSON.stringify(view));
     } catch {
       // A full or blocked store only costs the memory, not the session.
     }
-  }, [view, hydrated]);
+  }, [view, hydrated, storageKey]);
 
   const value = useMemo<ViewControls>(
     () => ({

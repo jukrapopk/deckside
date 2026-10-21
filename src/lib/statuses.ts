@@ -40,3 +40,12 @@ export type StatusCounts = Record<Status, number> & { all: number };
 export function isStatus(value: string): value is Status {
   return (STATUSES as readonly string[]).includes(value);
 }
+
+export function countStatuses(
+  games: readonly { status: Status }[],
+): StatusCounts {
+  const counts = { all: games.length } as StatusCounts;
+  for (const status of STATUSES) counts[status] = 0;
+  for (const game of games) counts[game.status] += 1;
+  return counts;
+}
