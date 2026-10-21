@@ -204,40 +204,39 @@ export function CoverPicker({
             onChange={pickFile}
           />
 
-          <div className="flex flex-col gap-2">
-            <label
-              htmlFor="cover-search"
-              className="text-sm font-medium text-muted"
-            >
-              SteamGridDB
-            </label>
+          {/* The two ways in are alternatives, so a rule reads better than a
+              second label; the divider itself carries no meaning. */}
+          <div aria-hidden="true" className="flex items-center gap-3">
+            <span className="h-px flex-1 bg-line" />
+            <span className="text-sm text-muted">or</span>
+            <span className="h-px flex-1 bg-line" />
+          </div>
 
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <input
-                id="cover-search"
-                value={query}
-                onChange={(event) => setTyped(event.target.value)}
-                onKeyDown={(event) => {
-                  // Enter searches. It must not submit the game form.
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    search();
-                  }
-                }}
-                placeholder="Search"
-                autoComplete="off"
-                className={`${inputClass} min-w-0`}
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full shrink-0 sm:w-auto"
-                onClick={search}
-                disabled={searching || !canSearch}
-              >
-                {searching ? "Searching" : "Search"}
-              </Button>
-            </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              value={query}
+              onChange={(event) => setTyped(event.target.value)}
+              onKeyDown={(event) => {
+                // Enter searches. It must not submit the game form.
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  search();
+                }
+              }}
+              placeholder="Search SteamGridDB"
+              aria-label="Search SteamGridDB"
+              autoComplete="off"
+              className={`${inputClass} min-w-0`}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full shrink-0 sm:w-auto"
+              onClick={search}
+              disabled={searching || !canSearch}
+            >
+              {searching ? "Searching" : "Search"}
+            </Button>
           </div>
 
           {fileError && (
