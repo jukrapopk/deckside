@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ChevronDown,
-  Gamepad2,
-  Search,
-  SearchX,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronDown, SearchX } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { GameCard } from "./game-card";
 import { AddGameDialog } from "./game-dialog";
@@ -23,13 +17,7 @@ const ACTION =
   "mt-2 border border-line px-5 py-3 text-base font-medium hover:border-accent";
 
 export function GameGrid() {
-  const {
-    games,
-    counts,
-    query,
-    setQuery,
-    ready: libraryReady,
-  } = useLibrary();
+  const { games, counts, setQuery, ready: libraryReady } = useLibrary();
   const {
     ready,
     statuses,
@@ -66,7 +54,6 @@ export function GameGrid() {
   if (games.length === 0) {
     return (
       <NoMatches
-        description={`Nothing matches "${query}".`}
         action={
           <button
             type="button"
@@ -85,8 +72,6 @@ export function GameGrid() {
   if (visible.length === 0) {
     return (
       <NoMatches
-        icon={SearchX}
-        description="The status filter is hiding every game."
         action={
           <button
             type="button"
@@ -198,31 +183,20 @@ export function GameGrid() {
   );
 }
 
-/** Icon, heading, explanation, and an optional action. Shared empty state. */
+/** Icon, heading, and an optional action. Shared empty state. */
 function MessageState({
   icon,
   title,
-  description,
   action,
 }: {
   icon: ReactNode;
   title: string;
-  description?: string;
   action?: ReactNode;
 }) {
   return (
-    <div
-      className={`flex flex-col items-center px-6 py-24 text-center ${
-        description ? "gap-4" : "gap-6"
-      }`}
-    >
+    <div className="flex flex-col items-center gap-6 px-6 py-24 text-center">
       {icon}
       <h2 className="text-xl font-semibold">{title}</h2>
-      {description && (
-        <p className="max-w-[45ch] break-words text-base text-muted">
-          {description}
-        </p>
-      )}
       {action}
     </div>
   );
@@ -233,7 +207,7 @@ function EmptyLibrary() {
     <MessageState
       title="Your library is empty"
       icon={
-        <Gamepad2
+        <SearchX
           size={40}
           strokeWidth={1.75}
           aria-hidden="true"
@@ -245,21 +219,12 @@ function EmptyLibrary() {
   );
 }
 
-function NoMatches({
-  description,
-  action,
-  icon: Icon = Search,
-}: {
-  description?: string;
-  action: ReactNode;
-  icon?: LucideIcon;
-}) {
+function NoMatches({ action }: { action: ReactNode }) {
   return (
     <MessageState
       title="No games found"
-      description={description}
       icon={
-        <Icon
+        <SearchX
           size={40}
           strokeWidth={1.75}
           aria-hidden="true"

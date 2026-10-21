@@ -20,7 +20,7 @@ export const uploadDemoCover: CoverUpload = async (file) => {
   if (!COVER_UPLOAD_TYPES.includes(file.type)) {
     return {
       ok: false,
-      error: "Covers must be a JPEG, PNG, WebP, or AVIF image.",
+      error: "Use a JPEG, PNG, WebP, or AVIF image.",
     };
   }
 

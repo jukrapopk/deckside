@@ -41,7 +41,7 @@ const DEMO_POSTER_PREFIX = "/demo/";
 const DATA_IMAGE_PATTERN =
   /^data:image\/(?:avif|jpeg|png|webp);base64,[a-z0-9+/]+=*$/i;
 
-const COVER_ERROR = "Cover art must be an uploaded image or an https link.";
+const COVER_ERROR = "Upload an image or paste an https link.";
 
 /** FormData is untrusted; both backends run the same checks. */
 export function readGameFields(
@@ -113,7 +113,7 @@ export function readGameFields(
   ) {
     return {
       ok: false,
-      error: `Progress must be a whole number from ${PROGRESS_MIN} to ${PROGRESS_MAX}.`,
+      error: `Progress must be ${PROGRESS_MIN}–${PROGRESS_MAX}.`,
     };
   }
 

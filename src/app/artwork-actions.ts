@@ -39,14 +39,14 @@ export async function findCovers(query: string): Promise<CoverSearchResult> {
   if (!key) {
     return {
       ok: false,
-      message: "Add a SteamGridDB key in Settings, then search again.",
+      message: "Add a SteamGridDB key in Settings.",
     };
   }
 
   try {
     const games = await searchGames(key, term);
     if (games.length === 0) {
-      return { ok: false, message: `No game on SteamGridDB matched "${term}".` };
+      return { ok: false, message: `No match for "${term}".` };
     }
 
     const game = games[0];
@@ -54,7 +54,7 @@ export async function findCovers(query: string): Promise<CoverSearchResult> {
     if (grids.length === 0) {
       return {
         ok: false,
-        message: `No portrait art for ${game.name}. Try a different title.`,
+        message: `No portrait art for ${game.name}.`,
       };
     }
 
@@ -66,14 +66,11 @@ export async function findCovers(query: string): Promise<CoverSearchResult> {
   } catch (error) {
     switch (classifySteamGridDbError(error)) {
       case "auth":
-        return {
-          ok: false,
-          message: `${STEAMGRIDDB_KEY_REJECTED} Check it in Settings.`,
-        };
+        return { ok: false, message: STEAMGRIDDB_KEY_REJECTED };
       case "rate-limit":
         return { ok: false, message: STEAMGRIDDB_RATE_LIMITED };
       case "not-found":
-        return { ok: false, message: `No art found for "${term}".` };
+        return { ok: false, message: `No art for "${term}".` };
       default:
         return { ok: false, message: STEAMGRIDDB_UNREACHABLE };
     }

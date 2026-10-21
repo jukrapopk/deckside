@@ -17,7 +17,7 @@ export function parseRating(value: string):
   ) {
     return {
       rating: null,
-      error: `Rating must be a whole number from ${RATING_MIN} to ${RATING_MAX}.`,
+      error: `Rating must be ${RATING_MIN}–${RATING_MAX}.`,
     };
   }
 

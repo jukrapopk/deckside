@@ -115,7 +115,7 @@ export function CoverPicker({
 
     // Mirrored on the server; catching it here saves a round trip.
     if (!COVER_UPLOAD_TYPES.includes(chosen.type)) {
-      setFileError("Covers must be a JPEG, PNG, WebP, or AVIF image.");
+      setFileError("Use a JPEG, PNG, WebP, or AVIF image.");
       event.target.value = "";
       return;
     }

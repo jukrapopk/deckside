@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronUp } from "lucide-react";
+import { ChevronUp, SearchX } from "lucide-react";
 import { DynamicIcon, type IconName } from "lucide-react/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { selectedControl } from "@/components/field";
@@ -117,33 +117,12 @@ export function CustomIconPicker({
       .split(/[^a-z0-9]+/)
       .filter(Boolean);
 
-    if (tokens.length === 0) {
-      return {
-        names: SUGGESTED_ICON_NAMES,
-        total: SUGGESTED_ICON_NAMES.length,
-        suggested: true,
-      };
-    }
+    if (tokens.length === 0) return SUGGESTED_ICON_NAMES;
 
-    const matches = LUCIDE_ICON_NAMES.filter((name) =>
+    return LUCIDE_ICON_NAMES.filter((name) =>
       tokens.every((token) => name.includes(token)),
-    );
-
-    return {
-      names: matches.slice(0, RESULT_LIMIT),
-      total: matches.length,
-      suggested: false,
-    };
+    ).slice(0, RESULT_LIMIT);
   }, [query]);
-
-  // The suggestion screen carries no caption; only a search needs reporting.
-  const caption = results.suggested
-    ? null
-    : results.total === 0
-      ? `No icon matches “${query.trim()}”.`
-      : results.total > results.names.length
-        ? `${results.names.length} of ${results.total} matches · keep typing to narrow it down.`
-        : `${results.total} ${results.total === 1 ? "match" : "matches"}.`;
 
   function choose(name: string) {
     onChange(`${CUSTOM_ICON_PREFIX}${name}`);
@@ -172,7 +151,7 @@ export function CustomIconPicker({
               if (event.key !== "Enter") return;
 
               event.preventDefault();
-              const first = results.names[0];
+              const first = results[0];
               if (first) choose(first);
             }}
             placeholder="Search Lucide"
@@ -227,39 +206,44 @@ export function CustomIconPicker({
           }}
           className="fixed z-50 overflow-y-auto border border-line bg-surface p-2"
         >
-          <div className="grid grid-cols-8 gap-2">
-            {results.names.map((name) => {
-              const active = value === `${CUSTOM_ICON_PREFIX}${name}`;
+          {results.length === 0 ? (
+            // Nothing to list: the centered glyph says it without a sentence.
+            <div
+              role="status"
+              className="flex items-center justify-center py-6 text-muted"
+            >
+              <SearchX size={20} strokeWidth={2.25} aria-hidden="true" />
+              <span className="sr-only">No matching icons</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-8 gap-2">
+              {results.map((name) => {
+                const active = value === `${CUSTOM_ICON_PREFIX}${name}`;
 
-              return (
-                <button
-                  key={name}
-                  type="button"
-                  aria-pressed={active}
-                  aria-label={name}
-                  title={name}
-                  onClick={() => choose(name)}
-                  className={`flex h-10 items-center justify-center border transition-colors motion-reduce:transition-none ${
-                    active
-                      ? selectedControl
-                      : "border-line text-muted hover:text-ink"
-                  }`}
-                >
-                  <DynamicIcon
-                    name={name as IconName}
-                    size={18}
-                    strokeWidth={2.25}
-                    aria-hidden="true"
-                  />
-                </button>
-              );
-            })}
-          </div>
-
-          {caption && (
-            <p className="mt-2 text-xs text-muted" aria-live="polite">
-              {caption}
-            </p>
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    aria-pressed={active}
+                    aria-label={name}
+                    title={name}
+                    onClick={() => choose(name)}
+                    className={`flex h-10 items-center justify-center border transition-colors motion-reduce:transition-none ${
+                      active
+                        ? selectedControl
+                        : "border-line text-muted hover:text-ink"
+                    }`}
+                  >
+                    <DynamicIcon
+                      name={name as IconName}
+                      size={18}
+                      strokeWidth={2.25}
+                      aria-hidden="true"
+                    />
+                  </button>
+                );
+              })}
+            </div>
           )}
         </div>
       )}

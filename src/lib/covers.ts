@@ -127,7 +127,7 @@ export async function saveCoverFile(file: File): Promise<SaveResult> {
   if (!COVER_UPLOAD_TYPES.includes(file.type)) {
     return {
       ok: false,
-      error: "Covers must be a JPEG, PNG, WebP, or AVIF image.",
+      error: "Use a JPEG, PNG, WebP, or AVIF image.",
     };
   }
   if (file.size > COVER_UPLOAD_MAX_BYTES) {
@@ -154,7 +154,7 @@ export async function saveCoverUrl(url: string): Promise<SaveResult> {
       signal: AbortSignal.timeout(REMOTE_TIMEOUT_MS),
     });
   } catch {
-    return { ok: false, error: "Couldn't download that cover. Try another one." };
+    return { ok: false, error: "Couldn't download that cover." };
   }
 
   if (
@@ -162,7 +162,7 @@ export async function saveCoverUrl(url: string): Promise<SaveResult> {
     !response.headers.get("content-type")?.startsWith("image/")
   ) {
     await response.body?.cancel().catch(() => {});
-    return { ok: false, error: "Couldn't download that cover. Try another one." };
+    return { ok: false, error: "Couldn't download that cover." };
   }
 
   const bytes = await readCapped(response, REMOTE_COVER_MAX_BYTES);

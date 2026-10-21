@@ -4,8 +4,7 @@ import { SteamGridDbError } from "./steamgriddb";
 export const STEAMGRIDDB_KEY_REJECTED = "SteamGridDB rejected that key.";
 export const STEAMGRIDDB_RATE_LIMITED =
   "SteamGridDB is rate limiting. Try again in a minute.";
-export const STEAMGRIDDB_UNREACHABLE =
-  "Could not reach SteamGridDB. Check the connection and retry.";
+export const STEAMGRIDDB_UNREACHABLE = "Could not reach SteamGridDB.";
 
 export type SteamGridDbFailure =
   | "auth"
