@@ -6,9 +6,9 @@ Deckside is a personal game library: track what you own, what is up next, what
 you are playing, and what you have finished. Built with Next.js 16, SQLite, and
 Drizzle ORM.
 
-[Live demo](https://deckside-library.vercel.app/) · [Demo branch](https://github.com/jukrapopk/deckside/tree/demo)
+[Live demo](https://deckside-demo.glasspile.com/) · [Demo branch](https://github.com/jukrapopk/deckside/tree/demo)
 
-[![Deckside demo showing a grid of game posters](docs/demo.webp)](https://deckside-library.vercel.app/)
+[![Deckside demo showing a grid of game posters](docs/demo.webp)](https://deckside-demo.glasspile.com/)
 
 *The demo library, seeded with sample games and original posters.*
 
@@ -28,7 +28,7 @@ network.
 
 ## Demo
 
-The [live demo](https://deckside-library.vercel.app/) runs from the
+The [live demo](https://deckside-demo.glasspile.com/) runs from the
 [`demo` branch](https://github.com/jukrapopk/deckside/tree/demo). It uses the
 same interface without SQLite: sample games and changes live in `localStorage`,
 so each browser gets its own copy. Some sample games use eight original abstract
