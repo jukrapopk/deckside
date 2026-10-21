@@ -44,6 +44,17 @@ The root URL rewrites to `/demo`, and startup migrations are skipped. Do not add
 separate start command. If `/` shows the SQLite app, `DEMO_MODE` was missing
 during the build — add it and redeploy.
 
+`DEMO_MODE` is read at startup/build time, so restart `next dev` after changing
+it. In PowerShell:
+
+```powershell
+$env:DEMO_MODE = "1"
+npm run dev
+```
+
+Or set `DEMO_MODE=1` in `.env.local` and restart. On Vercel, changing the
+environment variable requires a new deployment.
+
 ## Scripts
 
 | Script | What it does |

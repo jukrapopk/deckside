@@ -9,11 +9,19 @@ const allowedDevOrigins = process.env.ALLOWED_DEV_ORIGINS?.split(",")
 const nextConfig: NextConfig = {
   allowedDevOrigins,
   async rewrites() {
-    // The demo is always available at /demo. A Vercel demo deployment sets
-    // this at build time so the root URL is the demo instead of the SQLite app.
-    return process.env.DEMO_MODE === "1"
-      ? [{ source: "/", destination: "/demo" }]
-      : [];
+    // The demo is always available at /demo. A demo deployment sets this at
+    // build time so the root URL is the demo instead of the SQLite page.
+    // `beforeFiles` is required: an array rewrite runs after `/` already
+    // matched the filesystem page and would never take effect.
+    if (process.env.DEMO_MODE !== "1") {
+      return { beforeFiles: [], afterFiles: [], fallback: [] };
+    }
+
+    return {
+      beforeFiles: [{ source: "/", destination: "/demo" }],
+      afterFiles: [],
+      fallback: [],
+    };
   },
   cacheComponents: true,
   partialPrefetching: true,
