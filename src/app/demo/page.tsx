@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { DemoLibrary } from "@/demo/demo-library";
 
 export const metadata: Metadata = {
-  title: "Deckside demo",
+  title: "Deckside (Demo)",
   description:
     "Try Deckside with a sample library. Everything stays in your browser.",
   robots: {

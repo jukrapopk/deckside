@@ -14,7 +14,7 @@ export function DemoLibrary() {
     <ViewProvider storageKey="deckside:demo:view">
       <DemoLibraryProvider>
         <div className="flex min-h-[100dvh] flex-col">
-          <h1 className="sr-only">Deckside demo</h1>
+          <h1 className="sr-only">Deckside (Demo)</h1>
           <p className="border-b border-line bg-surface px-5 py-2 text-sm text-muted">
             Demo library. Changes stay in this browser.
           </p>
