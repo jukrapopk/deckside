@@ -27,10 +27,22 @@ posters under `public/demo/posters`; the same eight are selectable in the demo�
 add/edit form. No third-party cover art is bundled. Use it locally at
 [http://localhost:3000/demo](http://localhost:3000/demo).
 
-For a Vercel demo deployment, set `DEMO_MODE=1` in the project environment. The
-root URL then rewrites to `/demo`, and startup migrations are skipped. The demo
-needs no database and uses the same build command; there is no separate start
-command.
+### Vercel deployment
+
+The hosted demo is deployed from the `demo` branch; `main` remains the SQLite
+app.
+
+1. Push the branch: `git push -u origin demo`.
+2. Import the repository into a new Vercel project.
+3. In **Settings → Git**, set the **Production Branch** to `demo`.
+4. Add `DEMO_MODE=1` to the project environment for Production (and Preview if
+   desired).
+5. Deploy with the default Next.js settings and `npm run build`.
+
+The root URL rewrites to `/demo`, and startup migrations are skipped. Do not add
+`DATABASE_PATH` or `STEAMGRIDDB_API_KEY`; the demo needs neither. There is no
+separate start command. If `/` shows the SQLite app, `DEMO_MODE` was missing
+during the build — add it and redeploy.
 
 ## Scripts
 
