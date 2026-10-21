@@ -15,10 +15,11 @@ import type { Platform } from "@/db/schema";
 import { PLATFORM_NAME_MAX_LENGTH } from "@/lib/limits";
 import {
   DEFAULT_PLATFORM_ICON,
-  isPlatformIcon,
+  isPlatformIconValue,
   PLATFORM_ICONS,
-  type PlatformIconKey,
+  type PlatformIconValue,
 } from "@/lib/platforms";
+import { CustomIconPicker } from "./custom-icon-picker";
 
 export function AddPlatformDialog() {
   const modal = useModal();
@@ -85,8 +86,8 @@ function PlatformForm(props: PlatformFormProps) {
   const existing = props.mode === "edit" ? props.platform : null;
 
   const [name, setName] = useState(existing?.name ?? "");
-  const [icon, setIcon] = useState<PlatformIconKey>(
-    existing && isPlatformIcon(existing.icon)
+  const [icon, setIcon] = useState<PlatformIconValue>(
+    existing && isPlatformIconValue(existing.icon)
       ? existing.icon
       : DEFAULT_PLATFORM_ICON,
   );
@@ -152,6 +153,8 @@ function PlatformForm(props: PlatformFormProps) {
             );
           })}
         </div>
+
+        <CustomIconPicker value={icon} onChange={setIcon} />
 
         <input type="hidden" name="icon" value={icon} />
       </FieldGroup>

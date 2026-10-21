@@ -12,7 +12,7 @@ import {
   PROGRESS_MIN,
   TITLE_MAX_LENGTH,
 } from "@/lib/limits";
-import { isPlatformIcon, type PlatformIconKey } from "@/lib/platforms";
+import { isPlatformIconValue, type PlatformIconValue } from "@/lib/platforms";
 import { parseRating } from "@/lib/rating";
 import {
   clearSetting,
@@ -186,7 +186,7 @@ export async function deleteGame(id: number): Promise<void> {
 
 /** The platform list is managed from Settings and picked from a game's form. */
 type PlatformFields =
-  | { ok: true; name: string; icon: PlatformIconKey }
+  | { ok: true; name: string; icon: PlatformIconValue }
   | { ok: false; error: string };
 
 function readPlatform(formData: FormData): PlatformFields {
@@ -200,7 +200,12 @@ function readPlatform(formData: FormData): PlatformFields {
       error: `Keep the name to ${PLATFORM_NAME_MAX_LENGTH} characters or fewer.`,
     };
   }
-  if (!isPlatformIcon(icon)) return { ok: false, error: "Choose an icon." };
+  // Presets are keys; anything else has to be a well-formed `lucide:<name>`.
+  // Whether this build ships that name is a rendering concern, so an unknown
+  // but valid name saves and draws the default glyph.
+  if (!isPlatformIconValue(icon)) {
+    return { ok: false, error: "Choose an icon." };
+  }
 
   return { ok: true, name, icon };
 }
