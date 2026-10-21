@@ -10,8 +10,6 @@ Drizzle ORM.
 
 [![Deckside demo showing a grid of game posters](docs/demo.webp)](https://deckside-demo.glasspile.com/)
 
-*The demo library, seeded with sample games and original posters.*
-
 ## Run locally
 
 ```bash
