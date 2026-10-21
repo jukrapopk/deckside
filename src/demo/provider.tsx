@@ -17,6 +17,7 @@ import { matchesQuery, type GameWithPlatforms } from "@/lib/library";
 import { readPlatformFields } from "@/lib/platform-fields";
 import type { Platform } from "@/lib/platforms";
 import { countStatuses, type StatusCounts } from "@/lib/statuses";
+import { uploadDemoCover } from "./cover-upload";
 import { DEMO_POSTERS } from "./seed";
 import {
   createDemoStore,
@@ -29,6 +30,13 @@ function knownPlatformIds(store: DemoStore, ids: number[]): number[] {
   const known = new Set(store.platforms.map((platform) => platform.id));
   return ids.filter((id) => known.has(id));
 }
+
+/**
+ * A browser can refuse the write — a cover is a data URL, so the 5 MB quota is
+ * reachable. Persisting first means a refused change is not shown as saved.
+ */
+const STORAGE_ERROR =
+  "This browser could not save the library. Storage may be full; remove a cover or a game and try again.";
 
 /** A complete client-side library backed by one versioned localStorage key. */
 export function DemoLibraryProvider({ children }: { children: ReactNode }) {
@@ -45,9 +53,10 @@ export function DemoLibraryProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const commit = useCallback((next: DemoStore) => {
+    if (!saveDemoStore(next)) return false;
     storeRef.current = next;
     setStore(next);
-    saveDemoStore(next);
+    return true;
   }, []);
 
   const addGame = useCallback(
@@ -68,12 +77,13 @@ export function DemoLibraryProvider({ children }: { children: ReactNode }) {
         updatedAt: now,
       };
 
-      commit({
+      const saved = commit({
         ...current,
         games: [...current.games, game],
         nextGameId: current.nextGameId + 1,
       });
-      return { ok: true };
+
+      return saved ? { ok: true } : { error: STORAGE_ERROR };
     },
     [commit],
   );
@@ -96,11 +106,12 @@ export function DemoLibraryProvider({ children }: { children: ReactNode }) {
         updatedAt: new Date(),
       };
 
-      commit({
+      const saved = commit({
         ...current,
         games: current.games.map((item) => (item.id === id ? game : item)),
       });
-      return { ok: true };
+
+      return saved ? { ok: true } : { error: STORAGE_ERROR };
     },
     [commit],
   );
@@ -141,12 +152,13 @@ export function DemoLibraryProvider({ children }: { children: ReactNode }) {
         icon: fields.icon,
       };
 
-      commit({
+      const saved = commit({
         ...current,
         platforms: [...current.platforms, platform],
         nextPlatformId: current.nextPlatformId + 1,
       });
-      return { ok: true };
+
+      return saved ? { ok: true } : { error: STORAGE_ERROR };
     },
     [commit],
   );
@@ -172,7 +184,7 @@ export function DemoLibraryProvider({ children }: { children: ReactNode }) {
         return { error: "That platform is already in the list." };
       }
 
-      commit({
+      const saved = commit({
         ...current,
         platforms: current.platforms.map((platform) =>
           platform.id === id
@@ -180,7 +192,8 @@ export function DemoLibraryProvider({ children }: { children: ReactNode }) {
             : platform,
         ),
       });
-      return { ok: true };
+
+      return saved ? { ok: true } : { error: STORAGE_ERROR };
     },
     [commit],
   );
@@ -260,6 +273,7 @@ export function DemoLibraryProvider({ children }: { children: ReactNode }) {
       ready: store !== null,
       actions,
       coverPresets: DEMO_POSTERS,
+      coverUpload: uploadDemoCover,
       hasSteamGridDbKey: false,
       isDemo: true,
       resetDemo,

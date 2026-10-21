@@ -7,9 +7,9 @@ services:
     init: true
     restart: unless-stopped
     ports:
-      # Local-only by default. Set BIND_ADDRESS to a private LAN/Tailscale
-      # address to open it to another trusted device.
-      - "${BIND_ADDRESS:-127.0.0.1}:3000:3000"
+      # Local-only by default. Set HOST_PORT for another host port, or
+      # BIND_ADDRESS to open it to another trusted device.
+      - "${BIND_ADDRESS:-127.0.0.1}:${HOST_PORT:-3210}:3000"
     environment:
       DATABASE_PATH: /data/deckside.db
       MIGRATIONS_PATH: /app/drizzle

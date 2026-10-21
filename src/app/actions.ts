@@ -4,6 +4,7 @@ import { refresh } from "next/cache";
 import { and, eq, ne, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { gamePlatforms, games, platforms } from "@/db/schema";
+import { deleteCover, saveCoverFile, saveCoverUrl } from "@/lib/covers";
 import { readGameFields } from "@/lib/game-fields";
 import type { FormState } from "@/lib/form-state";
 import { API_KEY_MAX_LENGTH } from "@/lib/limits";
@@ -41,21 +42,71 @@ function linksFor(gameId: number, platformIds: number[]) {
   return platformIds.map((platformId) => ({ gameId, platformId }));
 }
 
+type StagedCover =
+  | { ok: true; url: string | null; created: string | null }
+  | { ok: false; error: string };
+
+/**
+ * Turns the form's cover choice into something the row can point at. An upload
+ * converts, a new SteamGridDB pick is downloaded and converted, and an
+ * unchanged value is left exactly as it was — including the remote links rows
+ * saved before covers were localized.
+ */
+async function stageCover(
+  file: File | null,
+  url: string | null,
+  previous: string | null,
+): Promise<StagedCover> {
+  if (file) {
+    const saved = await saveCoverFile(file);
+    if (!saved.ok) return { ok: false, error: saved.error };
+
+    return { ok: true, url: saved.url, created: saved.url };
+  }
+
+  if (!url || url === previous) return { ok: true, url, created: null };
+
+  if (url.startsWith("https://")) {
+    const saved = await saveCoverUrl(url);
+    if (!saved.ok) return { ok: false, error: saved.error };
+
+    return { ok: true, url: saved.url, created: saved.url };
+  }
+
+  return { ok: true, url, created: null };
+}
+
 export async function addGame(formData: FormData): Promise<FormState> {
   const fields = readGameFields(formData);
   if (!fields.ok) return { error: fields.error };
 
+  const cover = await stageCover(
+    fields.coverFile,
+    fields.values.coverUrl,
+    null,
+  );
+  if (!cover.ok) return { error: cover.error };
+
   const platformIds = validPlatformIds(fields.platformIds);
   const db = getDb();
 
-  db.transaction((tx) => {
-    const inserted = tx.insert(games).values(fields.values).run();
-    const gameId = Number(inserted.lastInsertRowid);
+  try {
+    db.transaction((tx) => {
+      const inserted = tx
+        .insert(games)
+        .values({ ...fields.values, coverUrl: cover.url })
+        .run();
+      const gameId = Number(inserted.lastInsertRowid);
 
-    if (platformIds.length) {
-      tx.insert(gamePlatforms).values(linksFor(gameId, platformIds)).run();
-    }
-  });
+      if (platformIds.length) {
+        tx.insert(gamePlatforms).values(linksFor(gameId, platformIds)).run();
+      }
+    });
+  } catch (error) {
+    // Do not leave a file behind for a row that never appeared.
+    await deleteCover(cover.created);
+    throw error;
+  }
 
   refresh();
   return { ok: true };
@@ -70,22 +121,46 @@ export async function updateGame(
   const fields = readGameFields(formData);
   if (!fields.ok) return { error: fields.error };
 
-  const platformIds = validPlatformIds(fields.platformIds);
   const db = getDb();
+  const previous = db
+    .select({ coverUrl: games.coverUrl })
+    .from(games)
+    .where(eq(games.id, id))
+    .get();
 
-  db.transaction((tx) => {
-    tx.update(games)
-      .set({ ...fields.values, updatedAt: new Date() })
-      .where(eq(games.id, id))
-      .run();
+  if (!previous) return { error: "Unknown game." };
 
-    // The form always carries the full selection, so replace the set.
-    tx.delete(gamePlatforms).where(eq(gamePlatforms.gameId, id)).run();
+  const cover = await stageCover(
+    fields.coverFile,
+    fields.values.coverUrl,
+    previous.coverUrl,
+  );
+  if (!cover.ok) return { error: cover.error };
 
-    if (platformIds.length) {
-      tx.insert(gamePlatforms).values(linksFor(id, platformIds)).run();
-    }
-  });
+  const coverUrl = cover.url;
+  const platformIds = validPlatformIds(fields.platformIds);
+
+  try {
+    db.transaction((tx) => {
+      tx.update(games)
+        .set({ ...fields.values, coverUrl, updatedAt: new Date() })
+        .where(eq(games.id, id))
+        .run();
+
+      // The form always carries the full selection, so replace the set.
+      tx.delete(gamePlatforms).where(eq(gamePlatforms.gameId, id)).run();
+
+      if (platformIds.length) {
+        tx.insert(gamePlatforms).values(linksFor(id, platformIds)).run();
+      }
+    });
+  } catch (error) {
+    await deleteCover(cover.created);
+    throw error;
+  }
+
+  // The previous upload is only removed once the row points somewhere else.
+  if (previous.coverUrl !== coverUrl) await deleteCover(previous.coverUrl);
 
   refresh();
   return { ok: true };
@@ -94,7 +169,16 @@ export async function updateGame(
 export async function deleteGame(id: number): Promise<void> {
   if (!Number.isInteger(id)) return;
 
-  getDb().delete(games).where(eq(games.id, id)).run();
+  const db = getDb();
+  const deleted = db
+    .select({ coverUrl: games.coverUrl })
+    .from(games)
+    .where(eq(games.id, id))
+    .get();
+
+  db.delete(games).where(eq(games.id, id)).run();
+  await deleteCover(deleted?.coverUrl);
+
   refresh();
 }
 

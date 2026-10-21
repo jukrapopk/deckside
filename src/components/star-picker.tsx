@@ -21,7 +21,7 @@ export function StarPicker({
         const filled = value !== null && stars <= value;
 
         return (
-          <label key={stars} className="group cursor-pointer">
+          <label key={stars} className="rating-option group cursor-pointer">
             <input
               type="radio"
               name={name}
@@ -32,7 +32,7 @@ export function StarPicker({
               className="peer sr-only"
             />
             <span
-              className={`flex size-9 items-center justify-center border peer-focus-visible:border-2 peer-focus-visible:border-accent ${
+              className={`flex size-9 items-center justify-center border ${
                 filled
                   ? "border-accent bg-accent-strong text-white"
                   : "border-line bg-surface text-muted group-hover:text-ink"

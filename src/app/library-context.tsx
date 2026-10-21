@@ -2,6 +2,7 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 import type { CoverPreset, CoverSearch } from "@/lib/cover-search";
+import type { CoverUpload } from "@/lib/cover-upload";
 import type { FormState } from "@/lib/form-state";
 import type { GameWithPlatforms } from "@/lib/library";
 import type { Platform } from "@/lib/platforms";
@@ -36,6 +37,8 @@ export type LibraryContextValue = {
   coverSearch?: CoverSearch;
   /** Bundled posters shown when network cover search is unavailable. */
   coverPresets?: CoverPreset[];
+  /** Set when the file has to be encoded in the browser (the demo). */
+  coverUpload?: CoverUpload;
   keyActions?: KeyActions;
   hasSteamGridDbKey: boolean;
   isDemo: boolean;

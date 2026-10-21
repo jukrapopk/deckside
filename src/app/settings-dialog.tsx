@@ -318,14 +318,6 @@ function KeySettings({
           </KeyActionButton>
         </div>
 
-        {(checking || checkResult) && (
-          <p
-            role="status"
-            className={`break-words text-sm ${checkFailed ? "text-danger" : "text-muted"}`}
-          >
-            {checking ? "Checking API key" : checkResult?.message}
-          </p>
-        )}
       </div>
 
       <FormError message={saveError} />

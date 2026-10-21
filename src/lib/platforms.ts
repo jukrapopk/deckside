@@ -18,9 +18,14 @@ export type Platform = {
 };
 
 /*
-  Platform icons are stored as a key, not as a component, so the database stays
-  portable and an unknown key can fall back instead of breaking a card. The
-  set is deliberately small: these are the shapes that read at 18px on a tile.
+  Platform icons are stored as a value, not as a component, so the database stays
+  portable and an unknown value can fall back instead of breaking a card.
+
+  The presets are deliberately few: these are the shapes that read at 18px on a
+  tile, and they cover most of a library in one tap. Anything else is stored as
+  `lucide:<name>` and drawn from the full Lucide catalogue, which the picker
+  searches. The prefix separates the two forms, so the column and the preset
+  keys needed no migration.
 */
 export const PLATFORM_ICONS = [
   { key: "monitor", label: "Desktop", icon: Monitor },
@@ -37,8 +42,41 @@ export type PlatformIconKey = (typeof PLATFORM_ICONS)[number]["key"];
 
 export const DEFAULT_PLATFORM_ICON: PlatformIconKey = "console";
 
-export function isPlatformIcon(value: string): value is PlatformIconKey {
+/** Marks a value as a full Lucide name instead of one of the presets. */
+export const CUSTOM_ICON_PREFIX = "lucide:";
+
+/**
+ * A custom value is the prefix plus a kebab-case Lucide name. The longest name
+ * in Lucide 1.59 is 38 characters; the limit leaves room for longer ones while
+ * still bounding what a form can write to the column.
+ */
+const CUSTOM_ICON_PATTERN = /^lucide:[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const PLATFORM_ICON_MAX_LENGTH = 56;
+
+export type CustomPlatformIcon = `lucide:${string}`;
+export type PlatformIconValue = PlatformIconKey | CustomPlatformIcon;
+
+function isPlatformIcon(value: string): value is PlatformIconKey {
   return PLATFORM_ICONS.some((option) => option.key === value);
+}
+
+function isCustomPlatformIcon(value: string): value is CustomPlatformIcon {
+  return (
+    value.length <= PLATFORM_ICON_MAX_LENGTH && CUSTOM_ICON_PATTERN.test(value)
+  );
+}
+
+export function isPlatformIconValue(
+  value: string,
+): value is PlatformIconValue {
+  return isPlatformIcon(value) || isCustomPlatformIcon(value);
+}
+
+/** The Lucide name inside a custom value, or null for a preset. */
+export function customIconName(value: string): string | null {
+  return value.startsWith(CUSTOM_ICON_PREFIX)
+    ? value.slice(CUSTOM_ICON_PREFIX.length)
+    : null;
 }
 
 export function platformIcon(key: string): LucideIcon {

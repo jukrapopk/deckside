@@ -32,8 +32,10 @@ The [live demo](https://deckside-demo.glasspile.com/) runs from the
 [`demo` branch](https://github.com/jukrapopk/deckside/tree/demo). It uses the
 same interface without SQLite: sample games and changes live in `localStorage`,
 so each browser gets its own copy. Some sample games use eight original abstract
-posters. The Vercel project sets `DEMO_MODE=1` so `/` serves the demo. It needs no
-database or SteamGridDB key, and live cover search is disabled.
+posters. A cover you upload is resized in the browser and stored with the game,
+so it counts against the browser's storage. The Vercel project sets `DEMO_MODE=1`
+so `/` serves the demo. It needs no database or SteamGridDB key, and live cover
+search is disabled.
 
 `main` remains the full local app backed by SQLite.
 
@@ -60,9 +62,13 @@ database or SteamGridDB key, and live cover search is disabled.
 | `STEAMGRIDDB_API_KEY` | unset | Overrides the key saved in Settings |
 | `ALLOWED_DEV_ORIGINS` | unset | Extra dev hosts, comma-separated (LAN/Tailscale) |
 
-Copy `.env.example` to `.env.local` for local Next development. Cover art comes
-from SteamGridDB; add a key in Settings or set `STEAMGRIDDB_API_KEY`. Searches run
-on the server, so the browser never receives the key.
+Copy `.env.example` to `.env.local` for local Next development.
+
+Every cover is stored as a 2:3 WebP next to the database, in `data/covers`: an
+uploaded file is converted, and a SteamGridDB pick is downloaded and converted,
+so the library keeps its own copy instead of depending on the CDN. Searching uses
+SteamGridDB — add a key in Settings or set `STEAMGRIDDB_API_KEY`; searches run on
+the server, so the browser never receives the key.
 
 ## Docker
 
@@ -72,10 +78,13 @@ A `Dockerfile` and `docker-compose.yml` are included.
 docker compose up --build
 ```
 
-The image runs as a non-root user and stores `/data/deckside.db` on the
-`deckside_data` volume. Compose publishes on `127.0.0.1` by default; set
-`BIND_ADDRESS` to reach it over a private network. Set `BUILD_STANDALONE=1` for
-the standalone build the Dockerfile expects.
+The image runs as a non-root user and stores `/data/deckside.db` and uploaded
+covers in `/data/covers` on the `deckside_data` volume. Compose publishes on
+`127.0.0.1:3210` by default; open
+[http://localhost:3210](http://localhost:3210). Set `HOST_PORT` to use another
+port, and `BIND_ADDRESS` to reach it over a private network. For example,
+`BIND_ADDRESS=0.0.0.0` listens on every interface (including Tailscale/LAN). Set
+`BUILD_STANDALONE=1` for the standalone build the Dockerfile expects.
 
 ## License
 

@@ -7,6 +7,16 @@ export const PLATFORM_NAME_MAX_LENGTH = 40;
 export const COVER_URL_MAX_LENGTH = 500;
 export const API_KEY_MAX_LENGTH = 200;
 
+/** Local cover uploads: the cap both the picker and the action enforce. */
+export const COVER_UPLOAD_MAX_BYTES = 6 * 1024 * 1024;
+export const COVER_UPLOAD_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+];
+export const COVER_UPLOAD_ACCEPT = COVER_UPLOAD_TYPES.join(",");
+
 export const PROGRESS_MIN = 0;
 export const PROGRESS_MAX = 100;
 

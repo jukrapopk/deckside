@@ -173,7 +173,8 @@ export function createDemoStore(): DemoStore {
   return seedDemoData();
 }
 
-export function saveDemoStore(store: DemoStore) {
+/** Returns false when the write was refused, typically because storage is full. */
+export function saveDemoStore(store: DemoStore): boolean {
   const stored: StoredStore = {
     ...store,
     games: store.games.map(({ createdAt, updatedAt, ...game }) => ({
@@ -185,8 +186,11 @@ export function saveDemoStore(store: DemoStore) {
 
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+    return true;
   } catch {
-    // A blocked or full store only costs persistence, not the session.
+    // Uploaded covers are data URLs, so this is reachable in real use. The
+    // caller decides whether to keep the change in memory or report it.
+    return false;
   }
 }
 
