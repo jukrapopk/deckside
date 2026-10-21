@@ -81,14 +81,16 @@ export function Modal({
         // Clicks land on the dialog element itself only on the backdrop.
         if (event.target === dialogRef.current) onClose();
       }}
-      className="m-auto w-[calc(100vw-2rem)] max-w-lg max-h-[calc(100dvh-2rem)] flex-col overflow-hidden border border-line bg-surface p-0 text-ink open:flex"
+      className="m-auto w-[calc(100vw-2rem)] max-w-lg max-h-[calc(100dvh-2rem)] flex-col overflow-clip border border-line bg-surface p-0 text-ink open:flex"
     >
       {/* Only `display` is tied to [open]; the browser needs that to hide the
           closed dialog. The other layout rules stay on the element so the
           closing fade keeps its shape instead of snapping to a row before it
           leaves the top layer. The header stays put; the body is the single
           scroller. This `max-height` also beats the browser's own modal cap,
-          which would otherwise make the dialog a second scroll container. */}
+          which would otherwise make the dialog a second scroll container.
+          `overflow-clip` matters: `hidden` still lets focus scroll the dialog
+          and move the header. */}
       <div className="flex shrink-0 items-start justify-between gap-4 border-b border-line px-5 py-4">
         {/* A game title can be a single long word; without min-w-0 and
             break-words it would push the close button out of the dialog. */}
