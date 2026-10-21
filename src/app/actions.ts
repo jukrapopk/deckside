@@ -81,7 +81,7 @@ function readFields(formData: FormData): Fields {
   ) {
     return {
       ok: false,
-      error: "Cover art must be an uploaded image or an https link.",
+      error: "Upload an image or paste an https link.",
     };
   }
 
@@ -99,7 +99,7 @@ function readFields(formData: FormData): Fields {
   ) {
     return {
       ok: false,
-      error: `Progress must be a whole number from ${PROGRESS_MIN} to ${PROGRESS_MAX}.`,
+      error: `Progress must be ${PROGRESS_MIN}–${PROGRESS_MAX}.`,
     };
   }
 

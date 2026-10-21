@@ -13,9 +13,6 @@ export default function LibraryError({ reset }: { reset: () => void }) {
         className="text-muted"
       />
       <h1 className="text-xl font-semibold">The library failed to load</h1>
-      <p className="max-w-[55ch] text-base text-muted">
-        The database query did not complete. This is usually temporary.
-      </p>
       <Button variant="primary" className="mt-2" onClick={reset}>
         Try again
       </Button>

@@ -48,11 +48,7 @@ async function LibraryGrid({ searchParams }: { searchParams: SearchParams }) {
 
   return (
     <PlatformsProvider platforms={listPlatforms()}>
-      <GameGrid
-        games={listGames(filters)}
-        total={countByStatus().all}
-        q={filters.q ?? ""}
-      />
+      <GameGrid games={listGames(filters)} total={countByStatus().all} />
     </PlatformsProvider>
   );
 }
