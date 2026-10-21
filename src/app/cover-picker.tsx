@@ -279,11 +279,11 @@ export function CoverPicker({
               </Button>
             </div>
           ) : (
-            !presets?.length && (
-              <p className="text-sm text-muted">
-                SteamGridDB cover search is unavailable in the demo.
-              </p>
-            )
+            // The demo has no key, so this names the missing option instead of
+            // leaving the divider pointing at nothing. Centred under the rule.
+            <p className="text-center text-sm text-muted">
+              Search using SteamGridDB (Not available in Demo)
+            </p>
           )}
 
           {fileError && (
