@@ -13,6 +13,7 @@ import {
   TITLE_MAX_LENGTH,
 } from "@/lib/limits";
 import { isPlatformIconValue, type PlatformIconValue } from "@/lib/platforms";
+import { deleteCover, isCoverUrl, saveCover } from "@/lib/covers";
 import { parseRating } from "@/lib/rating";
 import {
   clearSetting,
@@ -43,6 +44,7 @@ type Fields =
         coverUrl: string | null;
       };
       platformIds: number[];
+      coverFile: File | null;
     }
   | { ok: false; error: string };
 
@@ -50,6 +52,10 @@ function readFields(formData: FormData): Fields {
   const title = String(formData.get("title") ?? "").trim();
   const status = String(formData.get("status") ?? "backlog");
   const coverUrl = String(formData.get("coverUrl") ?? "").trim();
+  // An empty file input still posts a File with no bytes.
+  const uploaded = formData.get("coverFile");
+  const coverFile =
+    uploaded instanceof File && uploaded.size > 0 ? uploaded : null;
   const platformIds = [
     ...new Set(
       formData
@@ -67,13 +73,16 @@ function readFields(formData: FormData): Fields {
     };
   }
   if (!isStatus(status)) return { ok: false, error: "Unknown status." };
-  // The picker only writes https links, but the field is still form input.
+  // The picker writes https links and uploaded files, but the field is still
+  // form input, so the shape is re-checked here.
   if (
     coverUrl &&
-    (!coverUrl.startsWith("https://") ||
-      coverUrl.length > COVER_URL_MAX_LENGTH)
+    (!isCoverUrl(coverUrl) || coverUrl.length > COVER_URL_MAX_LENGTH)
   ) {
-    return { ok: false, error: "Cover art must be an https link." };
+    return {
+      ok: false,
+      error: "Cover art must be an uploaded image or an https link.",
+    };
   }
 
   const parsed = parseRating(String(formData.get("rating") ?? ""));
@@ -105,6 +114,7 @@ function readFields(formData: FormData): Fields {
       coverUrl: coverUrl || null,
     },
     platformIds,
+    coverFile,
   };
 }
 
@@ -127,21 +137,46 @@ function linksFor(gameId: number, platformIds: number[]) {
   return platformIds.map((platformId) => ({ gameId, platformId }));
 }
 
+/** Stages an uploaded cover, if the form carried one. */
+async function stageCover(file: File | null) {
+  if (!file) return { ok: true as const, url: null };
+
+  const saved = await saveCover(file);
+  if (!saved.ok) return { ok: false as const, error: saved.error };
+
+  return { ok: true as const, url: saved.url };
+}
+
 export async function addGame(formData: FormData): Promise<FormState> {
   const fields = readFields(formData);
   if (!fields.ok) return { error: fields.error };
 
+  const cover = await stageCover(fields.coverFile);
+  if (!cover.ok) return { error: cover.error };
+
   const platformIds = validPlatformIds(fields.platformIds);
   const db = getDb();
 
-  db.transaction((tx) => {
-    const inserted = tx.insert(games).values(fields.values).run();
-    const gameId = Number(inserted.lastInsertRowid);
+  try {
+    db.transaction((tx) => {
+      const inserted = tx
+        .insert(games)
+        .values({
+          ...fields.values,
+          coverUrl: cover.url ?? fields.values.coverUrl,
+        })
+        .run();
+      const gameId = Number(inserted.lastInsertRowid);
 
-    if (platformIds.length) {
-      tx.insert(gamePlatforms).values(linksFor(gameId, platformIds)).run();
-    }
-  });
+      if (platformIds.length) {
+        tx.insert(gamePlatforms).values(linksFor(gameId, platformIds)).run();
+      }
+    });
+  } catch (error) {
+    // Do not leave a file behind for a row that never appeared.
+    await deleteCover(cover.url);
+    throw error;
+  }
 
   refresh();
   return { ok: true };
@@ -156,22 +191,42 @@ export async function updateGame(
   const fields = readFields(formData);
   if (!fields.ok) return { error: fields.error };
 
-  const platformIds = validPlatformIds(fields.platformIds);
   const db = getDb();
+  const previous = db
+    .select({ coverUrl: games.coverUrl })
+    .from(games)
+    .where(eq(games.id, id))
+    .get();
 
-  db.transaction((tx) => {
-    tx.update(games)
-      .set({ ...fields.values, updatedAt: new Date() })
-      .where(eq(games.id, id))
-      .run();
+  if (!previous) return { error: "Unknown game." };
 
-    // The form always carries the full selection, so replace the set.
-    tx.delete(gamePlatforms).where(eq(gamePlatforms.gameId, id)).run();
+  const cover = await stageCover(fields.coverFile);
+  if (!cover.ok) return { error: cover.error };
 
-    if (platformIds.length) {
-      tx.insert(gamePlatforms).values(linksFor(id, platformIds)).run();
-    }
-  });
+  const coverUrl = cover.url ?? fields.values.coverUrl;
+  const platformIds = validPlatformIds(fields.platformIds);
+
+  try {
+    db.transaction((tx) => {
+      tx.update(games)
+        .set({ ...fields.values, coverUrl, updatedAt: new Date() })
+        .where(eq(games.id, id))
+        .run();
+
+      // The form always carries the full selection, so replace the set.
+      tx.delete(gamePlatforms).where(eq(gamePlatforms.gameId, id)).run();
+
+      if (platformIds.length) {
+        tx.insert(gamePlatforms).values(linksFor(id, platformIds)).run();
+      }
+    });
+  } catch (error) {
+    await deleteCover(cover.url);
+    throw error;
+  }
+
+  // The previous upload is only removed once the row points somewhere else.
+  if (previous.coverUrl !== coverUrl) await deleteCover(previous.coverUrl);
 
   refresh();
   return { ok: true };
@@ -180,7 +235,16 @@ export async function updateGame(
 export async function deleteGame(id: number): Promise<void> {
   if (!Number.isInteger(id)) return;
 
-  getDb().delete(games).where(eq(games.id, id)).run();
+  const db = getDb();
+  const deleted = db
+    .select({ coverUrl: games.coverUrl })
+    .from(games)
+    .where(eq(games.id, id))
+    .get();
+
+  db.delete(games).where(eq(games.id, id)).run();
+  await deleteCover(deleted?.coverUrl);
+
   refresh();
 }
 

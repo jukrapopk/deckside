@@ -62,7 +62,8 @@ database or SteamGridDB key, and live cover search is disabled.
 
 Copy `.env.example` to `.env.local` for local Next development. Cover art comes
 from SteamGridDB; add a key in Settings or set `STEAMGRIDDB_API_KEY`. Searches run
-on the server, so the browser never receives the key.
+on the server, so the browser never receives the key. Covers can also be uploaded
+from a file; uploads are written next to the database, in `data/covers`.
 
 ## Docker
 
@@ -72,8 +73,8 @@ A `Dockerfile` and `docker-compose.yml` are included.
 docker compose up --build
 ```
 
-The image runs as a non-root user and stores `/data/deckside.db` on the
-`deckside_data` volume. Compose publishes on `127.0.0.1:3210` by default; open
+The image runs as a non-root user and stores `/data/deckside.db` and uploaded
+covers in `/data/covers` on the `deckside_data` volume. Compose publishes on `127.0.0.1:3210` by default; open
 [http://localhost:3210](http://localhost:3210). Set `HOST_PORT` to use another
 port, and `BIND_ADDRESS` to reach it over a private network. For example,
 `BIND_ADDRESS=0.0.0.0` listens on every interface (including Tailscale/LAN). Set

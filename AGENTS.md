@@ -28,6 +28,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - A `"use server"` module may only export async functions at runtime (type-only exports are erased). Put shared constants in `src/lib` (statuses, view vocabulary, platform icons, rating).
 - Only `q` lives in the URL. Status, sort, direction, and grouping are client preferences stored in `localStorage["game-library:view"]`; don't move them into the URL.
 - SteamGridDB searches run server-side in `src/app/artwork-actions.ts`. The key is write-only from the browser; `STEAMGRIDDB_API_KEY` overrides the value saved in Settings.
+- Uploaded covers are files, not rows: `src/lib/covers.ts` writes them next to the database (`<db dir>/covers`) and `src/app/covers/[name]/route.ts` serves them. The game form posts the file through the server action, so `experimental.serverActions.bodySizeLimit` must stay above the 6 MB cap; replacing a cover, removing one, or deleting a game unlinks the old file.
 
 ## UI
 

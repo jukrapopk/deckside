@@ -2,12 +2,23 @@
 
 import { Check, X } from "lucide-react";
 import Image from "next/image";
-import { useState, useTransition } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+  type ChangeEvent,
+} from "react";
 import { findCovers, type CoverOption } from "./artwork-actions";
 import { Button } from "@/components/button";
 import { CoverArt } from "@/components/cover-art";
 import { inputClass } from "@/components/field";
-import { STEAMGRIDDB_QUERY_MIN_LENGTH } from "@/lib/limits";
+import {
+  COVER_UPLOAD_ACCEPT,
+  COVER_UPLOAD_MAX_BYTES,
+  COVER_UPLOAD_TYPES,
+  STEAMGRIDDB_QUERY_MIN_LENGTH,
+} from "@/lib/limits";
 
 type Result =
   | { status: "idle" }
@@ -25,9 +36,10 @@ const VISIBLE_OPTIONS = 8;
 const COVER_FRAME = "relative aspect-2/3 overflow-hidden border";
 
 /**
- * Cover art picker. Writes the chosen URL into the game form's hidden field,
- * so Save is still the only thing that persists anything; the preview updates
- * immediately because that is what makes a choice feel like a choice.
+ * Cover art picker. It writes the chosen URL into the game form's hidden field
+ * and leaves a picked file on the form's file input; Save is still the only
+ * thing that persists anything. The preview updates immediately because that is
+ * what makes a choice feel like a choice.
  */
 export function CoverPicker({
   title,
@@ -47,6 +59,64 @@ export function CoverPicker({
   const [result, setResult] = useState<Result>({ status: "idle" });
   const [searching, startSearch] = useTransition();
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string>();
+  // Kept in a ref so the unmount cleanup reads the latest URL, not the first.
+  const previewRef = useRef<string | null>(null);
+
+  // A blob URL is the only way to show a file that has not been uploaded yet.
+  // It is created in the change handler rather than an effect, so the render
+  // that shows the file is the same one that creates the URL.
+  function releasePreview() {
+    if (previewRef.current) URL.revokeObjectURL(previewRef.current);
+    previewRef.current = null;
+  }
+
+  useEffect(() => releasePreview, []);
+
+  function clearFile() {
+    releasePreview();
+    setFilePreview(null);
+    setFileError(undefined);
+
+    // The input keeps its own copy of the file until it is cleared, and it is
+    // what posts with the form.
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function chooseCover(url: string) {
+    // A SteamGridDB choice replaces a staged file, not just its URL.
+    clearFile();
+    onChange(url);
+  }
+
+  function pickFile(event: ChangeEvent<HTMLInputElement>) {
+    const chosen = event.target.files?.[0] ?? null;
+    if (!chosen) return;
+
+    // Mirrored on the server; catching it here saves a round trip.
+    if (!COVER_UPLOAD_TYPES.includes(chosen.type)) {
+      setFileError("Covers must be a JPEG, PNG, WebP, or AVIF image.");
+      event.target.value = "";
+      return;
+    }
+
+    if (chosen.size > COVER_UPLOAD_MAX_BYTES) {
+      setFileError("Keep the cover under 6 MB.");
+      event.target.value = "";
+      return;
+    }
+
+    setFileError(undefined);
+    releasePreview();
+    const preview = URL.createObjectURL(chosen);
+    previewRef.current = preview;
+    setFilePreview(preview);
+    // The file supersedes a URL; the server writes it on Save.
+    onChange("");
+  }
+
   function search() {
     if (!canSearch) return;
 
@@ -61,7 +131,16 @@ export function CoverPicker({
   }
 
   const frame = `${COVER_FRAME} w-20 shrink-0 border-line`;
-  const preview = (
+  const hasCover = Boolean(filePreview || value);
+  const preview = filePreview ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={filePreview}
+      alt=""
+      aria-hidden="true"
+      className="absolute inset-0 size-full object-cover"
+    />
+  ) : (
     <CoverArt
       src={value || null}
       title={title}
@@ -72,11 +151,16 @@ export function CoverPicker({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex gap-3">
-        {value ? (
+      {/* `items-start` matters: as a stretched flex item the preview would take
+          the control column's height and lose its 2:3 frame on narrow screens. */}
+      <div className="flex items-start gap-3">
+        {hasCover ? (
           <button
             type="button"
-            onClick={() => onChange("")}
+            onClick={() => {
+              clearFile();
+              onChange("");
+            }}
             aria-label="Remove cover"
             title="Remove cover"
             className={`group ${frame} cursor-pointer`}
@@ -102,36 +186,65 @@ export function CoverPicker({
           <div className={frame}>{preview}</div>
         )}
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <label htmlFor="cover-search" className="sr-only">
-              Search SteamGridDB
-            </label>
-            <input
-              id="cover-search"
-              value={query}
-              onChange={(event) => setTyped(event.target.value)}
-              onKeyDown={(event) => {
-                // Enter searches. It must not submit the game form.
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  search();
-                }
-              }}
-              placeholder="Search SteamGridDB"
-              autoComplete="off"
-              className={`${inputClass} min-w-0`}
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full shrink-0 sm:w-auto"
-              onClick={search}
-              disabled={searching || !canSearch}
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Upload
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            name="coverFile"
+            accept={COVER_UPLOAD_ACCEPT}
+            className="hidden"
+            onChange={pickFile}
+          />
+
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="cover-search"
+              className="text-sm font-medium text-muted"
             >
-              {searching ? "Searching" : "Search"}
-            </Button>
+              SteamGridDB
+            </label>
+
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                id="cover-search"
+                value={query}
+                onChange={(event) => setTyped(event.target.value)}
+                onKeyDown={(event) => {
+                  // Enter searches. It must not submit the game form.
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    search();
+                  }
+                }}
+                placeholder="Search"
+                autoComplete="off"
+                className={`${inputClass} min-w-0`}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full shrink-0 sm:w-auto"
+                onClick={search}
+                disabled={searching || !canSearch}
+              >
+                {searching ? "Searching" : "Search"}
+              </Button>
+            </div>
           </div>
+
+          {fileError && (
+            <p role="status" className="text-sm text-danger">
+              {fileError}
+            </p>
+          )}
         </div>
       </div>
 
@@ -148,7 +261,7 @@ export function CoverPicker({
                 <li key={option.id}>
                   <button
                     type="button"
-                    onClick={() => onChange(option.url)}
+                    onClick={() => chooseCover(option.url)}
                     aria-label={`Cover art option ${index + 1}`}
                     aria-pressed={selected}
                     className={`${COVER_FRAME} block w-full transition-colors motion-reduce:transition-none ${
