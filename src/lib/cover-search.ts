@@ -11,3 +11,9 @@ export type CoverSearchResult =
   | { ok: false; message: string };
 
 export type CoverSearch = (query: string) => Promise<CoverSearchResult>;
+
+/** A bundled placeholder the demo can choose without a network search. */
+export type CoverPreset = {
+  url: string;
+  label: string;
+};

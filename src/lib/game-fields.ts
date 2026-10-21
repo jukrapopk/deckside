@@ -20,8 +20,16 @@ export type GameFieldsResult =
   | { ok: true; values: GameFields; platformIds: number[] }
   | { ok: false; error: string };
 
+type GameFieldOptions = {
+  /** The demo can keep the bundled placeholder posters. */
+  allowDemoCover?: boolean;
+};
+
 /** FormData is untrusted; both backends run the same checks. */
-export function readGameFields(formData: FormData): GameFieldsResult {
+export function readGameFields(
+  formData: FormData,
+  options: GameFieldOptions = {},
+): GameFieldsResult {
   const title = String(formData.get("title") ?? "").trim();
   const status = String(formData.get("status") ?? "backlog");
   const coverUrl = String(formData.get("coverUrl") ?? "").trim();
@@ -43,11 +51,11 @@ export function readGameFields(formData: FormData): GameFieldsResult {
   }
   if (!isStatus(status)) return { ok: false, error: "Unknown status." };
   // The picker only writes https links, but the field is still form input.
-  if (
-    coverUrl &&
-    (!coverUrl.startsWith("https://") ||
-      coverUrl.length > COVER_URL_MAX_LENGTH)
-  ) {
+  const validCover =
+    !coverUrl ||
+    coverUrl.startsWith("https://") ||
+    (options.allowDemoCover && coverUrl.startsWith("/demo/"));
+  if (!validCover || coverUrl.length > COVER_URL_MAX_LENGTH) {
     return { ok: false, error: "Cover art must be an https link." };
   }
 

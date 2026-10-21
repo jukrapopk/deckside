@@ -6,7 +6,11 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/button";
 import { CoverArt } from "@/components/cover-art";
 import { inputClass } from "@/components/field";
-import type { CoverOption, CoverSearch } from "@/lib/cover-search";
+import type {
+  CoverOption,
+  CoverPreset,
+  CoverSearch,
+} from "@/lib/cover-search";
 import { STEAMGRIDDB_QUERY_MIN_LENGTH } from "@/lib/limits";
 
 type Result =
@@ -34,12 +38,15 @@ export function CoverPicker({
   value,
   onChange,
   onSearch,
+  presets,
 }: {
   title: string;
   value: string;
   onChange: (url: string) => void;
   /** Omitted in the demo, where there is no server-side SteamGridDB key. */
   onSearch?: CoverSearch;
+  /** Bundled posters the demo can choose without a network search. */
+  presets?: CoverPreset[];
 }) {
   // Until the search box is touched it follows the title, so adding a game
   // does not ask for the same words twice.
@@ -138,63 +145,111 @@ export function CoverPicker({
             </div>
           ) : (
             <p className="text-sm text-muted">
-              Cover search is unavailable in the demo. New games use their
-              initial.
+              SteamGridDB cover search is unavailable in the demo.
             </p>
           )}
         </div>
       </div>
 
-      {result.status === "found" && (
+      {presets?.length ? (
         <>
-          <p role="status" className="break-words text-sm text-muted">
-            Art for <span className="text-ink">{result.game}</span>
-          </p>
-          <ul className="grid grid-cols-4 gap-2">
-            {result.options.slice(0, VISIBLE_OPTIONS).map((option, index) => {
-              const selected = option.url === value;
-
-              return (
-                <li key={option.id}>
-                  <button
-                    type="button"
-                    onClick={() => onChange(option.url)}
-                    aria-label={`Cover art option ${index + 1}`}
-                    aria-pressed={selected}
-                    className={`${COVER_FRAME} block w-full transition-colors motion-reduce:transition-none ${
-                      selected
-                        ? "border-accent"
-                        : "border-line hover:border-accent"
-                    }`}
-                  >
-                    <Image
-                      src={option.thumb}
-                      alt=""
-                      aria-hidden="true"
-                      fill
-                      sizes="120px"
-                      className="object-cover"
-                    />
-                    {selected && (
-                      <span className="absolute right-0 top-0 flex size-5 items-center justify-center bg-accent-strong text-white">
-                        <Check size={12} strokeWidth={3} aria-hidden="true" />
-                      </span>
-                    )}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          <p className="break-words text-sm text-muted">Demo posters</p>
+          <CoverOptions
+            choices={presets.map((poster) => ({
+              id: poster.url,
+              url: poster.url,
+              thumb: poster.url,
+              label: `Use ${poster.label} poster`,
+            }))}
+            value={value}
+            onChange={onChange}
+          />
         </>
-      )}
+      ) : (
+        <>
+          {result.status === "found" && (
+            <>
+              <p role="status" className="break-words text-sm text-muted">
+                Art for <span className="text-ink">{result.game}</span>
+              </p>
+              <CoverOptions
+                choices={result.options
+                  .slice(0, VISIBLE_OPTIONS)
+                  .map((option, index) => ({
+                    id: option.id,
+                    url: option.url,
+                    thumb: option.thumb,
+                    label: `Cover art option ${index + 1}`,
+                  }))}
+                value={value}
+                onChange={onChange}
+              />
+            </>
+          )}
 
-      {result.status === "message" && (
-        <p role="status" className="break-words text-sm text-muted">
-          {result.message}
-        </p>
+          {result.status === "message" && (
+            <p role="status" className="break-words text-sm text-muted">
+              {result.message}
+            </p>
+          )}
+        </>
       )}
 
       <input type="hidden" name="coverUrl" value={value} />
     </div>
+  );
+}
+
+type CoverChoice = {
+  id: number | string;
+  url: string;
+  thumb: string;
+  label: string;
+};
+
+function CoverOptions({
+  choices,
+  value,
+  onChange,
+}: {
+  choices: CoverChoice[];
+  value: string;
+  onChange: (url: string) => void;
+}) {
+  return (
+    <ul className="grid grid-cols-4 gap-2">
+      {choices.map((choice) => {
+        const selected = choice.url === value;
+
+        return (
+          <li key={choice.id}>
+            <button
+              type="button"
+              onClick={() => onChange(choice.url)}
+              aria-label={choice.label}
+              aria-pressed={selected}
+              title={choice.label}
+              className={`${COVER_FRAME} block w-full transition-colors motion-reduce:transition-none ${
+                selected ? "border-accent" : "border-line hover:border-accent"
+              }`}
+            >
+              <Image
+                src={choice.thumb}
+                alt=""
+                aria-hidden="true"
+                fill
+                sizes="120px"
+                className="object-cover"
+              />
+              {selected && (
+                <span className="absolute right-0 top-0 flex size-5 items-center justify-center bg-accent-strong text-white">
+                  <Check size={12} strokeWidth={3} aria-hidden="true" />
+                </span>
+              )}
+            </button>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

@@ -22,7 +22,9 @@ migrations are applied automatically when the server starts.
 
 `/demo` is a client-only version of the library. It seeds a sample collection on
 first visit and keeps games, platforms, and preferences in `localStorage`; the
-route itself never opens SQLite. Use it locally at
+route itself never opens SQLite. Some seed entries use the original abstract
+posters under `public/demo/posters`; the same eight are selectable in the demo’s
+add/edit form. No third-party cover art is bundled. Use it locally at
 [http://localhost:3000/demo](http://localhost:3000/demo).
 
 For a Vercel demo deployment, set `DEMO_MODE=1` in the project environment. The

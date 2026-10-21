@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
-import type { CoverSearch } from "@/lib/cover-search";
+import type { CoverPreset, CoverSearch } from "@/lib/cover-search";
 import type { FormState } from "@/lib/form-state";
 import type { GameWithPlatforms } from "@/lib/library";
 import type { Platform } from "@/lib/platforms";
@@ -34,6 +34,8 @@ export type LibraryContextValue = {
   ready: boolean;
   actions: LibraryActions;
   coverSearch?: CoverSearch;
+  /** Bundled posters shown when network cover search is unavailable. */
+  coverPresets?: CoverPreset[];
   keyActions?: KeyActions;
   hasSteamGridDbKey: boolean;
   isDemo: boolean;

@@ -114,7 +114,7 @@ type GameFormProps =
  * rather than the previous attempt's fields and error.
  */
 function GameForm(props: GameFormProps) {
-  const { actions, coverSearch } = useLibrary();
+  const { actions, coverSearch, coverPresets } = useLibrary();
   const existing = props.mode === "edit" ? props.game : null;
 
   const [rating, setRating] = useState<number | null>(existing?.rating ?? null);
@@ -199,6 +199,7 @@ function GameForm(props: GameFormProps) {
           value={coverUrl}
           onChange={setCoverUrl}
           onSearch={coverSearch}
+          presets={coverPresets}
         />
       </FieldGroup>
 

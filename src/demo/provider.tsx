@@ -17,6 +17,7 @@ import { matchesQuery, type GameWithPlatforms } from "@/lib/library";
 import { readPlatformFields } from "@/lib/platform-fields";
 import type { Platform } from "@/lib/platforms";
 import { countStatuses, type StatusCounts } from "@/lib/statuses";
+import { DEMO_POSTERS } from "./seed";
 import {
   createDemoStore,
   loadDemoStore,
@@ -51,7 +52,7 @@ export function DemoLibraryProvider({ children }: { children: ReactNode }) {
 
   const addGame = useCallback(
     async (formData: FormData) => {
-      const fields = readGameFields(formData);
+      const fields = readGameFields(formData, { allowDemoCover: true });
       if (!fields.ok) return { error: fields.error };
 
       const current = storeRef.current;
@@ -79,7 +80,7 @@ export function DemoLibraryProvider({ children }: { children: ReactNode }) {
 
   const updateGame = useCallback(
     async (id: number, formData: FormData) => {
-      const fields = readGameFields(formData);
+      const fields = readGameFields(formData, { allowDemoCover: true });
       if (!fields.ok) return { error: fields.error };
 
       const current = storeRef.current;
@@ -258,6 +259,7 @@ export function DemoLibraryProvider({ children }: { children: ReactNode }) {
       pending: false,
       ready: store !== null,
       actions,
+      coverPresets: DEMO_POSTERS,
       hasSteamGridDbKey: false,
       isDemo: true,
       resetDemo,
