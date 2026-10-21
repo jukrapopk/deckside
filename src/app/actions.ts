@@ -13,7 +13,7 @@ import {
   TITLE_MAX_LENGTH,
 } from "@/lib/limits";
 import { isPlatformIconValue, type PlatformIconValue } from "@/lib/platforms";
-import { deleteCover, isCoverUrl, saveCover } from "@/lib/covers";
+import { deleteCover, isCoverUrl, saveCoverFile, saveCoverUrl } from "@/lib/covers";
 import { parseRating } from "@/lib/rating";
 import {
   clearSetting,
@@ -137,21 +137,47 @@ function linksFor(gameId: number, platformIds: number[]) {
   return platformIds.map((platformId) => ({ gameId, platformId }));
 }
 
-/** Stages an uploaded cover, if the form carried one. */
-async function stageCover(file: File | null) {
-  if (!file) return { ok: true as const, url: null };
+type StagedCover =
+  | { ok: true; url: string | null; created: string | null }
+  | { ok: false; error: string };
 
-  const saved = await saveCover(file);
-  if (!saved.ok) return { ok: false as const, error: saved.error };
+/**
+ * Turns the form's cover choice into something the row can point at. An upload
+ * converts, a new SteamGridDB pick is downloaded and converted, and an
+ * unchanged value is left exactly as it was — including the remote links rows
+ * saved before covers were localized.
+ */
+async function stageCover(
+  file: File | null,
+  url: string | null,
+  previous: string | null,
+): Promise<StagedCover> {
+  if (file) {
+    const saved = await saveCoverFile(file);
+    if (!saved.ok) return { ok: false, error: saved.error };
 
-  return { ok: true as const, url: saved.url };
-}
+    return { ok: true, url: saved.url, created: saved.url };
+  }
 
-export async function addGame(formData: FormData): Promise<FormState> {
+  if (!url || url === previous) return { ok: true, url, created: null };
+
+  if (url.startsWith("https://")) {
+    const saved = await saveCoverUrl(url);
+    if (!saved.ok) return { ok: false, error: saved.error };
+
+    return { ok: true, url: saved.url, created: saved.url };
+  }
+
+  return { ok: true, url, created: null };
+}export async function addGame(formData: FormData): Promise<FormState> {
   const fields = readFields(formData);
   if (!fields.ok) return { error: fields.error };
 
-  const cover = await stageCover(fields.coverFile);
+  const cover = await stageCover(
+    fields.coverFile,
+    fields.values.coverUrl,
+    null,
+  );
   if (!cover.ok) return { error: cover.error };
 
   const platformIds = validPlatformIds(fields.platformIds);
@@ -161,10 +187,7 @@ export async function addGame(formData: FormData): Promise<FormState> {
     db.transaction((tx) => {
       const inserted = tx
         .insert(games)
-        .values({
-          ...fields.values,
-          coverUrl: cover.url ?? fields.values.coverUrl,
-        })
+        .values({ ...fields.values, coverUrl: cover.url })
         .run();
       const gameId = Number(inserted.lastInsertRowid);
 
@@ -174,7 +197,7 @@ export async function addGame(formData: FormData): Promise<FormState> {
     });
   } catch (error) {
     // Do not leave a file behind for a row that never appeared.
-    await deleteCover(cover.url);
+    await deleteCover(cover.created);
     throw error;
   }
 
@@ -200,10 +223,14 @@ export async function updateGame(
 
   if (!previous) return { error: "Unknown game." };
 
-  const cover = await stageCover(fields.coverFile);
+  const cover = await stageCover(
+    fields.coverFile,
+    fields.values.coverUrl,
+    previous.coverUrl,
+  );
   if (!cover.ok) return { error: cover.error };
 
-  const coverUrl = cover.url ?? fields.values.coverUrl;
+  const coverUrl = cover.url;
   const platformIds = validPlatformIds(fields.platformIds);
 
   try {
@@ -221,7 +248,7 @@ export async function updateGame(
       }
     });
   } catch (error) {
-    await deleteCover(cover.url);
+    await deleteCover(cover.created);
     throw error;
   }
 

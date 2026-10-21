@@ -60,10 +60,12 @@ database or SteamGridDB key, and live cover search is disabled.
 | `STEAMGRIDDB_API_KEY` | unset | Overrides the key saved in Settings |
 | `ALLOWED_DEV_ORIGINS` | unset | Extra dev hosts, comma-separated (LAN/Tailscale) |
 
-Copy `.env.example` to `.env.local` for local Next development. Cover art comes
-from SteamGridDB; add a key in Settings or set `STEAMGRIDDB_API_KEY`. Searches run
-on the server, so the browser never receives the key. Covers can also be uploaded
-from a file; uploads are written next to the database, in `data/covers`.
+Copy `.env.example` to `.env.local` for local Next development. Covers come from
+SteamGridDB or from a file you upload; either way the image is downloaded (if
+needed) and stored as a WebP next to the database, in `data/covers`, so the
+library keeps its own copy. Searching uses SteamGridDB — add a key in Settings or
+set `STEAMGRIDDB_API_KEY`; searches run on the server, so the browser never
+receives the key.
 
 ## Docker
 

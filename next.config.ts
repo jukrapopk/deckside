@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "8mb" },
   },
   // Keep the native SQLite binding out of the bundle; it is required at runtime.
-  serverExternalPackages: ["better-sqlite3"],
+  serverExternalPackages: ["better-sqlite3", "sharp"],
   images: {
     // Cover art chosen in the edit dialog. SteamGridDB serves grids and thumbs
     // from its CDN, whose subdomain is not fixed.

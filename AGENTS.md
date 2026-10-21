@@ -29,6 +29,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Only `q` lives in the URL. Status, sort, direction, and grouping are client preferences stored in `localStorage["game-library:view"]`; don't move them into the URL.
 - SteamGridDB searches run server-side in `src/app/artwork-actions.ts`. The key is write-only from the browser; `STEAMGRIDDB_API_KEY` overrides the value saved in Settings.
 - Uploaded covers are files, not rows: `src/lib/covers.ts` writes them next to the database (`<db dir>/covers`) and `src/app/covers/[name]/route.ts` serves them. The game form posts the file through the server action, so `experimental.serverActions.bodySizeLimit` must stay above the 6 MB cap; replacing a cover, removing one, or deleting a game unlinks the old file.
+- Every cover is stored as a 2:3 WebP (`sharp`, 720×1080, q82): uploads are converted, and a SteamGridDB pick is downloaded first, so a row never depends on the CDN. Only `*.steamgriddb.com` is fetched (the URL comes from a form field), and rows that still hold a remote link are left alone — no backfill.
 
 ## UI
 
